@@ -1,0 +1,13 @@
+// Placeholder model for Stage 0 — full schema in Stage 2
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Stage0Placeholder {
+  id String @id
+}

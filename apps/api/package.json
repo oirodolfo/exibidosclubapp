@@ -1,0 +1,23 @@
+{
+  "name": "@exibidos/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@exibidos/config": "workspace:*",
+    "fastify": "^4.28.1",
+    "@fastify/cors": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2"
+  }
+}
