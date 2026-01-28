@@ -102,6 +102,9 @@ model Profile {
   activityPublic    Boolean @default(true)
   rankingsPublic    Boolean @default(true)
   badgesPublic      Boolean @default(true)
+  // Accept always: auto-accept follow and message requests (no manual approve)
+  acceptFollowRequestsAlways   Boolean @default(false)
+  acceptMessageRequestsAlways  Boolean @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
