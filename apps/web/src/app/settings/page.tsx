@@ -12,7 +12,6 @@ import {
   fieldset,
   field,
   fieldLabel,
-  fieldHint,
   blockHint,
   checkboxLabel,
   checkboxLabelLast,
