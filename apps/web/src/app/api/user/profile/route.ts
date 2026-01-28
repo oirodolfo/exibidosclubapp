@@ -5,9 +5,30 @@ import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 
 const PatchBody = z.object({
+  displayName: z.string().min(0).max(100).optional(),
+  bio: z.string().max(500).optional().nullable(),
+  isPrivate: z.boolean().optional(),
+  overviewPublic: z.boolean().optional(),
+  photosPublic: z.boolean().optional(),
+  activityPublic: z.boolean().optional(),
+  rankingsPublic: z.boolean().optional(),
+  badgesPublic: z.boolean().optional(),
   acceptFollowRequestsAlways: z.boolean().optional(),
   acceptMessageRequestsAlways: z.boolean().optional(),
 });
+
+const profileSelect = {
+  displayName: true,
+  bio: true,
+  isPrivate: true,
+  overviewPublic: true,
+  photosPublic: true,
+  activityPublic: true,
+  rankingsPublic: true,
+  badgesPublic: true,
+  acceptFollowRequestsAlways: true,
+  acceptMessageRequestsAlways: true,
+} as const;
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -15,17 +36,7 @@ export async function GET() {
 
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },
-    select: {
-      acceptFollowRequestsAlways: true,
-      acceptMessageRequestsAlways: true,
-      displayName: true,
-      isPrivate: true,
-      overviewPublic: true,
-      photosPublic: true,
-      activityPublic: true,
-      rankingsPublic: true,
-      badgesPublic: true,
-    },
+    select: profileSelect,
   });
   if (!profile) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json(profile);
@@ -40,15 +51,12 @@ export async function PATCH(req: Request) {
 
   const data = Object.fromEntries(
     Object.entries(parse.data).filter(([, v]) => v !== undefined)
-  ) as { acceptFollowRequestsAlways?: boolean; acceptMessageRequestsAlways?: boolean };
+  ) as Record<string, unknown>;
 
   const profile = await prisma.profile.upsert({
     where: { userId: session.user.id },
     create: { userId: session.user.id, ...data },
     update: data,
   });
-  return NextResponse.json({
-    acceptFollowRequestsAlways: profile.acceptFollowRequestsAlways,
-    acceptMessageRequestsAlways: profile.acceptMessageRequestsAlways,
-  });
+  return NextResponse.json(profile);
 }
