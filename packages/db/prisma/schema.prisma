@@ -20,6 +20,8 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   passwordHash  String?   // null for OAuth-only
+  name          String?   // Auth.js / OAuth; can mirror Profile.displayName
+  image         String?   // Auth.js / OAuth; URL or avatar key
   birthdate     DateTime  // age-gate
   role          String    @default("user") // user | creator | admin | moderator
   createdAt     DateTime  @default(now())
