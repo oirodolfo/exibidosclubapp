@@ -121,7 +121,11 @@ export default function SettingsPage() {
     <main className={page.default}>
       <h1>Profile &amp; privacy</h1>
       {slug && <p><Link href={`/${slug}`} className={link}>Back to your profile</Link></p>}
-      <p><Link href="/follow/requests" className={link}>Follow requests</Link></p>
+      <p>
+        <Link href="/upload" className={link}>Upload</Link>
+        {" · "}
+        <Link href="/follow/requests" className={link}>Follow requests</Link>
+      </p>
       {error && <p className={text.error}>{error}</p>}
       {success && <p className={text.success}>Saved.</p>}
 

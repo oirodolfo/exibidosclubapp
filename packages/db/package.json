@@ -13,8 +13,12 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0"
@@ -22,6 +26,7 @@
   "devDependencies": {
     "@types/node": "^22.10.1",
     "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

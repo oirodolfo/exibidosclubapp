@@ -1,6 +1,12 @@
 import { listReset, photoGrid } from "@/lib/variants";
 
-type ImageItem = { id: string; caption: string | null; createdAt: Date; moderationStatus: string };
+type ImageItem = {
+  id: string;
+  caption: string | null;
+  createdAt: Date;
+  moderationStatus: string;
+  thumbUrl?: string | null;
+};
 
 type Props = { images: ImageItem[]; isOwner: boolean };
 
@@ -15,8 +21,12 @@ export function PhotosTab({ images, isOwner }: Props) {
       <ul className={`${listReset} ${photoGrid}`}>
         {images.map((img) => (
           <li key={img.id}>
-            <div className="aspect-square bg-neutral-200 rounded-lg flex items-center justify-center text-xs text-neutral-400">
-              [img]
+            <div className="aspect-square bg-neutral-200 rounded-lg overflow-hidden flex items-center justify-center text-xs text-neutral-400">
+              {img.thumbUrl ? (
+                <img src={img.thumbUrl} alt={img.caption ?? "Photo"} className="w-full h-full object-cover" />
+              ) : (
+                <span>[img]</span>
+              )}
             </div>
             {img.caption && <p className="mt-1 text-sm">{img.caption}</p>}
             <p className="m-0 text-xs text-neutral-500">{new Date(img.createdAt).toLocaleDateString()}</p>

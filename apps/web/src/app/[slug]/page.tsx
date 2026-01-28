@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { getSignedDownloadUrl, isS3Configured } from "@/lib/storage";
 import { page, link } from "@/lib/variants";
 import { ProfileTabs, type TabId } from "./_components/ProfileTabs";
 import { OverviewTab } from "./_components/OverviewTab";
@@ -86,7 +87,7 @@ export default async function SlugPage({
       where: { userId: user.id, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 50,
-      select: { id: true, caption: true, createdAt: true, moderationStatus: true },
+      select: { id: true, thumbKey: true, caption: true, createdAt: true, moderationStatus: true },
     }),
     prisma.vote.findMany({
       where: { userId: user.id },
@@ -133,6 +134,22 @@ export default async function SlugPage({
 
   const displayName = profile?.displayName ?? user.name ?? slug;
 
+  const imagesWithUrls = await (async () => {
+    if (!isS3Configured()) return images.map((i) => ({ ...i, thumbUrl: null as string | null }));
+    const withUrls = await Promise.all(
+      images.map(async (img) => {
+        if (!img.thumbKey) return { ...img, thumbUrl: null as string | null };
+        try {
+          const thumbUrl = await getSignedDownloadUrl(img.thumbKey, 3600);
+          return { ...img, thumbUrl };
+        } catch {
+          return { ...img, thumbUrl: null as string | null };
+        }
+      })
+    );
+    return withUrls;
+  })();
+
   return (
     <main className={page.wide}>
       <header className="mb-6">
@@ -140,7 +157,13 @@ export default async function SlugPage({
           <div>
             <h1 className="m-0">{displayName}</h1>
             <p className="mt-1 text-neutral-500">exibidos.club/{slug}</p>
-            {isOwner && <p className="mt-2"><Link href="/settings" className={link}>Edit profile &amp; privacy</Link></p>}
+            {isOwner && (
+              <p className="mt-2">
+                <Link href="/upload" className={link}>Upload</Link>
+                {" · "}
+                <Link href="/settings" className={link}>Edit profile &amp; privacy</Link>
+              </p>
+            )}
           </div>
           {!isOwner && <FollowButton slug={slug} followStatus={followStatus} />}
         </div>
@@ -158,7 +181,7 @@ export default async function SlugPage({
 
       {tab === "photos" && (
         photosVisible ? (
-          <PhotosTab images={images} isOwner={isOwner} />
+          <PhotosTab images={imagesWithUrls} isOwner={isOwner} />
         ) : (
           <p>This section is private.</p>
         )
