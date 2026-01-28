@@ -1,4 +1,4 @@
-import type { Adapter, AdapterUser } from "next-auth/adapters";
+import type { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { prisma } from "@exibidos/db/client";
 
 /**
@@ -8,7 +8,7 @@ import { prisma } from "@exibidos/db/client";
  */
 export function ExibidosPrismaAdapter(): Adapter {
   return {
-    async createUser(user) {
+    async createUser(user: Omit<AdapterUser, "id">) {
       const u = await prisma.user.create({
         data: {
           email: user.email!,
@@ -61,7 +61,7 @@ export function ExibidosPrismaAdapter(): Adapter {
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
-    async linkAccount(account) {
+    async linkAccount(account: AdapterAccount) {
       await prisma.account.create({
         data: {
           userId: account.userId,

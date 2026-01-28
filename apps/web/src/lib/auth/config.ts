@@ -8,8 +8,7 @@ import { ExibidosPrismaAdapter } from "./adapter";
 
 const AGE_GATE_MIN_YEARS = 18;
 
-export function authOptions(): NextAuthOptions {
-  return {
+export const authOptions: NextAuthOptions = {
     adapter: ExibidosPrismaAdapter(),
     session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
     pages: {
@@ -71,7 +70,6 @@ export function authOptions(): NextAuthOptions {
       },
     },
   };
-}
 
 export function isAgeAllowed(birthdate: Date): boolean {
   const now = new Date();
@@ -81,4 +79,5 @@ export function isAgeAllowed(birthdate: Date): boolean {
   return age >= AGE_GATE_MIN_YEARS;
 }
 
-export const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$|^[a-z0-9]$/;
+/** 1–30 chars, lowercase alphanumeric and hyphen, not starting/ending with hyphen */
+export const SLUG_REGEX = /^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,27}[a-z0-9]$/;
