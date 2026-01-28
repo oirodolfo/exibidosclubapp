@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { link, listReset, listItemRow, page, slugHandle, mainBlock } from "@/lib/variants";
 
 type Request = { fromId: string; slug: string | null; displayName: string | null; createdAt: string };
 
@@ -34,22 +36,22 @@ export default function FollowRequestsPage() {
     if (res.ok) setList((prev) => prev.filter((r) => r.fromId !== fromId));
   }
 
-  if (loading) return <main style={{ padding: "1rem" }}>Loading…</main>;
+  if (loading) return <main className={mainBlock}>Loading…</main>;
 
   return (
-    <main style={{ maxWidth: 560, margin: "0 auto", padding: "1rem" }}>
+    <main className={page.mid}>
       <h1>Follow requests</h1>
-      <p><Link href="/settings">Settings</Link></p>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <p><Link href="/settings" className={link}>Settings</Link></p>
+      <ul className={listReset}>
         {list.map((r) => (
-          <li key={r.fromId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid #eee" }}>
+          <li key={r.fromId} className={listItemRow}>
             <div>
-              {r.slug ? <Link href={`/${r.slug}`}>{r.displayName ?? r.slug}</Link> : (r.displayName ?? r.fromId)}
-              {r.slug && <span style={{ color: "#666", marginLeft: "0.5rem" }}>@{r.slug}</span>}
+              {r.slug ? <Link href={`/${r.slug}`} className={link}>{r.displayName ?? r.slug}</Link> : (r.displayName ?? r.fromId)}
+              {r.slug && <span className={slugHandle}>@{r.slug}</span>}
             </div>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button type="button" onClick={() => accept(r.fromId)}>Accept</button>
-              <button type="button" onClick={() => reject(r.fromId)}>Reject</button>
+            <div className="flex gap-2">
+              <Button type="button" variant="primary" size="sm" onClick={() => accept(r.fromId)}>Accept</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => reject(r.fromId)}>Reject</Button>
             </div>
           </li>
         ))}

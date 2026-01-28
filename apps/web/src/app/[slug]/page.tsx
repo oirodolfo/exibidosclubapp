@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { page, link } from "@/lib/variants";
 import { ProfileTabs, type TabId } from "./_components/ProfileTabs";
 import { OverviewTab } from "./_components/OverviewTab";
 import { PhotosTab } from "./_components/PhotosTab";
@@ -65,11 +66,11 @@ export default async function SlugPage({
   // Private profile: only owner or accepted followers can see
   if (profile?.isPrivate && !isOwner && !isFollower) {
     return (
-      <main style={{ maxWidth: 560, margin: "2rem auto", padding: "0 1rem" }}>
+      <main className={page.private}>
         <h1>exibidos.club/{slug}</h1>
         <p>This profile is private. Request to follow to see their content.</p>
         <p><FollowButton slug={slug} followStatus={followStatus} /></p>
-        <p><Link href="/">Home</Link></p>
+        <p><Link href="/" className={link}>Home</Link></p>
       </main>
     );
   }
@@ -133,13 +134,13 @@ export default async function SlugPage({
   const displayName = profile?.displayName ?? user.name ?? slug;
 
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "1rem" }}>
-      <header style={{ marginBottom: "1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+    <main className={page.wide}>
+      <header className="mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 style={{ margin: 0 }}>{displayName}</h1>
-            <p style={{ margin: "0.25rem 0 0", color: "#666" }}>exibidos.club/{slug}</p>
-            {isOwner && <p style={{ marginTop: "0.5rem" }}><Link href="/settings">Edit profile &amp; privacy</Link></p>}
+            <h1 className="m-0">{displayName}</h1>
+            <p className="mt-1 text-neutral-500">exibidos.club/{slug}</p>
+            {isOwner && <p className="mt-2"><Link href="/settings" className={link}>Edit profile &amp; privacy</Link></p>}
           </div>
           {!isOwner && <FollowButton slug={slug} followStatus={followStatus} />}
         </div>

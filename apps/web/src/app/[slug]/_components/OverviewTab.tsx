@@ -1,3 +1,6 @@
+import { text, link as linkCls } from "@/lib/variants";
+import Link from "next/link";
+
 type Props = {
   displayName: string;
   bio: string | null;
@@ -7,21 +10,20 @@ type Props = {
 };
 
 export function OverviewTab({ displayName, bio, slug, counts, isOwner }: Props) {
-
   return (
     <section>
-      <h2>{displayName}</h2>
-      <p style={{ color: "#666" }}>exibidos.club/{slug}</p>
-      {bio != null && bio !== "" && <p style={{ whiteSpace: "pre-wrap", marginTop: "0.5rem" }}>{bio}</p>}
-      <dl style={{ display: "flex", gap: "1.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
-        <div><dt style={{ fontSize: "0.875rem", color: "#666" }}>Uploads</dt><dd style={{ margin: 0, fontWeight: 600 }}>{counts.uploads}</dd></div>
-        <div><dt style={{ fontSize: "0.875rem", color: "#666" }}>Votes</dt><dd style={{ margin: 0, fontWeight: 600 }}>{counts.votes}</dd></div>
-        <div><dt style={{ fontSize: "0.875rem", color: "#666" }}>Likes</dt><dd style={{ margin: 0, fontWeight: 600 }}>{counts.likes}</dd></div>
-        <div><dt style={{ fontSize: "0.875rem", color: "#666" }}>Followers</dt><dd style={{ margin: 0, fontWeight: 600 }}><a href={`/${slug}/followers`}>{counts.followers}</a></dd></div>
-        <div><dt style={{ fontSize: "0.875rem", color: "#666" }}>Following</dt><dd style={{ margin: 0, fontWeight: 600 }}><a href={`/${slug}/following`}>{counts.following}</a></dd></div>
+      <h2 className="text-lg font-semibold">{displayName}</h2>
+      <p className={text.muted}>exibidos.club/{slug}</p>
+      {bio != null && bio !== "" && <p className="whitespace-pre-wrap mt-2">{bio}</p>}
+      <dl className="flex gap-6 mt-4 flex-wrap">
+        <div><dt className="text-sm text-neutral-500">Uploads</dt><dd className="m-0 font-semibold">{counts.uploads}</dd></div>
+        <div><dt className="text-sm text-neutral-500">Votes</dt><dd className="m-0 font-semibold">{counts.votes}</dd></div>
+        <div><dt className="text-sm text-neutral-500">Likes</dt><dd className="m-0 font-semibold">{counts.likes}</dd></div>
+        <div><dt className="text-sm text-neutral-500">Followers</dt><dd className="m-0 font-semibold"><Link href={`/${slug}/followers`} className={linkCls}>{counts.followers}</Link></dd></div>
+        <div><dt className="text-sm text-neutral-500">Following</dt><dd className="m-0 font-semibold"><Link href={`/${slug}/following`} className={linkCls}>{counts.following}</Link></dd></div>
       </dl>
       {isOwner && (
-        <p style={{ marginTop: "1rem" }}><a href="/settings">Edit profile &amp; privacy</a></p>
+        <p className="mt-4"><Link href="/settings" className={linkCls}>Edit profile &amp; privacy</Link></p>
       )}
     </section>
   );

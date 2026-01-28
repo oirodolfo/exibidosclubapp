@@ -12,10 +12,10 @@ export function ActivityTab({ items }: Props) {
 
   return (
     <section>
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+      <ul className="list-none p-0 m-0">
         {items.map((a) => (
-          <li key={`${a.type}-${a.id}`} style={{ padding: "0.5rem 0", borderBottom: "1px solid #eee" }}>
-            <span style={{ fontSize: "0.75rem", color: "#666" }}>{new Date(a.createdAt).toLocaleString()}</span>
+          <li key={`${a.type}-${a.id}`} className="py-2 border-b border-neutral-200">
+            <span className="text-xs text-neutral-500">{new Date(a.createdAt).toLocaleString()}</span>
             {" — "}
             {a.type === "upload" && <>Uploaded {a.caption ? `"${a.caption}"` : "a photo"}</>}
             {a.type === "vote" && <>Voted on an image</>}

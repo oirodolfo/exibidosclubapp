@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { link, listReset, listItemBordered, page, slugHandle, mainBlock } from "@/lib/variants";
 
 export default async function FollowingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -28,9 +29,9 @@ export default async function FollowingPage({ params }: { params: Promise<{ slug
   const canSee = isOwner || isFollower || !isPrivate;
   if (!canSee) {
     return (
-      <main style={{ padding: "1rem" }}>
+      <main className={mainBlock}>
         <p>This list is private.</p>
-        <p><Link href={`/${slug}`}>Back to profile</Link></p>
+        <p><Link href={`/${slug}`} className={link}>Back to profile</Link></p>
       </main>
     );
   }
@@ -42,17 +43,17 @@ export default async function FollowingPage({ params }: { params: Promise<{ slug
   });
 
   return (
-    <main style={{ maxWidth: 560, margin: "0 auto", padding: "1rem" }}>
+    <main className={page.mid}>
       <h1>Following</h1>
-      <p><Link href={`/${slug}`}>← {slug}</Link></p>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <p><Link href={`/${slug}`} className={link}>← {slug}</Link></p>
+      <ul className={listReset}>
         {list.map((f) => {
           const s = f.to.slugs[0]?.slug;
           const name = f.to.profile?.displayName ?? f.to.name ?? s ?? "—";
           return (
-            <li key={f.id} style={{ padding: "0.5rem 0", borderBottom: "1px solid #eee" }}>
-              {s ? <Link href={`/${s}`}>{name}</Link> : name}
-              {s && <span style={{ color: "#666", marginLeft: "0.5rem" }}>@{s}</span>}
+            <li key={f.id} className={listItemBordered}>
+              {s ? <Link href={`/${s}`} className={link}>{name}</Link> : name}
+              {s && <span className={slugHandle}>@{s}</span>}
             </li>
           );
         })}

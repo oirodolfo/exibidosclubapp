@@ -3,6 +3,25 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import {
+  link,
+  page,
+  mainBlock,
+  fieldset,
+  field,
+  fieldLabel,
+  fieldHint,
+  blockHint,
+  checkboxLabel,
+  checkboxLabelLast,
+  formRow,
+  closeFriendRow,
+  listReset,
+  text,
+  textarea,
+} from "@/lib/variants";
 
 type Profile = {
   displayName: string | null;
@@ -96,44 +115,43 @@ export default function SettingsPage() {
     setSaving(false);
   }
 
-  if (loading) return <main style={{ padding: "1rem" }}>Loading…</main>;
-  if (!profile) return <main style={{ padding: "1rem" }}>Not found.</main>;
+  if (loading) return <main className={mainBlock}>Loading…</main>;
+  if (!profile) return <main className={mainBlock}>Not found.</main>;
 
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "1rem" }}>
+    <main className={page.default}>
       <h1>Profile &amp; privacy</h1>
-      {slug && <p><Link href={`/${slug}`}>Back to your profile</Link></p>}
-      <p><Link href="/follow/requests">Follow requests</Link></p>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>Saved.</p>}
+      {slug && <p><Link href={`/${slug}`} className={link}>Back to your profile</Link></p>}
+      <p><Link href="/follow/requests" className={link}>Follow requests</Link></p>
+      {error && <p className={text.error}>{error}</p>}
+      {success && <p className={text.success}>Saved.</p>}
 
       <form onSubmit={onSubmit}>
-        <fieldset style={{ marginBottom: "1rem" }}>
+        <fieldset className={fieldset}>
           <legend>Profile</legend>
-          <div style={{ marginBottom: "0.75rem" }}>
-            <label htmlFor="displayName">Display name</label>
-            <input
+          <div className={field}>
+            <label htmlFor="displayName" className={fieldLabel}>Display name</label>
+            <Input
               id="displayName"
               value={profile.displayName ?? ""}
               onChange={(e) => setProfile((p) => p ? { ...p, displayName: e.target.value || null } : p)}
-              style={{ display: "block", width: "100%", padding: "0.5rem" }}
             />
           </div>
-          <div style={{ marginBottom: "0.75rem" }}>
-            <label htmlFor="bio">Bio</label>
+          <div className={field}>
+            <label htmlFor="bio" className={fieldLabel}>Bio</label>
             <textarea
               id="bio"
               rows={3}
+              className={textarea}
               value={profile.bio ?? ""}
               onChange={(e) => setProfile((p) => p ? { ...p, bio: e.target.value || null } : p)}
-              style={{ display: "block", width: "100%", padding: "0.5rem" }}
             />
           </div>
         </fieldset>
 
-        <fieldset style={{ marginBottom: "1rem" }}>
+        <fieldset className={fieldset}>
           <legend>Privacy</legend>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <label className={checkboxLabel}>
             <input
               type="checkbox"
               checked={profile.isPrivate}
@@ -141,9 +159,9 @@ export default function SettingsPage() {
             />
             Private profile (only followers see your content)
           </label>
-          <p style={{ fontSize: "0.875rem", color: "#666", marginTop: "0.75rem" }}>Section visibility (for non-followers when profile is public):</p>
+          <p className={blockHint}>Section visibility (for non-followers when profile is public):</p>
           {(["overviewPublic", "photosPublic", "activityPublic", "rankingsPublic", "badgesPublic"] as const).map((k) => (
-            <label key={k} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <label key={k} className={checkboxLabel}>
               <input
                 type="checkbox"
                 checked={profile[k]}
@@ -154,25 +172,25 @@ export default function SettingsPage() {
           ))}
         </fieldset>
 
-        <fieldset style={{ marginBottom: "1rem" }}>
+        <fieldset className={fieldset}>
           <legend>Close friends</legend>
-          <form onSubmit={addCloseFriend} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            <input value={closeFriendSlug} onChange={(e) => setCloseFriendSlug(e.target.value)} placeholder="Handle (slug)" style={{ flex: 1, padding: "0.5rem" }} />
-            <button type="submit">Add</button>
+          <form onSubmit={addCloseFriend} className={formRow}>
+            <Input value={closeFriendSlug} onChange={(e) => setCloseFriendSlug(e.target.value)} placeholder="Handle (slug)" className="flex-1" />
+            <Button type="submit">Add</Button>
           </form>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          <ul className={listReset}>
             {closeFriends.map((c) => (
-              <li key={c.slug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.25rem 0" }}>
-                <a href={`/${c.slug}`}>{c.displayName ?? c.slug}</a>
-                <button type="button" onClick={() => removeCloseFriend(c.slug)}>Remove</button>
+              <li key={c.slug} className={closeFriendRow}>
+                <Link href={`/${c.slug}`} className={link}>{c.displayName ?? c.slug}</Link>
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeCloseFriend(c.slug)}>Remove</Button>
               </li>
             ))}
           </ul>
         </fieldset>
 
-        <fieldset style={{ marginBottom: "1rem" }}>
+        <fieldset className={fieldset}>
           <legend>Accept always</legend>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <label className={checkboxLabel}>
             <input
               type="checkbox"
               checked={profile.acceptFollowRequestsAlways}
@@ -180,7 +198,7 @@ export default function SettingsPage() {
             />
             Auto-accept follow requests
           </label>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label className={checkboxLabelLast}>
             <input
               type="checkbox"
               checked={profile.acceptMessageRequestsAlways}
@@ -190,7 +208,7 @@ export default function SettingsPage() {
           </label>
         </fieldset>
 
-        <button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
       </form>
     </main>
   );

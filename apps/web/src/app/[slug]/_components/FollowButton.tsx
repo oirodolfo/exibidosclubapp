@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 type Status = "none" | "pending" | "accepted";
 
@@ -30,10 +31,10 @@ export function FollowButton({ slug, followStatus }: { slug: string; followStatu
   }
 
   if (followStatus === "accepted") {
-    return <button type="button" onClick={unfollow} disabled={loading}>{loading ? "…" : "Unfollow"}</button>;
+    return <Button type="button" variant="secondary" onClick={unfollow} disabled={loading}>{loading ? "…" : "Unfollow"}</Button>;
   }
   if (followStatus === "pending") {
     return <span>Requested</span>;
   }
-  return <button type="button" onClick={follow} disabled={loading}>{loading ? "…" : "Follow"}</button>;
+  return <Button type="button" variant="secondary" onClick={follow} disabled={loading}>{loading ? "…" : "Follow"}</Button>;
 }

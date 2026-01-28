@@ -17,9 +17,15 @@
     "next-auth": "^4.24.7",
     "bcryptjs": "^2.4.3",
     "zod": "^3.23.8",
-    "@exibidos/db": "workspace:*"
+    "@exibidos/db": "workspace:*",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
+    "tailwindcss": "^3.4.16",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20",
     "@exibidos/ui": "workspace:*",
     "@exibidos/config": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
