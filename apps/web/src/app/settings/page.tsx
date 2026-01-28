@@ -20,6 +20,8 @@ type Profile = {
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
+  const [closeFriends, setCloseFriends] = useState<{ slug: string; displayName: string | null }[]>([]);
+  const [closeFriendSlug, setCloseFriendSlug] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +30,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     (async () => {
-      const [profRes, meRes] = await Promise.all([
+      const [profRes, meRes, cfRes] = await Promise.all([
         fetch("/api/user/profile"),
         fetch("/api/user/me"),
+        fetch("/api/close-friends"),
       ]);
       if (profRes.status === 401 || meRes.status === 401) {
         router.replace("/auth/login?callbackUrl=/settings");
@@ -43,11 +46,30 @@ export default function SettingsPage() {
       }
       const p = (await profRes.json()) as Profile;
       const me = (await meRes.json()) as { slug?: string | null };
+      const cf = (cfRes.ok ? ((await cfRes.json()) as { closeFriends?: { slug: string | null; displayName: string | null }[] }) : { closeFriends: [] });
       setProfile(p);
       setSlug(me.slug ?? null);
+      setCloseFriends((cf.closeFriends ?? []).filter((c): c is { slug: string; displayName: string | null } => c.slug != null).map((c) => ({ slug: c.slug!, displayName: c.displayName })));
       setLoading(false);
     })();
   }, [router]);
+
+  async function addCloseFriend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!closeFriendSlug.trim()) return;
+    const res = await fetch("/api/close-friends", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: closeFriendSlug.trim() }) });
+    if (res.ok) {
+      setCloseFriendSlug("");
+      const r = await fetch("/api/close-friends");
+      const d = (await r.json()) as { closeFriends?: { slug: string | null; displayName: string | null }[] };
+      setCloseFriends((d.closeFriends ?? []).filter((c): c is { slug: string; displayName: string | null } => c.slug != null).map((c) => ({ slug: c.slug!, displayName: c.displayName })));
+    }
+  }
+
+  async function removeCloseFriend(s: string) {
+    const res = await fetch(`/api/close-friends/${encodeURIComponent(s)}`, { method: "DELETE" });
+    if (res.ok) setCloseFriends((prev) => prev.filter((c) => c.slug !== s));
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,6 +103,7 @@ export default function SettingsPage() {
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "1rem" }}>
       <h1>Profile &amp; privacy</h1>
       {slug && <p><Link href={`/${slug}`}>Back to your profile</Link></p>}
+      <p><Link href="/follow/requests">Follow requests</Link></p>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {success && <p style={{ color: "green" }}>Saved.</p>}
 
@@ -129,6 +152,22 @@ export default function SettingsPage() {
               {k.replace(/Public$/, " public")}
             </label>
           ))}
+        </fieldset>
+
+        <fieldset style={{ marginBottom: "1rem" }}>
+          <legend>Close friends</legend>
+          <form onSubmit={addCloseFriend} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <input value={closeFriendSlug} onChange={(e) => setCloseFriendSlug(e.target.value)} placeholder="Handle (slug)" style={{ flex: 1, padding: "0.5rem" }} />
+            <button type="submit">Add</button>
+          </form>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {closeFriends.map((c) => (
+              <li key={c.slug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.25rem 0" }}>
+                <a href={`/${c.slug}`}>{c.displayName ?? c.slug}</a>
+                <button type="button" onClick={() => removeCloseFriend(c.slug)}>Remove</button>
+              </li>
+            ))}
+          </ul>
         </fieldset>
 
         <fieldset style={{ marginBottom: "1rem" }}>

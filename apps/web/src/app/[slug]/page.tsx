@@ -8,6 +8,7 @@ import { PhotosTab } from "./_components/PhotosTab";
 import { ActivityTab } from "./_components/ActivityTab";
 import { RankingsTab } from "./_components/RankingsTab";
 import { BadgesTab } from "./_components/BadgesTab";
+import { FollowButton } from "./_components/FollowButton";
 import Link from "next/link";
 
 const TABS: TabId[] = ["overview", "photos", "activity", "rankings", "badges"];
@@ -50,23 +51,36 @@ export default async function SlugPage({
   const session = await getServerSession(authOptions);
   const isOwner = !!session?.user?.id && session.user.id === user.id;
 
-  // Private profile: only owner can see (Stage 5 will add "follower" check)
-  if (profile?.isPrivate && !isOwner) {
+  let isFollower = false;
+  let followStatus: "none" | "pending" | "accepted" = "none";
+  if (session?.user?.id && !isOwner) {
+    const f = await prisma.follow.findUnique({
+      where: { fromId_toId: { fromId: session.user.id, toId: user.id } },
+      select: { status: true },
+    });
+    isFollower = f?.status === "accepted";
+    followStatus = (f?.status === "accepted" || f?.status === "pending" ? f.status : "none") as "none" | "pending" | "accepted";
+  }
+
+  // Private profile: only owner or accepted followers can see
+  if (profile?.isPrivate && !isOwner && !isFollower) {
     return (
       <main style={{ maxWidth: 560, margin: "2rem auto", padding: "0 1rem" }}>
         <h1>exibidos.club/{slug}</h1>
-        <p>This profile is private.</p>
-        <p>Request to follow to see their content. (Coming in Stage 5)</p>
+        <p>This profile is private. Request to follow to see their content.</p>
+        <p><FollowButton slug={slug} followStatus={followStatus} /></p>
         <p><Link href="/">Home</Link></p>
       </main>
     );
   }
 
   // Load dashboard data
-  const [uploadsCount, votesCount, likesCount, images, votes, swipes, userBadges] = await Promise.all([
+  const [uploadsCount, votesCount, likesCount, followersCount, followingCount, images, votes, swipes, userBadges] = await Promise.all([
     prisma.image.count({ where: { userId: user.id, deletedAt: null } }),
     prisma.vote.count({ where: { userId: user.id } }),
     prisma.swipe.count({ where: { userId: user.id, direction: "like" } }),
+    prisma.follow.count({ where: { toId: user.id, status: "accepted" } }),
+    prisma.follow.count({ where: { fromId: user.id, status: "accepted" } }),
     prisma.image.findMany({
       where: { userId: user.id, deletedAt: null },
       orderBy: { createdAt: "desc" },
@@ -100,7 +114,7 @@ export default async function SlugPage({
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 40);
 
-  const counts = { uploads: uploadsCount, votes: votesCount, likes: likesCount };
+  const counts = { uploads: uploadsCount, votes: votesCount, likes: likesCount, followers: followersCount, following: followingCount };
 
   const p = profile ?? {
     overviewPublic: true,
@@ -121,9 +135,14 @@ export default async function SlugPage({
   return (
     <main style={{ maxWidth: 720, margin: "0 auto", padding: "1rem" }}>
       <header style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: 0 }}>{displayName}</h1>
-        <p style={{ margin: "0.25rem 0 0", color: "#666" }}>exibidos.club/{slug}</p>
-        {isOwner && <p style={{ marginTop: "0.5rem" }}><Link href="/settings">Edit profile &amp; privacy</Link></p>}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+          <div>
+            <h1 style={{ margin: 0 }}>{displayName}</h1>
+            <p style={{ margin: "0.25rem 0 0", color: "#666" }}>exibidos.club/{slug}</p>
+            {isOwner && <p style={{ marginTop: "0.5rem" }}><Link href="/settings">Edit profile &amp; privacy</Link></p>}
+          </div>
+          {!isOwner && <FollowButton slug={slug} followStatus={followStatus} />}
+        </div>
       </header>
 
       <ProfileTabs slug={slug} current={tab} />
