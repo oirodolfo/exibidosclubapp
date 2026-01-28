@@ -1,4 +1,7 @@
-// Placeholder model for Stage 0 — full schema in Stage 2
+// exibidos.club — Production Prisma Schema
+// Stage 2: Users, Auth, Profiles, Slugs, Images, Categories/Tags, Votes, Swipes,
+//          Rankings, Badges, Follows, Messaging, Groups, Tracking, Feature Flags, Moderation, Audit
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +11,598 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Stage0Placeholder {
-  id String @id
+// ---------------------------------------------------------------------------
+// Users & Auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?   // null for OAuth-only
+  birthdate     DateTime  // age-gate
+  role          String    @default("user") // user | creator | admin | moderator
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // soft delete
+
+  accounts    Account[]
+  sessions    Session[]
+  profile     Profile?
+  slugs       Slug[]
+  slugHistory SlugHistory[]
+  images      Image[]
+  votes       Vote[]
+  swipes      Swipe[]
+  followFrom  Follow[]   @relation("Follower")
+  followTo    Follow[]   @relation("Following")
+  closeFriendFrom CloseFriend[] @relation("CloseFriendUser")
+  closeFriendTo   CloseFriend[] @relation("CloseFriendTarget")
+  userBadges  UserBadge[]
+  messageRequestsSent     MessageRequest[] @relation("MessageRequestFrom")
+  messageRequestsReceived MessageRequest[] @relation("MessageRequestTo")
+  conversationParticipants ConversationParticipant[]
+  groupMembers GroupMember[]
+  auditLogs   AuditLog[]  @relation("AuditActor")
+  featureFlagOverrides FeatureFlagOverride[]
+  moderationReportsCreated ModerationReport[] @relation("ReportCreatedBy")
+  trackingEvents TrackingEvent[]
+
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String  // google | twitter
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ---------------------------------------------------------------------------
+// Profiles & Slugs
+// ---------------------------------------------------------------------------
+
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  displayName   String?
+  bio           String?  @db.Text
+  avatarKey     String?  // S3 key for avatar
+  isPrivate     Boolean  @default(false)
+  // Privacy per section (JSON or separate columns for clarity)
+  overviewPublic    Boolean @default(true)
+  photosPublic      Boolean @default(true)
+  activityPublic    Boolean @default(true)
+  rankingsPublic    Boolean @default(true)
+  badgesPublic      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Slug {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  slug      String   @unique // exibidos.club/{slug}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+}
+
+model SlugHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  oldSlug   String
+  newSlug   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([oldSlug])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Images
+// ---------------------------------------------------------------------------
+
+model Image {
+  id              String   @id @default(cuid())
+  userId          String
+  storageKey      String   // S3 key original (never exposed)
+  thumbKey        String?  // thumbnail
+  blurKey         String?  // blurred preview
+  watermarkedKey  String?  // watermarked variant for feed/profile/rankings
+  mimeType        String   @default("image/jpeg")
+  width           Int?
+  height          Int?
+  visibility      String   @default("public") // public | swipe_only
+  blurMode        String?  // none | eyes | full
+  blurSuggested   Boolean  @default(false)   // ML suggested blur
+  watermarkApplied Boolean @default(false)
+  moderationStatus String  @default("pending") // pending | approved | rejected | queued
+  moderationNote  String?  @db.Text
+  caption         String?  @db.Text
+  duplicateOfId   String?  // if duplicate detected
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  duplicateOf    Image?  @relation("Duplicate", fields: [duplicateOfId], references: [id])
+  duplicates     Image[] @relation("Duplicate")
+  imageEmbedding ImageEmbedding?
+  imageTags      ImageTag[]
+  votes       Vote[]
+  swipes      Swipe[]
+  rankingSnapshots RankingSnapshot[]
+  moderationReports ModerationReport[]
+
+  @@index([userId])
+  @@index([visibility])
+  @@index([moderationStatus])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([duplicateOfId])
+}
+
+// ---------------------------------------------------------------------------
+// Categories & Tags (multi-label)
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String   @id @default(cuid())
+  parentId    String?
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  tags     Tag[]
+  swipes   Swipe[]    // category chosen after like
+  groups   Group[]
+  rankingSnapshots RankingSnapshot[]
+
+  @@index([parentId])
+  @@index([slug])
+}
+
+model Tag {
+  id         String   @id @default(cuid())
+  categoryId String
+  name       String
+  slug       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  imageTags  ImageTag[]
+  votes      Vote[]
+
+  @@unique([categoryId, slug])
+  @@index([categoryId])
+}
+
+model ImageTag {
+  id        String   @id @default(cuid())
+  imageId   String
+  tagId     String
+  source    String   @default("user") // user | ml | vote
+  confidence Float?  // ML confidence 0..1
+  createdAt DateTime @default(now())
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([imageId, tagId])
+  @@index([imageId])
+  @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Votes (weighted)
+// ---------------------------------------------------------------------------
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  imageId   String
+  tagId     String?
+  weight    Int      @default(1) // 1..5 or -1 for down
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  tag   Tag?  @relation(fields: [tagId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, imageId, tagId])
+  @@index([userId])
+  @@index([imageId])
+  @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Swipes (implicit feedback)
+// ---------------------------------------------------------------------------
+
+model Swipe {
+  id          String   @id @default(cuid())
+  userId      String
+  imageId     String
+  direction   String   // like | dislike | skip
+  categoryId  String?  // set when direction=like (category voted after like)
+  createdAt   DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image    Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([imageId])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Rankings & Snapshots
+// ---------------------------------------------------------------------------
+
+model RankingSnapshot {
+  id         String   @id @default(cuid())
+  imageId    String
+  period     String   // daily | weekly | monthly | alltime
+  categoryId String?
+  rank       Int
+  score      Float
+  snapshotAt DateTime @default(now())
+
+  image    Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([period, categoryId, rank])
+  @@index([imageId])
+  @@index([snapshotAt])
+}
+
+// ---------------------------------------------------------------------------
+// Badges & Achievements
+// ---------------------------------------------------------------------------
+
+model Badge {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. first_upload, top_weekly, streak_7
+  name        String
+  description String?  @db.Text
+  iconKey     String?  // S3 or asset key
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}
+
+// ---------------------------------------------------------------------------
+// Followers / Social Graph
+// ---------------------------------------------------------------------------
+
+model Follow {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  status    String   @default("accepted") // pending | accepted | blocked
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  from User @relation("Follower", fields: [fromId], references: [id], onDelete: Cascade)
+  to   User @relation("Following", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([fromId])
+  @@index([toId])
+  @@index([status])
+}
+
+model CloseFriend {
+  id        String   @id @default(cuid())
+  userId    String
+  targetId  String
+  createdAt DateTime @default(now())
+
+  user   User @relation("CloseFriendUser", fields: [userId], references: [id], onDelete: Cascade)
+  target User @relation("CloseFriendTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetId])
+  @@index([userId])
+  @@index([targetId])
+}
+
+// ---------------------------------------------------------------------------
+// Messaging & Message Requests
+// ---------------------------------------------------------------------------
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String   // denorm for quick access; must match a participant
+  body           String   @db.Text
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+  deletedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+model MessageRequest {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  status    String   @default("pending") // pending | accepted | rejected
+  message   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  from User @relation("MessageRequestFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   User @relation("MessageRequestTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([toId])
+  @@index([status])
+}
+
+// Block/mute: separate or in a generic UserRelation. For clarity:
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+model Mute {
+  id        String   @id @default(cuid())
+  userId    String
+  mutedId   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mutedId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Groups & Group Memberships
+// ---------------------------------------------------------------------------
+
+model Group {
+  id          String   @id @default(cuid())
+  categoryId  String
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  avatarKey   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  members  GroupMember[]
+
+  @@index([categoryId])
+  @@index([slug])
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String   @default("member") // admin | moderator | member
+  joinedAt  DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+// Add Group relation to Category (Category currently has no groups field)
+// We need to add it. Checking: Category has tags, swipes. We need groups.
+// I added Group with categoryId. We need Category.groups. In Prisma the relation
+// is inferred from Group.categoryId -> Category. So Category needs:
+//   groups Group[]
+// Let me add that. Actually in my schema I have Group with categoryId and
+// Category @relation. The "other" side on Category is missing. I need to add
+//   groups Group[] to Category.
+// I'll do a search_replace to add it.
+
+// ---------------------------------------------------------------------------
+// Tracking Events
+// ---------------------------------------------------------------------------
+
+model TrackingEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String   // event name (taxonomy)
+  payload   Json?    // contextual data (anonymized where needed)
+  ipHash    String?  // hashed for privacy
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([name])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Feature Flags
+// ---------------------------------------------------------------------------
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  description String?  @db.Text
+  enabled     Boolean  @default(false)
+  rolloutPct  Int      @default(0) // 0..100
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  overrides FeatureFlagOverride[]
+}
+
+model FeatureFlagOverride {
+  id        String   @id @default(cuid())
+  flagId    String
+  userId    String
+  enabled   Boolean
+  createdAt DateTime @default(now())
+
+  flag FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([flagId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Moderation & Audit Logs
+// ---------------------------------------------------------------------------
+
+model ModerationReport {
+  id        String   @id @default(cuid())
+  imageId   String
+  reporterId String
+  reason    String   @db.Text
+  status    String   @default("open") // open | dismissed | action_taken
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  image    Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  reporter User  @relation("ReportCreatedBy", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String   // e.g. user.login, image.upload, slug.change
+  entityType String?  // User, Image, etc.
+  entityId   String?
+  meta       Json?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// ML (embeddings, runs) — for Stage 11
+// ---------------------------------------------------------------------------
+
+model ImageEmbedding {
+  id           String   @id @default(cuid())
+  imageId      String   @unique
+  modelVersion String
+  vector       Bytes?   // float32 array; use pgvector in migration if desired
+  createdAt    DateTime @default(now())
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([modelVersion])
+}
+
+model MlRun {
+  id          String   @id @default(cuid())
+  jobType     String   // embed | classify | cluster
+  modelVersion String
+  config      Json?
+  startedAt   DateTime @default(now())
+  finishedAt  DateTime?
+  status      String   @default("running") // running | ok | error
+  error       String?  @db.Text
+  metrics     Json?
+
+  @@index([jobType])
+  @@index([startedAt])
 }
