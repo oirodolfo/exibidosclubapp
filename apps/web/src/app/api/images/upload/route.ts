@@ -126,6 +126,7 @@ export async function POST(req: Request) {
       caption,
       blurMode: blurMode === "none" ? null : blurMode,
       blurSuggested: result.blurSuggested,
+      watermarkApplied: true,
       moderationStatus: "pending",
       contentHash,
     },

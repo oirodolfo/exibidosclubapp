@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { buildStorageKey, extFromMime, uploadToS3 } from "./s3";
+import { applyWatermark } from "./watermark";
 import { detectFaces, type FaceResult } from "@/lib/face-detection";
 
 const THUMB_MAX_WIDTH = 400;
@@ -78,10 +79,11 @@ export async function processImage(
   const thumbMeta = await sharp(thumbBase).metadata();
   const thumbW = thumbMeta.width ?? origW;
   const thumbH = thumbMeta.height ?? origH;
-  const thumbBuffer =
+  let thumbBuffer =
     blurMode !== "none" && faces.length > 0
       ? await applyFaceBlur(thumbBase, faces, origW, origH, thumbW, thumbH, blurMode)
       : thumbBase;
+  thumbBuffer = await applyWatermark(thumbBuffer, thumbW, thumbH, THUMB_QUALITY);
   const thumbKey = buildStorageKey(userId, imageId, "thumb", "jpg");
   await uploadToS3(thumbKey, thumbBuffer, "image/jpeg");
 
@@ -93,10 +95,11 @@ export async function processImage(
   const blurMeta = await sharp(blurBase).metadata();
   const blurW = blurMeta.width ?? origW;
   const blurH = blurMeta.height ?? origH;
-  const blurBuffer =
+  let blurBuffer =
     blurMode !== "none" && faces.length > 0
       ? await applyFaceBlur(blurBase, faces, origW, origH, blurW, blurH, blurMode)
       : blurBase;
+  blurBuffer = await applyWatermark(blurBuffer, blurW, blurH, 70);
   const blurKey = buildStorageKey(userId, imageId, "blur", "jpg");
   await uploadToS3(blurKey, blurBuffer, "image/jpeg");
 
