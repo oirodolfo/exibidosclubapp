@@ -46,3 +46,10 @@ export {
   type VoteInput,
   type SwipeInput,
 } from "./weak-labels/index.js";
+
+export {
+  validateDataset,
+  type ValidateInput,
+  type ValidationReport,
+  type ValidationCheck,
+} from "./validation/index.js";
