@@ -54,14 +54,22 @@ export async function GET(req: Request) {
 
   const withUrls = await (async () => {
     if (!isS3Configured()) {
-      return items.map((img) => ({ ...img, thumbUrl: null as string | null }));
+      return items.map((img) => ({
+        ...img,
+        thumbUrl: null as string | null,
+        imageUrl: null as string | null,
+      }));
     }
     return Promise.all(
       items.map(async (img) => {
         const thumbUrl = img.thumbKey
           ? await getSignedDownloadUrl(img.thumbKey, 3600).catch(() => null)
           : null;
-        return { ...img, thumbUrl };
+        const imageKey = img.watermarkedKey ?? img.thumbKey ?? null;
+        const imageUrl = imageKey
+          ? await getSignedDownloadUrl(imageKey, 3600).catch(() => null)
+          : thumbUrl;
+        return { ...img, thumbUrl, imageUrl };
       })
     );
   })();
@@ -69,6 +77,7 @@ export async function GET(req: Request) {
   const feed = withUrls.map((img) => ({
     id: img.id,
     thumbUrl: img.thumbUrl,
+    imageUrl: img.imageUrl ?? img.thumbUrl,
     caption: img.caption,
     createdAt: img.createdAt,
     owner: {

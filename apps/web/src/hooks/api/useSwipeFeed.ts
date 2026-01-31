@@ -7,6 +7,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 export type FeedItem = {
   id: string;
   thumbUrl: string | null;
+  imageUrl?: string | null;
   caption: string | null;
   createdAt: string;
   owner: { id: string; name: string | null; slug: string | null };
