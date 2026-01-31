@@ -1,0 +1,18 @@
+# One-off migrations — runs prisma migrate deploy then exits
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.14.2 --activate
+WORKDIR /app
+
+FROM base AS deps
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY packages/db ./packages/db
+COPY packages/config ./packages/config
+RUN pnpm install --frozen-lockfile
+
+FROM base AS runner
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
+COPY --from=deps /app/packages/db ./packages/db
+COPY --from=deps /app/packages/config ./packages/config
+WORKDIR /app
+CMD ["pnpm", "--filter", "@exibidos/db", "exec", "prisma", "migrate", "deploy"]

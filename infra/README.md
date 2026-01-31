@@ -4,11 +4,73 @@ Scripts e configs para desenvolvimento local (Docker Compose) e pipeline (CI).
 
 ---
 
-## Desenvolvimento local com Docker
+## Full stack via Docker Compose (recomendado)
 
-Apenas **infraestrutura** roda em containers; as aplicações (web, api, ims) rodam no host.
+Todo o sistema sobe com um único comando a partir da **raiz do repositório**:
 
-### O que sobe no Docker
+```bash
+docker compose -f infra/docker-compose.yml up -d
+```
+
+### Serviços
+
+| Serviço       | Porta  | Uso |
+|---------------|--------|-----|
+| **postgres**  | 5432   | Banco Prisma |
+| **redis**     | 6379   | Sessões, cache |
+| **minio**     | 9000, 9001 | S3 (API + console) |
+| **minio-init** | —      | Cria bucket `exibidos` (one-off) |
+| **migrate**   | —      | Roda `prisma migrate deploy` (one-off) |
+| **web**       | 3000   | Next.js — http://localhost:3000 |
+| **api**       | 4000   | API Fastify — http://localhost:4000 |
+| **ims**       | 4001   | Image Manipulation Service (legacy) — http://localhost:4001 |
+| **image-service** | 4002 | NestJS Image Manipulation Service — http://localhost:4002 |
+| **ml-ingestion** | 4010 | NestJS Label Studio + weak label ingestion — http://localhost:4010 |
+| **ml-training-orchestrator** | 4011 | NestJS training orchestration — http://localhost:4011 |
+| **ml-model-registry** | 4012 | NestJS model registry — http://localhost:4012 |
+| **ml-observability** | 4013 | NestJS observability & drift — http://localhost:4013 |
+
+- **migrate** roda após Postgres ficar healthy e termina; **web** e **api** só sobem depois do migrate.
+- Variáveis de ambiente (DB, Redis, S3, SESSION_SECRET) estão definidas no compose; para produção, use um `.env` e `SESSION_SECRET` real.
+
+### Comandos úteis
+
+```bash
+# Subir
+docker compose -f infra/docker-compose.yml up -d
+
+# Logs
+docker compose -f infra/docker-compose.yml logs -f web
+
+# Parar
+docker compose -f infra/docker-compose.yml down
+
+# Rebuild após mudanças no código
+docker compose -f infra/docker-compose.yml up -d --build
+```
+
+### Seed (opcional)
+
+Após a primeira subida, para popular o banco:
+
+```bash
+docker compose -f infra/docker-compose.yml run --rm -e DATABASE_URL=postgresql://exibidos:exibidos@postgres:5432/exibidos web sh -c "cd /app && pnpm --filter @exibidos/db run db:seed"
+```
+
+---
+
+## Desenvolvimento local — só infra no Docker
+
+Se quiser rodar **apenas a infraestrutura** em containers e as apps (web, api, ims) no host:
+
+1. Comente ou remova no `docker-compose.yml` os serviços **migrate**, **web**, **api**, **ims** (ou use um profile).
+2. Suba só a infra:
+   ```bash
+   docker compose -f infra/docker-compose.yml up -d postgres redis minio minio-init
+   ```
+3. No host: `cp env.example .env`, `pnpm install`, `pnpm --filter @exibidos/db exec prisma migrate dev`, `pnpm dev:web` (e opcionalmente api/ims).
+
+### O que sobe no Docker (só infra)
 
 | Serviço     | Imagem              | Portas        | Uso                    |
 |------------|---------------------|---------------|------------------------|
@@ -19,40 +81,6 @@ Apenas **infraestrutura** roda em containers; as aplicações (web, api, ims) ro
 
 - **Volumes**: `postgres_data`, `redis_data`, `minio_data` para persistência.
 - **minio-init** depende do healthcheck do MinIO e cria o bucket automaticamente; depois termina (`restart: "no"`).
-
-### Passo a passo
-
-1. **Subir os serviços**
-   ```bash
-   docker compose -f infra/docker-compose.yml up -d
-   ```
-
-2. **Aguardar ficarem saudáveis**  
-   Especialmente o MinIO e o `minio-init` (criação do bucket). Sugestão: 15–30 s.
-   ```bash
-   docker compose -f infra/docker-compose.yml ps
-   ```
-   Quando `minio` estiver `healthy` e `minio-init` tiver `Exited (0)`, pode seguir.
-
-3. **Variáveis de ambiente**
-   ```bash
-   cp env.example .env
-   ```
-   Edite `.env` se precisar (para dev local o template já aponta para localhost:5432, 6379, 9000).
-
-4. **Dependências e banco**
-   ```bash
-   pnpm install
-   pnpm --filter @exibidos/db exec prisma migrate dev
-   pnpm --filter @exibidos/db run db:seed
-   ```
-
-5. **Rodar as apps no host**
-   - Web: `pnpm dev:web` (porta 3000)
-   - API: `pnpm dev:api` (porta 4000)
-   - IMS: a partir de `apps/ims`, `pnpm dev` (porta 4001)
-
-   Ou, da raiz: `pnpm dev` para o que estiver configurado no workspace.
 
 ### Verificar serviços
 
@@ -76,7 +104,14 @@ Apenas **infraestrutura** roda em containers; as aplicações (web, api, ims) ro
 
 ## Build de imagens (produção)
 
-- **Dockerfile.api**: imagem da API (Fastify).
 - **Dockerfile.web**: imagem do Next.js.
+- **Dockerfile.api**: imagem da API (Fastify).
+- **Dockerfile.ims**: imagem do IMS (Image Manipulation Service, legacy).
+- **Dockerfile.image-service**: NestJS Image Manipulation Service.
+- **Dockerfile.ml-ingestion**: NestJS Label Studio + weak label ingestion.
+- **Dockerfile.ml-training-orchestrator**: NestJS training orchestration.
+- **Dockerfile.ml-model-registry**: NestJS model registry.
+- **Dockerfile.ml-observability**: NestJS observability & drift.
+- **Dockerfile.migrate**: one-off para `prisma migrate deploy`.
 
-Usados para deploy; em dev local as apps rodam no host contra Postgres/Redis/MinIO do `docker-compose`.
+Usados pelo `docker-compose` (full stack) ou para deploy; em dev local você pode rodar só a infra e as apps no host.
