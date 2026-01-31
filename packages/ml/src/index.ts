@@ -53,3 +53,18 @@ export {
   type ValidationReport,
   type ValidationCheck,
 } from "./validation/index.js";
+
+export {
+  DEFAULT_TRAINING_CONFIG,
+  prepareTrainingRun,
+  createMetricsPlaceholder,
+  deterministicSplits,
+  type TrainingConfig,
+  type TrainingPipelineInput,
+  type TrainingPipelineOutput,
+  type TrainingMetricsArtifact,
+  type ClassMetrics,
+  type RegionMetrics,
+  type SplitKind,
+  type SplitResult,
+} from "./training/index.js";
