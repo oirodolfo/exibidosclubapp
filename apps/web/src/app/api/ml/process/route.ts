@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
+import { getActiveModelVersion } from "@exibidos/ml-registry-client";
 import { authOptions } from "@/lib/auth/config";
 import { ensureMlMetadataForImage } from "@/lib/ml/ingest";
 import { log } from "@/lib/logger";
@@ -28,6 +29,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     try {
+      const registryUrl = process.env.ML_MODEL_REGISTRY_URL;
+      const activeModelVersion = registryUrl
+        ? await getActiveModelVersion({ baseUrl: registryUrl })
+        : null;
+      if (activeModelVersion) log.ml.info("process: active model from registry", { activeModelVersion });
       await ensureMlMetadataForImage(imageId);
       log.ml.info("process: single image", { imageId });
       return NextResponse.json({ ok: true, processed: 1 });
