@@ -1,28 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { link, listItemBordered, listReset } from "@/lib/variants";
-
-type Conversation = {
-  id: string;
-  other: { id: string; name: string | null; slug: string | null } | null;
-  lastMessage: { body: string; createdAt: string } | null;
-};
+import { useConversations } from "@/hooks/api";
 
 export function MessagesClient() {
-  const [convs, setConvs] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: convs, isLoading } = useConversations();
 
-  useEffect(() => {
-    fetch("/api/messages/conversations")
-      .then((r) => (r.ok ? r.json() : { conversations: [] }))
-      .then((d) => setConvs(d.conversations ?? []))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <p className="text-neutral-500">Loading…</p>;
-  if (convs.length === 0) {
+  if (isLoading) return <p className="text-neutral-500">Loading…</p>;
+  if (!convs?.length) {
     return (
       <p className="text-neutral-500">
         No conversations. Visit a profile and send a message request to start.
@@ -31,7 +17,7 @@ export function MessagesClient() {
   }
 
   return (
-    <ul className={`${listReset}`}>
+    <ul className={listReset}>
       {convs.map((c) => (
         <li key={c.id} className={listItemBordered}>
           <Link href={`/messages/${c.id}`} className={link}>

@@ -1,101 +1,49 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { link } from "@/lib/variants";
-
-type FeedItem = {
-  id: string;
-  thumbUrl: string | null;
-  caption: string | null;
-  createdAt: string;
-  owner: { id: string; name: string | null; slug: string | null };
-};
+import { useSwipeFeed, useSwipeMutation } from "@/hooks/api";
+import { useSwipeStore } from "@/stores";
 
 export function SwipeFeed() {
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [swiping, setSwiping] = useState(false);
+  const { currentIndex, setCurrentIndex } = useSwipeStore();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSwipeFeed();
+  const swipeMutation = useSwipeMutation();
 
-  const fetchFeed = useCallback(async (cursor?: string | null) => {
-    const url = cursor ? `/api/swipe/feed?cursor=${cursor}` : "/api/swipe/feed";
-    const res = await fetch(url);
-    if (!res.ok) {
-      const d = (await res.json().catch(() => ({}))) as { error?: string };
-      throw new Error(d.error ?? "Failed to load");
-    }
-    const data = (await res.json()) as { feed: FeedItem[]; nextCursor: string | null };
-    return data;
-  }, []);
+  const allItems = data?.pages.flatMap((p) => p.feed) ?? [];
+  const item = allItems[currentIndex];
 
   useEffect(() => {
-    fetchFeed()
-      .then(({ feed, nextCursor: nc }) => {
-        setItems(feed);
-        setNextCursor(nc);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [fetchFeed]);
-
-  const loadMore = useCallback(async () => {
-    if (!nextCursor || items.length === 0) return;
-    try {
-      const { feed, nextCursor: nc } = await fetchFeed(nextCursor);
-      setItems((prev) => [...prev, ...feed]);
-      setNextCursor(nc);
-    } catch {
-      // ignore
+    if (currentIndex >= allItems.length - 3 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [nextCursor, items.length, fetchFeed]);
+  }, [currentIndex, allItems.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const swipe = useCallback(
-    async (direction: "like" | "dislike" | "skip") => {
-      const item = items[currentIndex];
-      if (!item || swiping) return;
-
-      setSwiping(true);
-      try {
-        const res = await fetch("/api/swipe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageId: item.id, direction }),
-        });
-        if (!res.ok) {
-          const d = (await res.json().catch(() => ({}))) as { error?: string };
-          throw new Error(d.error ?? "Failed");
-        }
-        if (currentIndex >= items.length - 3 && nextCursor) {
-          loadMore();
-        }
-        setCurrentIndex((i) => i + 1);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Swipe failed");
-      } finally {
-        setSwiping(false);
+  const swipe = (direction: "like" | "dislike" | "skip") => {
+    if (!item || swipeMutation.isPending) return;
+    swipeMutation.mutate(
+      { imageId: item.id, direction },
+      {
+        onSuccess: () => setCurrentIndex((i) => i + 1),
+        onError: () => {},
       }
-    },
-    [items, currentIndex, swiping, nextCursor, loadMore]
-  );
+    );
+  };
 
-  if (loading) {
-    return <p className="text-neutral-500 py-8">Loading...</p>;
-  }
-  if (error) {
+  if (isLoading) return <p className="text-neutral-500 py-8">Loading...</p>;
+  if (error)
     return (
       <p className="text-red-600 py-4">
-        {error}{" "}
-        <button type="button" onClick={() => window.location.reload()} className={link}>
+        {error.message}{" "}
+        <button type="button" onClick={() => refetch()} className={link}>
           Retry
         </button>
       </p>
     );
-  }
-  if (items.length === 0) {
+  if (allItems.length === 0)
     return (
       <div className="py-12 text-center">
         <p className="text-neutral-500">No images to swipe. Check back later!</p>
@@ -104,10 +52,8 @@ export function SwipeFeed() {
         </p>
       </div>
     );
-  }
 
-  const item = items[currentIndex];
-  if (!item) {
+  if (!item)
     return (
       <div className="py-12 text-center">
         <p className="text-neutral-500">You&apos;ve seen everything for now.</p>
@@ -116,7 +62,6 @@ export function SwipeFeed() {
         </p>
       </div>
     );
-  }
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -132,9 +77,7 @@ export function SwipeFeed() {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-neutral-400">
-            [img]
-          </div>
+          <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>
         )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
           {item.caption && <p className="m-0 text-sm">{item.caption}</p>}
@@ -154,7 +97,7 @@ export function SwipeFeed() {
           variant="danger"
           size="lg"
           onClick={() => swipe("dislike")}
-          disabled={swiping}
+          disabled={swipeMutation.isPending}
           aria-label="Dislike"
         >
           ✕
@@ -163,7 +106,7 @@ export function SwipeFeed() {
           variant="secondary"
           size="lg"
           onClick={() => swipe("skip")}
-          disabled={swiping}
+          disabled={swipeMutation.isPending}
           aria-label="Skip"
         >
           Skip
@@ -172,7 +115,7 @@ export function SwipeFeed() {
           variant="primary"
           size="lg"
           onClick={() => swipe("like")}
-          disabled={swiping}
+          disabled={swipeMutation.isPending}
           aria-label="Like"
         >
           ♥
@@ -180,7 +123,7 @@ export function SwipeFeed() {
       </div>
 
       <p className="text-sm text-neutral-500">
-        {currentIndex + 1} / {items.length}
+        {currentIndex + 1} / {allItems.length}
       </p>
     </div>
   );

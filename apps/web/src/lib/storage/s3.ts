@@ -1,3 +1,7 @@
+/**
+ * S3 client for R2/MinIO. Signed URLs for download; no public bucket.
+ * Env: S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY; optional S3_ENDPOINT.
+ */
 import {
   GetObjectCommand,
   PutObjectCommand,

@@ -1,46 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { link, listReset } from "@/lib/variants";
-
-type RankingItem = {
-  rank: number;
-  imageId: string;
-  score: number;
-  thumbUrl: string | null;
-  caption: string | null;
-  owner: { id: string; name: string | null; slug: string | null };
-};
+import { useRankings } from "@/hooks/api";
+import { useState } from "react";
 
 type Props = { rankingsEnabled?: boolean };
 
 export function RankingsTab({ rankingsEnabled = true }: Props) {
-  const [rankings, setRankings] = useState<RankingItem[]>([]);
   const [period, setPeriod] = useState("weekly");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!rankingsEnabled) return;
-    setLoading(true);
-    setError(null);
-    fetch(`/api/rankings?period=${period}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed");
-        return r.json();
-      })
-      .then((d) => {
-        setRankings(d.rankings ?? []);
-      })
-      .catch(() => setError("Could not load rankings"))
-      .finally(() => setLoading(false));
-  }, [period, rankingsEnabled]);
+  const { data: rankings, isLoading, error } = useRankings(period);
 
   if (!rankingsEnabled) return <p className="text-neutral-500">Rankings are disabled.</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (loading) return <p className="text-neutral-500">Loading rankings…</p>;
-  if (rankings.length === 0) {
+  if (error) return <p className="text-red-600">{error.message}</p>;
+  if (isLoading) return <p className="text-neutral-500">Loading rankings…</p>;
+  if (!rankings?.length) {
     return <p className="text-neutral-500">No rankings yet. Like images in Swipe to build them!</p>;
   }
 
@@ -66,7 +40,9 @@ export function RankingsTab({ rankingsEnabled = true }: Props) {
               {r.thumbUrl ? (
                 <img src={r.thumbUrl} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-xs text-neutral-400 flex items-center justify-center h-full">—</span>
+                <span className="text-xs text-neutral-400 flex items-center justify-center h-full">
+                  —
+                </span>
               )}
             </div>
             <div className="min-w-0 flex-1">

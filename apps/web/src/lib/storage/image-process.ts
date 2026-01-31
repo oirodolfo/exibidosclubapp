@@ -1,3 +1,7 @@
+/**
+ * Image pipeline: resize, face blur (optional), watermark, S3 upload.
+ * Thumb (400px), blur (800px). Face blur uses detectFaces when blurMode ≠ none.
+ */
 import sharp from "sharp";
 import { buildStorageKey, extFromMime } from "./s3";
 import { upload } from "./provider";

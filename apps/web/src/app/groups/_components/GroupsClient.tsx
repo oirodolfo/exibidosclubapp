@@ -1,24 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { link, listItemBordered, listReset } from "@/lib/variants";
-
-type Group = { id: string; name: string; slug: string; description: string | null; category: { name: string } };
+import { useGroups } from "@/hooks/api";
 
 export function GroupsClient() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: groups, isLoading } = useGroups();
 
-  useEffect(() => {
-    fetch("/api/groups")
-      .then((r) => (r.ok ? r.json() : { groups: [] }))
-      .then((d) => setGroups(d.groups ?? []))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <p className="text-neutral-500">Loading…</p>;
-  if (groups.length === 0) return <p className="text-neutral-500">No groups yet.</p>;
+  if (isLoading) return <p className="text-neutral-500">Loading…</p>;
+  if (!groups?.length) return <p className="text-neutral-500">No groups yet.</p>;
 
   return (
     <ul className={listReset}>

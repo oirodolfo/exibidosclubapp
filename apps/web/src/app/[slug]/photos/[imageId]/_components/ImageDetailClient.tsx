@@ -1,13 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { field, fieldLabel } from "@/lib/variants";
+import {
+  useCategories,
+  useImageTags,
+  useAddTag,
+  useRemoveTag,
+  useVote,
+} from "@/hooks/api";
 
-type TagInfo = { id: string; name: string; slug: string; category: string; source: string; confidence: number | null };
+type TagInfo = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  source: string;
+  confidence: number | null;
+};
 type VoteInfo = { avg: number; count: number };
-type CategoryInfo = { id: string; name: string; slug: string; tags: { id: string; name: string; slug: string }[] };
 
 type Props = {
   imageId: string;
@@ -16,120 +29,90 @@ type Props = {
   slug: string;
 };
 
-export function ImageDetailClient({ imageId, tags, voteByTag, slug }: Props) {
-  const [categories, setCategories] = useState<CategoryInfo[]>([]);
-  const [localTags, setLocalTags] = useState<TagInfo[]>(tags);
-  const [localVotes, setLocalVotes] = useState<Record<string, VoteInfo>>(voteByTag);
+export function ImageDetailClient({ imageId, tags: initialTags, voteByTag: initialVotes, slug }: Props) {
+  const router = useRouter();
+  const { data: categoriesData } = useCategories();
+  const { data: tagsData } = useImageTags(imageId);
+  const addTag = useAddTag(imageId);
+  const removeTag = useRemoveTag(imageId);
+  const vote = useVote(imageId);
   const [selectedTagId, setSelectedTagId] = useState("");
   const [voteWeight, setVoteWeight] = useState(5);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
-  useEffect(() => {
-    setLocalTags(tags);
-    setLocalVotes(voteByTag);
-  }, [tags, voteByTag]);
+  const categories = categoriesData ?? [];
+  const tagsFromApi = tagsData?.tags as
+    | Array<TagInfo & { category?: { name: string }; votes?: VoteInfo }>
+    | undefined;
+  const localTags: TagInfo[] = tagsFromApi
+    ? tagsFromApi.map((t) => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+        category: t.category?.name ?? "",
+        source: t.source,
+        confidence: t.confidence,
+      }))
+    : initialTags;
+  const voteByTag: Record<string, VoteInfo> = tagsFromApi
+    ? Object.fromEntries(
+        tagsFromApi.map((t) => [t.id, t.votes ?? { avg: 0, count: 0 }])
+      )
+    : initialVotes;
 
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/categories");
-      if (res.ok) {
-        const data = (await res.json()) as { categories?: { id: string; name: string; slug: string; tags: { id: string; name: string; slug: string }[] }[] };
-        if (data.categories) {
-          const withTags = await Promise.all(
-            (data.categories).map(async (c) => {
-              const tr = await fetch(`/api/categories/${c.slug}/tags`);
-              const td = (await tr.json()) as { tags?: { id: string; name: string; slug: string }[] };
-              return { ...c, tags: td.tags ?? [] };
-            })
-          );
-          setCategories(withTags);
-        }
-      }
-    })();
-  }, []);
-
-  async function addTag() {
-    if (!selectedTagId) return;
-    setError(null);
-    setLoading(true);
-    const res = await fetch(`/api/images/${imageId}/tags`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tagId: selectedTagId }),
-    });
-    setLoading(false);
-    if (res.status === 401) {
-      router.replace(`/auth/login?callbackUrl=/${slug}/photos/${imageId}`);
-      return;
-    }
-    if (!res.ok) {
-      const d = (await res.json().catch(() => ({}))) as { error?: string };
-      setError(d.error ?? "Failed");
-      return;
-    }
-    const tag = categories.flatMap((c) => c.tags).find((t) => t.id === selectedTagId);
-    if (tag) {
-      setLocalTags((prev) => [...prev, { ...tag, category: categories.find((c) => c.tags.some((t) => t.id === selectedTagId))?.name ?? "", source: "user", confidence: null }]);
-      setSelectedTagId("");
-    }
-    router.refresh();
-  }
-
-  async function removeTag(tagId: string) {
-    setError(null);
-    setLoading(true);
-    const res = await fetch(`/api/images/${imageId}/tags/${tagId}`, { method: "DELETE" });
-    setLoading(false);
-    if (res.ok) {
-      setLocalTags((prev) => prev.filter((t) => t.id !== tagId));
-      setLocalVotes((prev) => {
-        const next = { ...prev };
-        delete next[tagId];
-        return next;
-      });
-      router.refresh();
-    }
-  }
-
-  async function vote(tagId: string, weight: number) {
-    setError(null);
-    setLoading(true);
-    const res = await fetch(`/api/images/${imageId}/votes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tagId, weight }),
-    });
-    setLoading(false);
-    if (res.status === 401) {
-      router.replace(`/auth/login?callbackUrl=/${slug}/photos/${imageId}`);
-      return;
-    }
-    if (res.ok) {
-      const v = localVotes[tagId];
-      const count = (v?.count ?? 0) + 1;
-      const sum = (v?.avg ?? 0) * (v?.count ?? 0) + weight;
-      setLocalVotes((prev) => ({ ...prev, [tagId]: { avg: sum / count, count } }));
-      router.refresh();
-    }
-  }
-
-  const allTags = categories.flatMap((c) => c.tags.map((t) => ({ ...t, category: c.name })));
+  const allTags = categories.flatMap((c) =>
+    c.tags.map((t) => ({ ...t, category: c.name }))
+  );
   const availableToAdd = allTags.filter((t) => !localTags.some((lt) => lt.id === t.id));
+  const loading = addTag.isPending || removeTag.isPending || vote.isPending;
+
+  const handleAddTag = (tagId: string) => {
+    if (!tagId) return;
+    addTag.mutate(tagId, {
+      onSuccess: () => {
+        setSelectedTagId("");
+        router.refresh();
+      },
+      onError: (e) => {
+        if (e.message === "unauthorized")
+          router.replace(`/auth/login?callbackUrl=/${slug}/photos/${imageId}`);
+      },
+    });
+  };
+
+  const handleRemoveTag = (tagId: string) => {
+    removeTag.mutate(tagId, { onSuccess: () => router.refresh() });
+  };
+
+  const handleVote = (tagId: string, weight: number) => {
+    vote.mutate(
+      { tagId, weight },
+      {
+        onSuccess: () => router.refresh(),
+        onError: (e) => {
+          if (e.message === "unauthorized")
+            router.replace(`/auth/login?callbackUrl=/${slug}/photos/${imageId}`);
+        },
+      }
+    );
+  };
 
   return (
     <div>
-      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+      {(addTag.error || removeTag.error || vote.error) && (
+        <p className="text-red-600 text-sm mb-2">
+          {addTag.error?.message ?? removeTag.error?.message ?? vote.error?.message}
+        </p>
+      )}
       <ul className="list-none p-0 m-0 space-y-2">
         {localTags.map((t) => (
           <li key={t.id} className="flex items-center justify-between gap-2 py-2 border-b border-neutral-200">
             <span>
               <strong>{t.name}</strong>
               <span className="text-neutral-500 text-sm ml-2">({t.category})</span>
-              {localVotes[t.id] && (
+              {voteByTag[t.id] && (
                 <span className="text-neutral-500 text-sm ml-2">
-                  — {localVotes[t.id].count} vote{localVotes[t.id].count !== 1 ? "s" : ""}, avg {localVotes[t.id].avg.toFixed(1)}
+                  — {voteByTag[t.id].count} vote{voteByTag[t.id].count !== 1 ? "s" : ""}, avg{" "}
+                  {voteByTag[t.id].avg.toFixed(1)}
                 </span>
               )}
             </span>
@@ -140,13 +123,25 @@ export function ImageDetailClient({ imageId, tags, voteByTag, slug }: Props) {
                 className="text-sm border rounded px-2 py-1"
               >
                 {[5, 4, 3, 2, 1, -1].map((w) => (
-                  <option key={w} value={w}>{w === -1 ? "Disagree" : w}</option>
+                  <option key={w} value={w}>
+                    {w === -1 ? "Disagree" : w}
+                  </option>
                 ))}
               </select>
-              <Button size="sm" variant="secondary" onClick={() => vote(t.id, voteWeight)} disabled={loading}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => handleVote(t.id, voteWeight)}
+                disabled={loading}
+              >
                 Vote
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => removeTag(t.id)} disabled={loading}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleRemoveTag(t.id)}
+                disabled={loading}
+              >
                 Remove
               </Button>
             </div>
@@ -164,10 +159,17 @@ export function ImageDetailClient({ imageId, tags, voteByTag, slug }: Props) {
             >
               <option value="">Select…</option>
               {availableToAdd.map((t) => (
-                <option key={t.id} value={t.id}>{t.name} ({t.category})</option>
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.category})
+                </option>
               ))}
             </select>
-            <Button onClick={addTag} disabled={loading || !selectedTagId}>Add</Button>
+            <Button
+              onClick={() => handleAddTag(selectedTagId)}
+              disabled={loading || !selectedTagId}
+            >
+              Add
+            </Button>
           </div>
         </div>
       )}

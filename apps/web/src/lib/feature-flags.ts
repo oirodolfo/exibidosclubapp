@@ -1,6 +1,6 @@
 /**
- * Feature flag resolution: DB-backed with env override.
- * When FEATURE_* env is set, it overrides DB. Otherwise check FeatureFlag table.
+ * Feature flag resolution: env overrides DB.
+ * Env (e.g. FEATURE_TAGGING=true) takes precedence. DB supports rollout % and user overrides.
  */
 
 import { prisma } from "@exibidos/db/client";

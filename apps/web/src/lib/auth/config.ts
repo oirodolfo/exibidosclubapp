@@ -1,3 +1,7 @@
+/**
+ * Auth configuration: NextAuth with credentials + OAuth (Google, Twitter).
+ * Session: DB-backed, 30d max. OAuth users without slug → /auth/complete-signup.
+ */
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
