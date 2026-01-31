@@ -104,3 +104,15 @@ export {
   type FeedbackLoopConfig,
   type CandidateInput,
 } from "./feedback/index.js";
+
+export {
+  detectDrift,
+  DEFAULT_OBSERVABILITY_CONFIG,
+  type DriftInput,
+  type ObservabilityConfig,
+  type ConfidenceDistribution,
+  type ClassFrequencySnapshot,
+  type AnnotationCorrectionRate,
+  type ModelPerformanceSnapshot,
+  type DriftSignal,
+} from "./observability/index.js";
