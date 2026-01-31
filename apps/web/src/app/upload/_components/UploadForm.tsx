@@ -14,6 +14,7 @@ export function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
   const [visibility, setVisibility] = useState<"public" | "swipe_only">("public");
+  const [blurMode, setBlurMode] = useState<"none" | "eyes" | "full">("none");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -38,6 +39,7 @@ export function UploadForm() {
     formData.set("file", file);
     if (caption.trim()) formData.set("caption", caption.trim());
     formData.set("visibility", visibility);
+    formData.set("blurMode", blurMode);
     try {
       const res = await fetch("/api/images/upload", {
         method: "POST",
@@ -133,6 +135,38 @@ export function UploadForm() {
                   onChange={() => setVisibility("swipe_only")}
                 />
                 Swipe only
+              </label>
+            </div>
+          </div>
+          <div className={field}>
+            <span className={fieldLabel}>Face blur (privacy)</span>
+            <div className="flex flex-wrap gap-4 mt-1">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="blurMode"
+                  checked={blurMode === "none"}
+                  onChange={() => setBlurMode("none")}
+                />
+                None
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="blurMode"
+                  checked={blurMode === "eyes"}
+                  onChange={() => setBlurMode("eyes")}
+                />
+                Eyes only
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="blurMode"
+                  checked={blurMode === "full"}
+                  onChange={() => setBlurMode("full")}
+                />
+                Full face
               </label>
             </div>
           </div>

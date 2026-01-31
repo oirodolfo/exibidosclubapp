@@ -8,3 +8,4 @@ export {
   uploadToS3,
 } from "./s3";
 export { processImage } from "./image-process";
+export type { BlurMode } from "./image-process";

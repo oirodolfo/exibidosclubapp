@@ -4,11 +4,12 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { ensureMlMetadataForImage } from "@/lib/ml/ingest";
-import { isS3Configured, processImage } from "@/lib/storage";
+import { isS3Configured, processImage, type BlurMode } from "@/lib/storage";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIMES = ["image/jpeg", "image/png", "image/webp"] as const;
 const VISIBILITY = ["public", "swipe_only"] as const;
+const BLUR_MODES = ["none", "eyes", "full"] as const;
 
 function sha256(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
@@ -72,6 +73,10 @@ export async function POST(req: Request) {
   const visibility = VISIBILITY.includes(rawVisibility as (typeof VISIBILITY)[number])
     ? (rawVisibility as (typeof VISIBILITY)[number])
     : "public";
+  const rawBlurMode = (formData.get("blurMode") as string | null) || "none";
+  const blurMode: BlurMode = BLUR_MODES.includes(rawBlurMode as (typeof BLUR_MODES)[number])
+    ? (rawBlurMode as BlurMode)
+    : "none";
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
@@ -98,7 +103,7 @@ export async function POST(req: Request) {
 
   let result: Awaited<ReturnType<typeof processImage>>;
   try {
-    result = await processImage(userId, id, buffer, mime);
+    result = await processImage(userId, id, buffer, mime, blurMode);
   } catch (e) {
     console.error("image process error", e);
     return NextResponse.json(
@@ -119,6 +124,8 @@ export async function POST(req: Request) {
       height: result.height ?? null,
       visibility,
       caption,
+      blurMode: blurMode === "none" ? null : blurMode,
+      blurSuggested: result.blurSuggested,
       moderationStatus: "pending",
       contentHash,
     },
@@ -137,7 +144,7 @@ export async function POST(req: Request) {
       action: "image.upload",
       entityType: "Image",
       entityId: image.id,
-      meta: { visibility, hasCaption: !!caption },
+      meta: { visibility, hasCaption: !!caption, blurMode, blurSuggested: result.blurSuggested },
     },
   });
 
