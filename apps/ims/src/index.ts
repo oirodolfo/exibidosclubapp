@@ -8,6 +8,12 @@ import cors from "@fastify/cors";
 import { prisma } from "@exibidos/db/client";
 import type { ImageMlMetadataData } from "@exibidos/ml";
 import type { BlurMode } from "./contracts.js";
+import {
+  cacheKey,
+  memoryCacheGet,
+  memoryCacheSet,
+  isMemoryCacheEnabled,
+} from "./cache.js";
 import { resolveBlurMode } from "./blur-policies.js";
 import { parseTransformSpec } from "./parser.js";
 import { runPipeline } from "./pipeline.js";
@@ -85,6 +91,18 @@ async function main() {
         featureBlurDisabled: process.env.FEATURE_BLUR_DISABLED === "true",
       });
 
+    const key = cacheKey(imageId, query);
+    if (isMemoryCacheEnabled()) {
+      const cached = memoryCacheGet(key);
+      if (cached) {
+        return reply
+          .header("Content-Type", cached.contentType)
+          .header("Cache-Control", "public, max-age=31536000, immutable")
+          .header("X-IMS-Cache", "hit")
+          .send(cached.buffer);
+      }
+    }
+
     try {
       const result = await runPipeline({
         buffer,
@@ -95,9 +113,13 @@ async function main() {
         watermarkKind: parsed.spec.watermark,
         watermarkSlug: parsed.spec.slug,
       });
+      if (isMemoryCacheEnabled()) {
+        memoryCacheSet(key, { buffer: result.buffer, contentType: result.contentType });
+      }
       return reply
         .header("Content-Type", result.contentType)
         .header("Cache-Control", "public, max-age=31536000, immutable")
+        .header("X-IMS-Cache", "miss")
         .send(result.buffer);
     } catch (e) {
       request.log.error(e, "Pipeline failed");

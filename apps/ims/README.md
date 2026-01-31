@@ -54,6 +54,14 @@ GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1&crop=face
 - `watermark` — brand | user | none. Global brand or user-specific (exibidos.club/@slug); saliency-aware placement.
 - `slug` — user slug for watermark=user (exibidos.club/@slug).
 
+## Cache & delivery strategy
+
+- **URL immutability** — Same URL always returns same content; cache key = full URL (path + sorted query).
+- **Multi-layer** — (1) In-memory LRU in IMS when `IMS_MEMORY_CACHE_MAX` > 0; (2) Edge/CDN in front of IMS caches by URL; (3) Browser cache via `Cache-Control: public, max-age=31536000, immutable`.
+- **Version-based invalidation** — Bump query param `v` when transform semantics change; old URLs keep old behavior; **changing policy does NOT require purging CDN** (new context/blur = new URL).
+- **Observability** — Response header `X-IMS-Cache: hit | miss` when in-memory cache is enabled.
+- **Cold starts** — Optional in-memory cache reduces repeated transforms for hot images; set `IMS_MEMORY_CACHE_MAX` (entries) and `IMS_MEMORY_CACHE_TTL` (seconds, default 3600).
+
 ## Environment
 
-Same as rest of stack: `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, optional `S3_ENDPOINT`, `S3_REGION`, `S3_FORCE_PATH_STYLE`. Plus `DATABASE_URL` (to resolve imageId → storageKey). `PORT` (default 4001).
+Same as rest of stack: `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, optional `S3_ENDPOINT`, `S3_REGION`, `S3_FORCE_PATH_STYLE`. Plus `DATABASE_URL` (to resolve imageId → storageKey). `PORT` (default 4001). Optional: `IMS_MEMORY_CACHE_MAX` (0 = disabled), `IMS_MEMORY_CACHE_TTL` (seconds).
