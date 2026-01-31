@@ -5,13 +5,15 @@ import {
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app.module.js";
+import { HumanproofConfigService } from "./config/humanproof-config.service.js";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter()
   );
-  const port = Number(process.env.PORT) || 4020;
+  const config = app.get(HumanproofConfigService);
+  const port = Number(config.port) || 4020;
   await app.listen(port, "0.0.0.0");
 }
 
