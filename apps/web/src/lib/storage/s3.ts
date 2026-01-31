@@ -1,3 +1,7 @@
+/**
+ * S3 client for R2/MinIO. Signed URLs for download; no public bucket.
+ * Env: S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY; optional S3_ENDPOINT.
+ */
 import {
   GetObjectCommand,
   PutObjectCommand,
@@ -5,6 +9,7 @@ import {
   type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { log } from "@/lib/logger";
 
 const env = process.env.NODE_ENV ?? "development";
 
@@ -37,6 +42,10 @@ export function getS3Client(): S3Client {
   return _client;
 }
 
+/**
+ * Build storage key: {env}/{userId}/{imageId}/{variant}.{ext}.
+ * Same layout for S3 and local fallback; env comes from NODE_ENV.
+ */
 export function buildStorageKey(
   userId: string,
   imageId: string,
@@ -54,6 +63,7 @@ export type ProcessResult = {
   height?: number;
 };
 
+/** Map MIME type to file extension for storage keys; defaults to jpg for unknown. */
 export function extFromMime(mime: string): string {
   if (mime === "image/jpeg" || mime === "image/jpg") return "jpg";
   if (mime === "image/png") return "png";
@@ -68,6 +78,7 @@ export async function uploadToS3(
 ): Promise<void> {
   const client = getS3Client();
   const bucket = getBucket();
+  log.storage.debug("uploadToS3", { key, size: body.byteLength });
   const input: PutObjectCommandInput = {
     Bucket: bucket,
     Key: key,

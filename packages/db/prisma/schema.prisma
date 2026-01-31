@@ -167,6 +167,7 @@ model Image {
   duplicateOf    Image?  @relation("Duplicate", fields: [duplicateOfId], references: [id])
   duplicates     Image[] @relation("Duplicate")
   imageEmbedding ImageEmbedding?
+  imageMlMetadata ImageMlMetadata?
   imageTags      ImageTag[]
   votes       Vote[]
   swipes      Swipe[]
@@ -612,4 +613,20 @@ model MlRun {
 
   @@index([jobType])
   @@index([startedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Image ML metadata (long-lived contract; reusable and replayable)
+// ---------------------------------------------------------------------------
+
+model ImageMlMetadata {
+  id              String   @id @default(cuid())
+  imageId         String   @unique
+  contractVersion Int      // bump when schema of data changes
+  data            Json     // faceRegions, bodyRegions, interestRegions, explicitRegions, saliency
+  createdAt       DateTime @default(now())
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([contractVersion])
 }

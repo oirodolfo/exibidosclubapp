@@ -5,6 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "exibidos.club",
   description: "exibidos.club",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

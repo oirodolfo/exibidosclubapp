@@ -1,3 +1,7 @@
+/**
+ * Auth configuration: NextAuth with credentials + OAuth (Google, Twitter).
+ * Session: DB-backed, 30d max. OAuth users without slug → /auth/complete-signup.
+ */
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -5,6 +9,7 @@ import TwitterProvider from "next-auth/providers/twitter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@exibidos/db/client";
 import { ExibidosPrismaAdapter } from "./adapter";
+import { log } from "@/lib/logger";
 
 const AGE_GATE_MIN_YEARS = 18;
 
@@ -20,15 +25,28 @@ export const authOptions: NextAuthOptions = {
         name: "credentials",
         credentials: { email: { label: "Email", type: "email" }, password: { label: "Password", type: "password" } },
         async authorize(creds) {
-          if (!creds?.email || !creds?.password) return null;
+          if (!creds?.email || !creds?.password) {
+            log.auth.debug("authorize: missing email or password");
+            return null;
+          }
           const user = await prisma.user.findFirst({
             where: { email: creds.email, deletedAt: null },
             include: { slugs: true },
           });
-          if (!user?.passwordHash) return null;
+          if (!user?.passwordHash) {
+            log.auth.debug("authorize: user not found or no password", { email: creds.email });
+            return null;
+          }
           const ok = await bcrypt.compare(creds.password, user.passwordHash);
-          if (!ok) return null;
-          if (user.slugs.length === 0) return null;
+          if (!ok) {
+            log.auth.warn("authorize: invalid password", { email: creds.email });
+            return null;
+          }
+          if (user.slugs.length === 0) {
+            log.auth.debug("authorize: user has no slug", { userId: user.id });
+            return null;
+          }
+          log.auth.info("authorize: success", { userId: user.id, email: creds.email });
           return { id: user.id, email: user.email, name: user.name, image: user.image };
         },
       }),
@@ -45,12 +63,19 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
       async signIn({ user, account }) {
         if (account?.provider === "credentials") return true;
+        log.auth.debug("signIn: OAuth", { provider: account?.provider, userId: user.id });
         const exists = await prisma.user.findFirst({
           where: { id: user.id!, deletedAt: null },
           include: { slugs: true },
         });
-        if (exists && exists.slugs.length > 0) return true;
-        if (exists && exists.slugs.length === 0) return "/auth/complete-signup";
+        if (exists && exists.slugs.length > 0) {
+          log.auth.info("signIn: existing user", { userId: user.id });
+          return true;
+        }
+        if (exists && exists.slugs.length === 0) {
+          log.auth.info("signIn: redirect to complete-signup", { userId: user.id });
+          return "/auth/complete-signup";
+        }
         return true;
       },
       async redirect({ url, baseUrl }) {

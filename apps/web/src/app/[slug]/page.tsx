@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
-import { getSignedDownloadUrl, isS3Configured } from "@/lib/storage";
+import { getSignedDownloadUrl, isStorageConfigured } from "@/lib/storage";
 import { page, link } from "@/lib/variants";
 import { ProfileTabs, type TabId } from "./_components/ProfileTabs";
 import { OverviewTab } from "./_components/OverviewTab";
@@ -18,6 +19,26 @@ const TABS: TabId[] = ["overview", "photos", "activity", "rankings", "badges"];
 function parseTab(t: string | undefined): TabId {
   if (t && TABS.includes(t as TabId)) return t as TabId;
   return "overview";
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const slugRow = await prisma.slug.findFirst({
+    where: { slug, user: { deletedAt: null } },
+    include: { user: { include: { profile: true } } },
+  });
+  if (!slugRow?.user) return { title: "exibidos.club" };
+  const user = slugRow.user;
+  const profile = user.profile;
+  const displayName = profile?.displayName ?? user.name ?? slug;
+  const title = `${displayName} | exibidos.club`;
+  const description = profile?.bio ?? `View @${slug} on exibidos.club`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, siteName: "exibidos.club" },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function SlugPage({
@@ -135,7 +156,7 @@ export default async function SlugPage({
   const displayName = profile?.displayName ?? user.name ?? slug;
 
   const imagesWithUrls = await (async () => {
-    if (!isS3Configured()) return images.map((i) => ({ ...i, thumbUrl: null as string | null }));
+    if (!isStorageConfigured()) return images.map((i) => ({ ...i, thumbUrl: null as string | null }));
     const withUrls = await Promise.all(
       images.map(async (img) => {
         if (!img.thumbKey) return { ...img, thumbUrl: null as string | null };
@@ -181,7 +202,7 @@ export default async function SlugPage({
 
       {tab === "photos" && (
         photosVisible ? (
-          <PhotosTab images={imagesWithUrls} isOwner={isOwner} />
+          <PhotosTab images={imagesWithUrls} isOwner={isOwner} slug={slug} />
         ) : (
           <p>This section is private.</p>
         )
@@ -197,7 +218,7 @@ export default async function SlugPage({
 
       {tab === "rankings" && (
         rankingsVisible ? (
-          <RankingsTab />
+          <RankingsTab rankingsEnabled={process.env.FEATURE_RANKINGS === "true"} />
         ) : (
           <p>This section is private.</p>
         )

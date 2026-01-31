@@ -40,6 +40,13 @@ Production monorepo for **exibidos.club**. Single Git repository, multiple apps 
 
 ---
 
+## Environment
+
+- **Template**: Copy `env.example` to `.env` and fill secrets. Template has all features enabled for local dev (MinIO, Postgres, Redis from `infra/docker-compose.yml`).
+- **Env service**: `@exibidos/config` exports `getEnv()` (server) and `getPublicEnv()` (client-safe) with strong typings and defaults. Use instead of raw `process.env` where possible.
+
+---
+
 ## Commands (root)
 
 | Command        | Description                          |

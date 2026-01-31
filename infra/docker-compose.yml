@@ -1,9 +1,20 @@
-# Local development — Postgres, Redis, S3-compatible (MinIO)
-# Usage: docker compose -f infra/docker-compose.yml up -d
+# =============================================================================
+# Local development — Postgres, Redis, MinIO (S3-compatible)
+# Apps (web, api, ims) run on host; only infra runs in Docker.
+# =============================================================================
+# Usage:
+#   docker compose -f infra/docker-compose.yml up -d
+#   # Wait for services (especially minio-init). Then:
+#   cp env.example .env
+#   pnpm install && pnpm --filter @exibidos/db exec prisma migrate dev
+#   pnpm --filter @exibidos/db run db:seed
+#   pnpm dev:web    # optional: pnpm dev:api (port 4000), IMS (port 4001)
+# =============================================================================
 
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: exibidos-postgres
     environment:
       POSTGRES_USER: exibidos
       POSTGRES_PASSWORD: exibidos
@@ -13,15 +24,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U exibidos"]
+      test: ["CMD-SHELL", "pg_isready -U exibidos -d exibidos"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 5s
 
   redis:
     image: redis:7-alpine
+    container_name: exibidos-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -30,7 +45,8 @@ services:
 
   minio:
     image: minio/minio:latest
-    command: server /data
+    container_name: exibidos-minio
+    command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: exibidos
       MINIO_ROOT_PASSWORD: exibidos
@@ -43,8 +59,25 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 15s
+
+  # Creates S3 bucket "exibidos" so app works without manual setup
+  minio-init:
+    image: minio/mc:latest
+    container_name: exibidos-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 exibidos exibidos;
+      mc mb local/exibidos --ignore-existing;
+      exit 0;
+      "
+    restart: "no"
 
 volumes:
   postgres_data:
+  redis_data:
   minio_data:
