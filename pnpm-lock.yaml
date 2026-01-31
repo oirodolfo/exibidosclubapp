@@ -49,6 +49,31 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  apps/config-nest:
+    dependencies:
+      '@exibidos/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@exibidos/feature-flags':
+        specifier: workspace:*
+        version: link:../feature-flags
+      '@nestjs/common':
+        specifier: ^10.4.15
+        version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^10.4.15
+        version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  apps/feature-flags:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   apps/humanproof-service:
     dependencies:
       '@fastify/multipart':
@@ -95,6 +120,16 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  apps/image-sdk:
+    dependencies:
+      '@exibidos/ims-client':
+        specifier: workspace:*
+        version: link:../ims-client
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   apps/image-service:
     dependencies:
       '@aws-sdk/client-s3':
@@ -105,10 +140,10 @@ importers:
         version: link:../../packages/db
       '@exibidos/image-sdk':
         specifier: workspace:*
-        version: link:../../packages/image-sdk
+        version: link:../image-sdk
       '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../../packages/ml-contracts
+        version: link:../ml-contracts
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -151,7 +186,7 @@ importers:
         version: link:../../packages/db
       '@exibidos/ml':
         specifier: workspace:*
-        version: link:../../packages/ml
+        version: link:../ml
       '@fastify/cors':
         specifier: ^9.0.1
         version: 9.0.1
@@ -175,14 +210,42 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.7)(terser@5.46.0)
 
+  apps/ims-client:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.7)(terser@5.46.0)
+
+  apps/ml:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  apps/ml-contracts:
+    dependencies:
+      '@exibidos/taxonomy':
+        specifier: workspace:*
+        version: link:../taxonomy
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   apps/ml-ingestion:
     dependencies:
       '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../../packages/ml-contracts
+        version: link:../ml-contracts
       '@exibidos/taxonomy':
         specifier: workspace:*
-        version: link:../../packages/taxonomy
+        version: link:../taxonomy
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -219,10 +282,10 @@ importers:
     dependencies:
       '@exibidos/feature-flags':
         specifier: workspace:*
-        version: link:../../packages/feature-flags
+        version: link:../feature-flags
       '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../../packages/ml-contracts
+        version: link:../ml-contracts
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -253,10 +316,10 @@ importers:
     dependencies:
       '@exibidos/ml':
         specifier: workspace:*
-        version: link:../../packages/ml
+        version: link:../ml
       '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../../packages/ml-contracts
+        version: link:../ml-contracts
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -283,14 +346,27 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  apps/ml-registry-client:
+    dependencies:
+      '@exibidos/ml-contracts':
+        specifier: workspace:*
+        version: link:../ml-contracts
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   apps/ml-training-orchestrator:
     dependencies:
       '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../../packages/ml-contracts
+        version: link:../ml-contracts
       '@exibidos/taxonomy':
         specifier: workspace:*
-        version: link:../../packages/taxonomy
+        version: link:../taxonomy
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -313,6 +389,18 @@ importers:
       '@types/node':
         specifier: ^22.10.1
         version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  apps/shared-types:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  apps/taxonomy:
+    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -330,10 +418,10 @@ importers:
         version: link:../../packages/db
       '@exibidos/ml':
         specifier: workspace:*
-        version: link:../../packages/ml
+        version: link:../ml
       '@exibidos/ml-registry-client':
         specifier: workspace:*
-        version: link:../../packages/ml-registry-client
+        version: link:../ml-registry-client
       '@tanstack/react-query':
         specifier: ^5.90.20
         version: 5.90.20(react@18.3.1)
@@ -429,25 +517,6 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
-  packages/config-nest:
-    dependencies:
-      '@exibidos/config':
-        specifier: workspace:*
-        version: link:../config
-      '@exibidos/feature-flags':
-        specifier: workspace:*
-        version: link:../feature-flags
-      '@nestjs/common':
-        specifier: ^10.4.15
-        version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: ^10.4.15
-        version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
   packages/db:
     dependencies:
       '@prisma/client':
@@ -463,75 +532,6 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/feature-flags:
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/image-sdk:
-    dependencies:
-      '@exibidos/ims-client':
-        specifier: workspace:*
-        version: link:../ims-client
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/ims-client:
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.7)(terser@5.46.0)
-
-  packages/ml:
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.1
-        version: 22.19.7
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/ml-contracts:
-    dependencies:
-      '@exibidos/taxonomy':
-        specifier: workspace:*
-        version: link:../taxonomy
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/ml-registry-client:
-    dependencies:
-      '@exibidos/ml-contracts':
-        specifier: workspace:*
-        version: link:../ml-contracts
-    devDependencies:
-      '@types/node':
-        specifier: ^22.10.1
-        version: 22.19.7
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/shared-types:
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/taxonomy:
-    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
