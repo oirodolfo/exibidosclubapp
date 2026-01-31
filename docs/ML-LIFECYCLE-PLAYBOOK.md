@@ -184,7 +184,16 @@ Rollback does **not** overwrite the bad model. It only changes which **version**
 
 ---
 
-## 8. References
+## 8. Operational Steps (Checklist)
+
+- **Migrations**: With `.env` containing `DATABASE_URL`, run: `pnpm --filter @exibidos/db exec prisma migrate deploy` (e.g. after adding WeakLabel or schema changes).
+- **Typecheck**: `pnpm run typecheck` (all packages).
+- **Tests**: Run per package, e.g. `pnpm --filter @exibidos/ims-client run test`, `pnpm --filter @exibidos/ims run test` (root `pnpm run test` may pass flags that some runners do not accept).
+- **Env**: Copy `env.example` to `.env` and set `LABEL_STUDIO_*` and optional `ML_DATASET_ARTIFACT_PATH` for the ML pipeline.
+
+---
+
+## 9. References
 
 - **ML–IMS governance**: `docs/ML-IMS-GOVERNANCE.md` — ML informs, never controls; product rules override ML.
 - **Package**: `packages/ml` — taxonomy, ingestion, weak labels, validation, training, evaluation, deployment, feedback, observability.
