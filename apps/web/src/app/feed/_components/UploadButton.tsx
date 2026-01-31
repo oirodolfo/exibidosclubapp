@@ -1,89 +1,53 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useHumanproofStatus } from "@/hooks/api/useHumanproof";
+import { useFeedStore } from "@/stores/feedStore";
 import { UploadGateModal } from "./UploadGateModal";
 import { UploadForm } from "./UploadForm";
 
-type VerificationStatus =
-  | "UNVERIFIED"
-  | "PENDING"
-  | "VERIFIED"
-  | "REQUIRES_RECHECK"
-  | "REVOKED"
-  | null;
-
 /**
- * Smart upload CTA: context-aware by verification state.
- * Large tap target, fixed on mobile (bottom center). Never uploads if status !== VERIFIED.
+ * Smart upload CTA: context-aware by verification state (TanStack Query).
+ * Gate and form visibility in Zustand. Never uploads if status !== VERIFIED.
  */
 export function UploadButton() {
-  const [status, setStatus] = useState<VerificationStatus>(null);
-  const [loading, setLoading] = useState(true);
-  const [gateOpen, setGateOpen] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const router = useRouter();
+  const { data: statusData, isLoading } = useHumanproofStatus();
+  const status = statusData?.userVerificationStatus ?? null;
 
-  const fetchStatus = useCallback(async () => {
-    try {
-      const res = await fetch("/api/humanproof/status");
-      if (res.status === 401) {
-        setStatus(null);
-        setLoading(false);
-        return;
-      }
-      const data = (await res.json().catch(() => ({}))) as {
-        userVerificationStatus?: VerificationStatus;
-      };
-      setStatus(data.userVerificationStatus ?? "UNVERIFIED");
-    } catch {
-      setStatus("UNVERIFIED");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+  const {
+    uploadGateOpen,
+    uploadFormOpen,
+    setUploadGateOpen,
+    setUploadFormOpen,
+    closeUploadGate,
+    closeUploadForm,
+  } = useFeedStore();
 
   const handleUploadTap = useCallback(() => {
-    if (loading) return;
+    if (isLoading) return;
     if (status === "VERIFIED") {
-      setShowForm(true);
+      setUploadFormOpen(true);
       return;
     }
     if (status === "UNVERIFIED") {
-      setGateOpen(true);
+      setUploadGateOpen(true);
       return;
     }
-    if (status === "PENDING") {
-      return;
-    }
+    if (status === "PENDING") return;
     if (status === "REQUIRES_RECHECK" || status === "REVOKED") {
-      setGateOpen(true);
+      setUploadGateOpen(true);
       return;
     }
-    setGateOpen(true);
-  }, [loading, status]);
+    setUploadGateOpen(true);
+  }, [isLoading, status, setUploadFormOpen, setUploadGateOpen]);
 
   const handleFormDone = useCallback(() => {
-    setShowForm(false);
+    closeUploadForm();
     router.refresh();
-  }, [router]);
-
-  const handleGateClose = useCallback(() => {
-    setGateOpen(false);
-  }, []);
-
-  if (showForm) {
-    return (
-      <>
-        <UploadForm onDone={handleFormDone} onCancel={() => setShowForm(false)} />
-      </>
-    );
-  }
+  }, [closeUploadForm, router]);
 
   const isDisabled = status === "PENDING";
   const label =
@@ -91,9 +55,16 @@ export function UploadButton() {
       ? "Verification in progress"
       : status === "REQUIRES_RECHECK" || status === "REVOKED"
         ? "Re-verify to upload"
-        : status === "VERIFIED"
-          ? "Upload"
-          : "Upload";
+        : "Upload";
+
+  if (uploadFormOpen) {
+    return (
+      <UploadForm
+        onDone={handleFormDone}
+        onCancel={() => closeUploadForm()}
+      />
+    );
+  }
 
   return (
     <>
@@ -120,7 +91,7 @@ export function UploadButton() {
           </Button>
         </div>
       </div>
-      <UploadGateModal open={gateOpen} onClose={handleGateClose} />
+      <UploadGateModal open={uploadGateOpen} onClose={closeUploadGate} />
     </>
   );
 }

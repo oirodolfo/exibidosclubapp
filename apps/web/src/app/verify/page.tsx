@@ -1,156 +1,126 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { VerifyStepCode } from "./_components/VerifyStepCode";
 import { VerifyStepCamera } from "./_components/VerifyStepCamera";
 import { VerifyPending } from "./_components/VerifyPending";
 import { VerifyError } from "./_components/VerifyError";
+import {
+  useHumanproofStatus,
+  useHumanproofCode,
+  useHumanproofUpload,
+} from "@/hooks/api/useHumanproof";
+import { useFeedStore } from "@/stores/feedStore";
 
-type Step = "code" | "camera" | "pending" | "success" | "error";
+const DEVICE_KEY = "humanproof_device";
+const SESSION_KEY = "humanproof_session";
+
+function getDeviceFingerprint(): string {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem(DEVICE_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_KEY, id);
+  }
+  return id;
+}
+
+function getSessionId(): string {
+  if (typeof window === "undefined") return "";
+  let id = sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
 
 /**
  * Verification flow: code → camera → upload → result.
- * Mobile-optimized, single primary action per screen.
- * On VERIFIED: redirect to /feed and show toast.
+ * TanStack Query for code/upload mutations and status refetch; Zustand for step state.
  */
 export default function VerifyPage() {
-  const [step, setStep] = useState<Step>("code");
-  const [code, setCode] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
-  const [codeLoading, setCodeLoading] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [failureReasons, setFailureReasons] = useState<string[]>([]);
-  const [checkingStatus, setCheckingStatus] = useState(false);
   const router = useRouter();
+  const codeRequestedRef = useRef(false);
+  const {
+    verifyStep,
+    verifyCode,
+    verifyExpiresAt,
+    verifyErrorMessage,
+    verifyFailureReasons,
+    setVerifyStep,
+    setVerifyCode,
+    setVerifyError,
+    resetVerify,
+  } = useFeedStore();
 
-  const deviceFingerprint =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("humanproof_device") ??
-        (() => {
-          const id = crypto.randomUUID();
-          localStorage.setItem("humanproof_device", id);
-          return id;
-        })())
-      : "";
-  const sessionId =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("humanproof_session") ??
-        (() => {
-          const id = crypto.randomUUID();
-          sessionStorage.setItem("humanproof_session", id);
-          return id;
-        })()
-      : "";
+  const { refetch: refetchStatus, isFetching: checkingStatus } = useHumanproofStatus();
+  const codeMutation = useHumanproofCode();
+  const uploadMutation = useHumanproofUpload();
 
-  const requestCode = useCallback(async () => {
-    setCodeLoading(true);
-    setErrorMessage("");
-    try {
-      const res = await fetch("/api/humanproof/verification/code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deviceFingerprint,
-          sessionId,
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        code?: string;
-        expiresAt?: string;
-        message?: string;
-      };
-      if (!res.ok) {
-        setErrorMessage(data.message ?? "Could not get code. Try again.");
-        setCodeLoading(false);
-        return;
-      }
-      setCode(data.code ?? "");
-      setExpiresAt(data.expiresAt ?? "");
-      setStep("code");
-    } catch {
-      setErrorMessage("Something went wrong. Try again.");
-    }
-    setCodeLoading(false);
-  }, [deviceFingerprint, sessionId]);
-
+  // Request code when step is code and we don't have one yet (TanStack Query mutation)
   useEffect(() => {
-    if (step === "code" && !code) requestCode();
-  }, [step, code, requestCode]);
+    if (verifyStep !== "code" || verifyCode) return;
+    if (codeRequestedRef.current) return;
+    codeRequestedRef.current = true;
+    const deviceFingerprint = getDeviceFingerprint();
+    const sessionId = getSessionId();
+    codeMutation.mutate(
+      { deviceFingerprint, sessionId },
+      {
+        onSuccess: (data) => {
+          setVerifyCode(data.code, data.expiresAt);
+        },
+        onError: (err) => {
+          setVerifyError(err instanceof Error ? err.message : "Could not get code. Try again.");
+        },
+        onSettled: () => {
+          codeRequestedRef.current = false;
+        },
+      }
+    );
+  }, [verifyStep, verifyCode, codeMutation, setVerifyCode, setVerifyError]);
 
   const handleCodeNext = useCallback(() => {
-    setStep("camera");
-  }, []);
+    setVerifyStep("camera");
+  }, [setVerifyStep]);
 
   const handleCapture = useCallback(
-    async (blob: Blob) => {
-      setUploadLoading(true);
-      setErrorMessage("");
-      setFailureReasons([]);
-      try {
-        const formData = new FormData();
-        formData.set("file", blob, "verify.jpg");
-        const res = await fetch("/api/humanproof/verification/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = (await res.json().catch(() => ({}))) as {
-          accepted?: boolean;
-          failureReasons?: string[];
-          message?: string;
-        };
-        if (!res.ok) {
-          setErrorMessage(data.message ?? "Upload failed. Try again.");
-          setUploadLoading(false);
-          setStep("error");
-          return;
-        }
-        if (data.accepted) {
-          setStep("success");
-          router.push("/feed?verified=1");
-          return;
-        }
-        setFailureReasons(data.failureReasons ?? []);
-        setErrorMessage(
-          "We couldn’t accept this photo. Please use a camera (not a screenshot) and ensure the code is visible."
-        );
-        setStep("error");
-      } catch {
-        setErrorMessage("Something went wrong. Try again.");
-        setStep("error");
-      }
-      setUploadLoading(false);
+    (blob: Blob) => {
+      uploadMutation.mutate(blob, {
+        onSuccess: (data) => {
+          if (data.accepted) {
+            setVerifyStep("success");
+            router.push("/feed?verified=1");
+            return;
+          }
+          setVerifyError(
+            "We couldn’t accept this photo. Please use a camera (not a screenshot) and ensure the code is visible.",
+            data.failureReasons ?? []
+          );
+        },
+        onError: (err) => {
+          setVerifyError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+        },
+      });
     },
-    [router]
+    [uploadMutation, setVerifyStep, setVerifyError, router]
   );
 
   const handleCheckStatus = useCallback(async () => {
-    setCheckingStatus(true);
-    try {
-      const res = await fetch("/api/humanproof/status");
-      const data = (await res.json().catch(() => ({}))) as {
-        userVerificationStatus?: string;
-      };
-      if (data.userVerificationStatus === "VERIFIED") {
-        router.push("/feed?verified=1");
-        return;
-      }
-    } finally {
-      setCheckingStatus(false);
+    const result = await refetchStatus();
+    if (result.data?.userVerificationStatus === "VERIFIED") {
+      router.push("/feed?verified=1");
     }
-  }, [router]);
+  }, [refetchStatus, router]);
 
   const handleRetry = useCallback(() => {
-    setStep("code");
-    setCode("");
-    setExpiresAt("");
-    setErrorMessage("");
-    setFailureReasons([]);
-    requestCode();
-  }, [requestCode]);
+    codeRequestedRef.current = false;
+    resetVerify();
+  }, [resetVerify]);
 
-  if (step === "pending") {
+  if (verifyStep === "pending") {
     return (
       <main className="min-h-screen py-8">
         <VerifyPending
@@ -161,25 +131,25 @@ export default function VerifyPage() {
     );
   }
 
-  if (step === "error") {
+  if (verifyStep === "error") {
     return (
       <main className="min-h-screen py-8">
         <VerifyError
-          message={errorMessage}
-          failureReasons={failureReasons}
+          message={verifyErrorMessage}
+          failureReasons={verifyFailureReasons}
           onRetry={handleRetry}
         />
       </main>
     );
   }
 
-  if (step === "camera") {
+  if (verifyStep === "camera") {
     return (
       <main className="min-h-screen py-8">
         <VerifyStepCamera
           onCapture={handleCapture}
-          onBack={() => setStep("code")}
-          loading={uploadLoading}
+          onBack={() => setVerifyStep("code")}
+          loading={uploadMutation.isPending}
         />
       </main>
     );
@@ -188,14 +158,16 @@ export default function VerifyPage() {
   return (
     <main className="min-h-screen py-8">
       <VerifyStepCode
-        code={code}
-        expiresAt={expiresAt}
+        code={verifyCode}
+        expiresAt={verifyExpiresAt}
         onNext={handleCodeNext}
-        loading={codeLoading}
+        loading={codeMutation.isPending}
       />
-      {errorMessage && (
+      {codeMutation.isError && (
         <p className="mx-auto max-w-[480px] px-4 mt-4 text-red-600">
-          {errorMessage}
+          {codeMutation.error instanceof Error
+            ? codeMutation.error.message
+            : "Could not get code. Try again."}
         </p>
       )}
     </main>
