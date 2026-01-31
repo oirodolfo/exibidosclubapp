@@ -68,3 +68,13 @@ export {
   type SplitKind,
   type SplitResult,
 } from "./training/index.js";
+
+export {
+  evaluateAndGate,
+  DEFAULT_GATING_CONFIG,
+  type GatingConfig,
+  type EvaluateInput,
+  type GateDecision,
+  type GateDecisionArtifact,
+  type GateCheck,
+} from "./evaluation/index.js";
