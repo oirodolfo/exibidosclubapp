@@ -214,6 +214,22 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/feature-flags:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  packages/image-sdk:
+    dependencies:
+      '@exibidos/ims-client':
+        specifier: workspace:*
+        version: link:../ims-client
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   packages/ims-client:
     devDependencies:
       typescript:
@@ -228,6 +244,28 @@ importers:
       '@types/node':
         specifier: ^22.10.1
         version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  packages/ml-contracts:
+    dependencies:
+      '@exibidos/taxonomy':
+        specifier: workspace:*
+        version: link:../taxonomy
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  packages/shared-types:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  packages/taxonomy:
+    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
