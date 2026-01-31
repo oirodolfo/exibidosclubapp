@@ -78,3 +78,19 @@ export {
   type GateDecisionArtifact,
   type GateCheck,
 } from "./evaluation/index.js";
+
+export {
+  promoteToNextStage,
+  rollbackDeployment,
+  rolloutPctToStage,
+  nextRolloutStage,
+  checkThresholds,
+  DEFAULT_MONITORING_THRESHOLDS,
+  DEFAULT_ROLLOUT_STAGES,
+  type RolloutStateStore,
+  type MonitoringThresholds,
+  type DeploymentMetrics,
+  type ModelDeployment,
+  type RolloutConfig,
+  type RolloutStage,
+} from "./deployment/index.js";
