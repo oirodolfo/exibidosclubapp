@@ -38,8 +38,12 @@ export function VerticalFeedClient() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-exibidos-bg">
-        <p className="text-exibidos-muted">Loading...</p>
+      <div className="fixed inset-0 flex flex-col bg-exibidos-bg">
+        <div className="h-screen w-full animate-pulse bg-exibidos-surface" />
+        <div className="h-screen w-full animate-pulse bg-exibidos-surface" />
+        <div className="flex h-screen w-full items-center justify-center">
+          <p className="text-exibidos-muted text-sm">Loading feed...</p>
+        </div>
       </div>
     );
   }
@@ -141,7 +145,7 @@ export function VerticalFeedClient() {
                   swipeMutation.mutate({ imageId: item.id, direction: "like" });
                 }}
                 disabled={swipeMutation.isPending}
-                className="rounded-full bg-exibidos-lime px-4 py-2 text-sm font-semibold text-exibidos-bg hover:opacity-90 disabled:opacity-50"
+                className="rounded-full bg-exibidos-lime px-4 py-2 text-sm font-semibold text-exibidos-bg transition-transform hover:scale-105 hover:opacity-90 active:scale-95 disabled:opacity-50"
                 aria-label="Like"
               >
                 ♥ Like

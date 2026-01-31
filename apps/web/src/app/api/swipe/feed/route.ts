@@ -37,7 +37,12 @@ export async function GET(req: Request) {
     orderBy: [{ rankingScore: "desc" }, { createdAt: "desc" }],
     take: limit + 1,
     ...(cursor && { cursor: { id: cursor }, skip: 1 }),
-    include: {
+    select: {
+      id: true,
+      caption: true,
+      createdAt: true,
+      thumbKey: true,
+      watermarkedKey: true,
       user: {
         select: {
           id: true,
