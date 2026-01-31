@@ -9,9 +9,12 @@ export default async function Home() {
     <main className="mx-auto max-w-[480px] px-4 py-8">
       <h1>exibidos.club</h1>
       <p>Monorepo initialized.</p>
-      {session?.user && process.env.FEATURE_SWIPE === "true" && (
+      {session?.user && (
         <p>
-          <Link href="/swipe" className={link}>Swipe</Link>
+          <Link href="/feed" className={link}>Feed</Link>
+          {process.env.FEATURE_SWIPE === "true" && (
+            <> · <Link href="/swipe" className={link}>Swipe</Link></>
+          )}
         </p>
       )}
       {!session?.user && (

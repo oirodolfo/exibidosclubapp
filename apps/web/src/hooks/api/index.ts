@@ -15,3 +15,8 @@ export {
 export { useRankings } from "./useRankings";
 export { useConversations, useConversation, useSendMessage } from "./useMessages";
 export { useGroups } from "./useGroups";
+export {
+  useHumanproofStatus,
+  useHumanproofCode,
+  useHumanproofUpload,
+} from "./useHumanproof";
