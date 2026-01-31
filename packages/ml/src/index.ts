@@ -94,3 +94,13 @@ export {
   type RolloutConfig,
   type RolloutStage,
 } from "./deployment/index.js";
+
+export {
+  computePriorityScore,
+  prioritizeCandidates,
+  filterEligibleForFeedback,
+  DEFAULT_FEEDBACK_CONFIG,
+  type FeedbackCandidate,
+  type FeedbackLoopConfig,
+  type CandidateInput,
+} from "./feedback/index.js";
