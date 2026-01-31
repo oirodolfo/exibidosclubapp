@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSwipeFeed, useSwipeMutation, useComments, useAddComment } from "@/hooks/api";
 
 export function VerticalFeedClient() {
@@ -96,10 +97,12 @@ export function VerticalFeedClient() {
         >
           <div className="absolute inset-0">
             {item.imageUrl ?? item.thumbUrl ? (
-              <img
+              <Image
                 src={item.imageUrl ?? item.thumbUrl ?? ""}
                 alt={item.caption ?? ""}
-                className="h-full w-full object-contain"
+                fill
+                className="object-contain"
+                sizes="100vw"
               />
             ) : (
               <div className="h-full w-full flex items-center justify-center text-exibidos-muted">

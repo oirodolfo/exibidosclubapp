@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import Image from "next/image";
 
 async function fetchCategoryFeed(slug: string, cursor?: string | null) {
   const url = cursor
@@ -43,11 +44,15 @@ export function CategoryFeedClient({ slug }: { slug: string }) {
           className="block aspect-square overflow-hidden rounded-exibidos-md bg-exibidos-surface"
         >
           {img.thumbUrl ? (
-            <img
-              src={img.thumbUrl}
-              alt={img.caption ?? ""}
-              className="h-full w-full object-cover"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={img.thumbUrl}
+                alt={img.caption ?? ""}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 33vw"
+              />
+            </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center text-exibidos-muted">
               [img]

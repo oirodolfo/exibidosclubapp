@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { link, listReset } from "@/lib/variants";
 import { useRankings } from "@/hooks/api";
 import { useState } from "react";
@@ -36,9 +37,9 @@ export function RankingsTab({ rankingsEnabled = true }: Props) {
         {rankings.map((r) => (
           <li key={r.imageId} className="flex items-center gap-3 py-2 border-b border-neutral-200">
             <span className="font-bold text-lg w-8">#{r.rank}</span>
-            <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-neutral-200">
+            <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-neutral-200 relative">
               {r.thumbUrl ? (
-                <img src={r.thumbUrl} alt="" className="w-full h-full object-cover" />
+                <Image src={r.thumbUrl} alt="" fill className="object-cover" sizes="3rem" />
               ) : (
                 <span className="text-xs text-neutral-400 flex items-center justify-center h-full">
                   —
