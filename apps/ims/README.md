@@ -62,6 +62,12 @@ GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1&crop=face
 - **Observability** — Response header `X-IMS-Cache: hit | miss` when in-memory cache is enabled.
 - **Cold starts** — Optional in-memory cache reduces repeated transforms for hot images; set `IMS_MEMORY_CACHE_MAX` (entries) and `IMS_MEMORY_CACHE_TTL` (seconds, default 3600).
 
+## Observability & feedback
+
+- **Structured logs** — Each request logs: `imageId`, `crop`, `w`, `h`, `context`, `watermark`, `cache` (hit/miss), `statusCode`, `durationMs`, `cacheHitRatio`. Ingest for ML training, crop strategy evolution, product decisions.
+- **GET /metrics** — Returns: `requests`, `cacheHits`, `cacheMisses`, `cacheHitRatio`, `errors`, `byCrop`, `byStatus`. Use for dashboards and alerts.
+- **Response header** — `X-IMS-Cache: hit | miss` for cache observability.
+
 ## Environment
 
 Same as rest of stack: `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, optional `S3_ENDPOINT`, `S3_REGION`, `S3_FORCE_PATH_STYLE`. Plus `DATABASE_URL` (to resolve imageId → storageKey). `PORT` (default 4001). Optional: `IMS_MEMORY_CACHE_MAX` (0 = disabled), `IMS_MEMORY_CACHE_TTL` (seconds).

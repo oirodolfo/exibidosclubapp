@@ -14,6 +14,7 @@ import {
   memoryCacheSet,
   isMemoryCacheEnabled,
 } from "./cache.js";
+import { logRequest, getMetrics } from "./observability.js";
 import { resolveBlurMode } from "./blur-policies.js";
 import { parseTransformSpec } from "./parser.js";
 import { runPipeline } from "./pipeline.js";
@@ -26,6 +27,8 @@ async function main() {
 
   app.get("/health", async () => ({ status: "ok", service: "@exibidos/ims" }));
 
+  app.get("/metrics", async () => getMetrics());
+
   /**
    * GET /i/:imageId
    * Query: w, h, fit, fmt, q, v (all optional; v = contract version for cache safety)
@@ -34,15 +37,18 @@ async function main() {
   app.get<{
     Params: { imageId: string };
   }>("/i/:imageId", async (request, reply) => {
+    const start = Date.now();
     const { imageId } = request.params;
     const query = request.query as Record<string, string | undefined>;
 
     if (!isStorageConfigured()) {
+      logRequest(imageId, { v: 1, fit: "inside", fmt: "jpeg", q: 85 }, "miss", 503, Date.now() - start, request.log);
       return reply.status(503).send({ error: "storage_unavailable" });
     }
 
     const parsed = parseTransformSpec(query);
     if (!parsed.ok) {
+      logRequest(imageId, { v: 1, fit: "inside", fmt: "jpeg", q: 85 }, "miss", 400, Date.now() - start, request.log);
       return reply.status(400).send({ error: parsed.code, message: parsed.message });
     }
 
@@ -63,6 +69,7 @@ async function main() {
     });
 
     if (!image?.storageKey) {
+      logRequest(imageId, parsed.spec, "miss", 404, Date.now() - start, request.log);
       return reply.status(404).send({ error: "image_not_found" });
     }
 
@@ -74,6 +81,7 @@ async function main() {
       contentType = origin.contentType;
     } catch (e) {
       request.log.error(e, "S3 fetch failed");
+      logRequest(imageId, parsed.spec, "miss", 502, Date.now() - start, request.log);
       return reply.status(502).send({ error: "upstream_fetch_failed" });
     }
 
@@ -95,6 +103,7 @@ async function main() {
     if (isMemoryCacheEnabled()) {
       const cached = memoryCacheGet(key);
       if (cached) {
+        logRequest(imageId, parsed.spec, "hit", 200, Date.now() - start, request.log);
         return reply
           .header("Content-Type", cached.contentType)
           .header("Cache-Control", "public, max-age=31536000, immutable")
@@ -116,6 +125,7 @@ async function main() {
       if (isMemoryCacheEnabled()) {
         memoryCacheSet(key, { buffer: result.buffer, contentType: result.contentType });
       }
+      logRequest(imageId, parsed.spec, "miss", 200, Date.now() - start, request.log);
       return reply
         .header("Content-Type", result.contentType)
         .header("Cache-Control", "public, max-age=31536000, immutable")
@@ -123,6 +133,7 @@ async function main() {
         .send(result.buffer);
     } catch (e) {
       request.log.error(e, "Pipeline failed");
+      logRequest(imageId, parsed.spec, "miss", 500, Date.now() - start, request.log);
       return reply.status(500).send({ error: "processing_failed" });
     }
   });
