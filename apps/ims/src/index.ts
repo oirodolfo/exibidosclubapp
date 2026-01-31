@@ -43,7 +43,8 @@ async function main() {
     const needMlMetadata =
       parsed.spec.crop ||
       parsed.spec.blur === "face" ||
-      parsed.spec.blur === "eyes";
+      parsed.spec.blur === "eyes" ||
+      (parsed.spec.watermark != null && parsed.spec.watermark !== "none");
     const image = await prisma.image.findFirst({
       where: { id: imageId, deletedAt: null },
       select: {
@@ -91,6 +92,8 @@ async function main() {
         spec: parsed.spec,
         mlMetadata: needMlMetadata ? mlMetadata : undefined,
         blurMode,
+        watermarkKind: parsed.spec.watermark,
+        watermarkSlug: parsed.spec.slug,
       });
       return reply
         .header("Content-Type", result.contentType)

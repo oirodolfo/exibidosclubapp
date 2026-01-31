@@ -13,6 +13,7 @@ import {
   type CropMode,
   type FitMode,
   type OutputFormat,
+  type WatermarkKind,
 } from "./contracts.js";
 
 export interface ParseResult {
@@ -94,6 +95,15 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
   };
   const context = contextRaw ? contextMap[contextRaw] : undefined;
 
+  const watermarkRaw = query.watermark?.toLowerCase();
+  const watermarkMap: Record<string, WatermarkKind> = {
+    brand: "brand",
+    user: "user",
+    none: "none",
+  };
+  const watermark = watermarkRaw ? watermarkMap[watermarkRaw] : undefined;
+  const slug = query.slug?.trim();
+
   const spec: TransformSpec = {
     v,
     ...(w !== undefined && { w }),
@@ -104,6 +114,8 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
     ...(crop && { crop }),
     ...(blur && { blur }),
     ...(context && { context }),
+    ...(watermark && { watermark }),
+    ...(slug && { slug }),
   };
 
   return { ok: true, spec };

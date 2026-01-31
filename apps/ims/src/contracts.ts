@@ -20,6 +20,9 @@ export type BlurMode = "none" | "eyes" | "face" | "full";
 /** Request context for blur policy (public vs private). */
 export type BlurContext = "public" | "private";
 
+/** Watermark kind: brand (global) or user-specific (exibidos.club/@slug). */
+export type WatermarkKind = "brand" | "user" | "none";
+
 /** Parsed and validated transformation spec (never raw params in pipeline) */
 export interface TransformSpec {
   /** Contract version — bump when semantics change; old URLs keep working */
@@ -40,6 +43,10 @@ export interface TransformSpec {
   blur?: BlurMode;
   /** Optional: context for blur policy (public|private) */
   context?: BlurContext;
+  /** Optional: watermark (brand | user | none) */
+  watermark?: WatermarkKind;
+  /** Optional: user slug for watermark=user (exibidos.club/@slug) */
+  slug?: string;
 }
 
 /** Defaults for missing params (per version) */

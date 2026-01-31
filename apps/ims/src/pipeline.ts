@@ -7,8 +7,10 @@ import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
 import type { BlurMode } from "./contracts.js";
 import type { TransformSpec } from "./contracts.js";
+import type { WatermarkKind } from "./contracts.js";
 import { applyBlur } from "./blur-engine.js";
 import { computeCropRegion } from "./crop-engine.js";
+import { applyWatermark } from "./watermark-engine.js";
 
 export interface PipelineInput {
   buffer: Buffer;
@@ -18,6 +20,9 @@ export interface PipelineInput {
   mlMetadata?: ImageMlMetadataData | null;
   /** Resolved blur mode (from policy + context when not overridden by spec.blur) */
   blurMode?: BlurMode;
+  /** Watermark: brand | user | none; when user, slug for exibidos.club/@slug */
+  watermarkKind?: WatermarkKind;
+  watermarkSlug?: string;
 }
 
 export interface PipelineResult {
@@ -25,9 +30,9 @@ export interface PipelineResult {
   contentType: string;
 }
 
-/** Transformation order: 1) crop (if spec.crop) 2) blur (if blurMode) 3) resize 4) encode. */
+/** Transformation order: 1) crop 2) blur 3) resize 4) watermark 5) encode. */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
-  const { buffer, spec, mlMetadata, blurMode } = input;
+  const { buffer, spec, mlMetadata, blurMode, watermarkKind, watermarkSlug } = input;
 
   let pipeline = sharp(buffer);
 
@@ -75,6 +80,31 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       fit: spec.fit,
       withoutEnlargement: true,
     });
+  }
+
+  let wOut = wAfter;
+  let hOut = hAfter;
+  if (targetW > 0 && targetH > 0) {
+    wOut = targetW;
+    hOut = targetH;
+  }
+
+  if (watermarkKind && watermarkKind !== "none") {
+    const buf = await pipeline.toBuffer();
+    const resizedMeta = await sharp(buf).metadata();
+    const w = resizedMeta.width ?? wOut;
+    const h = resizedMeta.height ?? hOut;
+    const watermarked = await applyWatermark(
+      buf,
+      {
+        kind: watermarkKind,
+        userSlug: watermarkSlug,
+        width: w,
+        height: h,
+      },
+      mlMetadata ?? null
+    );
+    pipeline = sharp(watermarked);
   }
 
   const contentType = spec.fmt === "webp" ? "image/webp" : "image/jpeg";
