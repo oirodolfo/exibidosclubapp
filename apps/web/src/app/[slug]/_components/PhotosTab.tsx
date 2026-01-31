@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listReset, photoGrid } from "@/lib/variants";
 
 type ImageItem = {
@@ -8,9 +9,9 @@ type ImageItem = {
   thumbUrl?: string | null;
 };
 
-type Props = { images: ImageItem[]; isOwner: boolean };
+type Props = { images: ImageItem[]; isOwner: boolean; slug: string };
 
-export function PhotosTab({ images, isOwner }: Props) {
+export function PhotosTab({ images, isOwner, slug }: Props) {
   if (images.length === 0) {
     return <p>No photos yet.</p>;
   }
@@ -21,13 +22,15 @@ export function PhotosTab({ images, isOwner }: Props) {
       <ul className={`${listReset} ${photoGrid}`}>
         {images.map((img) => (
           <li key={img.id}>
-            <div className="aspect-square bg-neutral-200 rounded-lg overflow-hidden flex items-center justify-center text-xs text-neutral-400">
-              {img.thumbUrl ? (
-                <img src={img.thumbUrl} alt={img.caption ?? "Photo"} className="w-full h-full object-cover" />
-              ) : (
-                <span>[img]</span>
-              )}
-            </div>
+            <Link href={`/${slug}/photos/${img.id}`}>
+              <div className="aspect-square bg-neutral-200 rounded-lg overflow-hidden flex items-center justify-center text-xs text-neutral-400">
+                {img.thumbUrl ? (
+                  <img src={img.thumbUrl} alt={img.caption ?? "Photo"} className="w-full h-full object-cover" />
+                ) : (
+                  <span>[img]</span>
+                )}
+              </div>
+            </Link>
             {img.caption && <p className="mt-1 text-sm">{img.caption}</p>}
             <p className="m-0 text-xs text-neutral-500">{new Date(img.createdAt).toLocaleDateString()}</p>
             {isOwner && img.moderationStatus !== "approved" && (

@@ -181,7 +181,7 @@ export default async function SlugPage({
 
       {tab === "photos" && (
         photosVisible ? (
-          <PhotosTab images={imagesWithUrls} isOwner={isOwner} />
+          <PhotosTab images={imagesWithUrls} isOwner={isOwner} slug={slug} />
         ) : (
           <p>This section is private.</p>
         )

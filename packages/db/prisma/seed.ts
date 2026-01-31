@@ -49,7 +49,32 @@ async function main() {
     });
   }
 
-  console.log("Seed complete (Image includes contentHash).");
+  // Stage 9: Categories and tags for tagging/voting
+  const catStyle = await prisma.category.upsert({
+    where: { slug: "style" },
+    create: { name: "Style", slug: "style", sortOrder: 0 },
+    update: {},
+  });
+  const catGenre = await prisma.category.upsert({
+    where: { slug: "genre" },
+    create: { name: "Genre", slug: "genre", sortOrder: 1 },
+    update: {},
+  });
+  for (const t of [
+    { cat: catStyle, slug: "portrait", name: "Portrait" },
+    { cat: catStyle, slug: "landscape", name: "Landscape" },
+    { cat: catStyle, slug: "abstract", name: "Abstract" },
+    { cat: catGenre, slug: "art", name: "Art" },
+    { cat: catGenre, slug: "photo", name: "Photo" },
+  ]) {
+    await prisma.tag.upsert({
+      where: { categoryId_slug: { categoryId: t.cat.id, slug: t.slug } },
+      create: { categoryId: t.cat.id, name: t.name, slug: t.slug },
+      update: {},
+    });
+  }
+
+  console.log("Seed complete (Image, Categories, Tags).");
 }
 
 main()
