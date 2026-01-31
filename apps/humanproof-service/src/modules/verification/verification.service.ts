@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { UserVerificationStatus } from "../../domain/enums/user-verification-status.js";
+import type { EventBusPort } from "../../application/ports/event-bus.port.js";
 import type { VerificationAttempt } from "../../domain/entities/verification-attempt.js";
 import type { VerificationCodeRepository } from "../../application/ports/verification-code.repository.js";
+import { UserVerificationStatus } from "../../domain/enums/user-verification-status.js";
 import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
 import { randomBytes } from "node:crypto";
 
@@ -12,7 +13,8 @@ const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export class VerificationService {
   constructor(
     private readonly repo: VerificationCodeRepository,
-    private readonly config: HumanproofConfigService
+    private readonly config: HumanproofConfigService,
+    private readonly eventBus: EventBusPort
   ) {}
 
   async createCode(params: {
@@ -40,6 +42,13 @@ export class VerificationService {
       failureReasons: [],
     };
     await this.repo.save(attempt);
+    await this.eventBus.emit({
+      type: "humanproof.verification.started",
+      userId: params.userId,
+      deviceFingerprint: params.deviceFingerprint,
+      sessionId: params.sessionId,
+      timestamp: now.toISOString(),
+    });
     return {
       code,
       expiresAt: expiresAt.toISOString(),

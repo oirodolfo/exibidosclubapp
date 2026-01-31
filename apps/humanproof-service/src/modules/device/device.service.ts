@@ -1,19 +1,21 @@
 import { Injectable, ConflictException } from "@nestjs/common";
 import { randomBytes } from "node:crypto";
+import type { DeviceBindingRepository } from "../../application/ports/device-binding.repository.js";
+import type { EventBusPort } from "../../application/ports/event-bus.port.js";
 import type {
   DeviceBinding,
   VerificationStatusResponse,
 } from "../../domain/entities/device-binding.js";
 import { DeviceStatus } from "../../domain/enums/device-status.js";
 import { UserVerificationStatus } from "../../domain/enums/user-verification-status.js";
-import type { DeviceBindingRepository } from "../../application/ports/device-binding.repository.js";
 import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
 
 @Injectable()
 export class DeviceService {
   constructor(
     private readonly repo: DeviceBindingRepository,
-    private readonly config: HumanproofConfigService
+    private readonly config: HumanproofConfigService,
+    private readonly eventBus: EventBusPort
   ) {}
 
   async bindDevice(
@@ -48,6 +50,13 @@ export class DeviceService {
       lastSeenAt: now,
     };
     await this.repo.save(binding);
+    await this.eventBus.emit({
+      type: "humanproof.device.bound",
+      userId,
+      deviceFingerprint,
+      deviceId: id,
+      timestamp: now.toISOString(),
+    });
     return { bound: true, deviceId: id };
   }
 

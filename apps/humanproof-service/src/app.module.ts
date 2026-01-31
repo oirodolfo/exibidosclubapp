@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { HumanproofConfigModule } from "./config/config.module.js";
 import { DecisionModule } from "./modules/decision/decision.module.js";
+import { EventsModule } from "./modules/events/events.module.js";
 import { HashModule } from "./modules/hash/hash.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { MlModule } from "./modules/ml/ml.module.js";
@@ -9,6 +10,7 @@ import { VerificationModule } from "./modules/verification/verification.module.j
 @Module({
   imports: [
     HumanproofConfigModule,
+    EventsModule,
     HealthModule,
     HashModule,
     MlModule,
