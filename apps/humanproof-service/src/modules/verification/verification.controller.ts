@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -8,6 +10,7 @@ import {
   HttpStatus,
   BadRequestException,
 } from "@nestjs/common";
+import { DeviceService } from "../device/device.service.js";
 import { VerificationService } from "./verification.service.js";
 import { VerificationUploadService } from "./verification-upload.service.js";
 import { VerificationCodeRateLimitGuard } from "./verification-code-rate-limit.guard.js";
@@ -23,7 +26,8 @@ class CreateCodeDto {
 export class VerificationController {
   constructor(
     private readonly verification: VerificationService,
-    private readonly uploadService: VerificationUploadService
+    private readonly uploadService: VerificationUploadService,
+    private readonly deviceService: DeviceService
   ) {}
 
   @Post("code")
@@ -70,5 +74,12 @@ export class VerificationController {
       accepted: true,
       failureReasons: [],
     };
+  }
+
+  @Get("status/:userId")
+  async getStatus(
+    @Param("userId") userId: string
+  ) {
+    return this.deviceService.getVerificationStatus(userId);
   }
 }
