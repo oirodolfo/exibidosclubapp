@@ -102,11 +102,12 @@
 
 ## 6. Object Storage (S3-compatible)
 
-- **Provider**: Cloudflare R2 (prod), MinIO (local/dev).
+- **Provider**: Cloudflare R2 (prod), MinIO (local/dev). **Fallback**: local filesystem when S3 is not configured (for local testing without MinIO).
 - **Buckets** (logical or prefix): `exibidos-images` (originals, never public), `exibidos-thumbs`, `exibidos-og` (generated OG crops).
-- **Access**: Only via **signed URLs** (upload + download). No public bucket URLs for user content.
-- **Layout**: `{bucket}/{env}/{userId}/{imageId}/{variant}.{ext}` — e.g. `originals`, `thumb`, `blur`, `watermarked`, `og`.
+- **Access**: Only via **signed URLs** (upload + download). No public bucket URLs for user content. With local fallback, images are served via `/api/images/serve?key=...`.
+- **Layout**: `{bucket}/{env}/{userId}/{imageId}/{variant}.{ext}` — e.g. `originals`, `thumb`, `blur`, `watermarked`, `og`. Local: `STORAGE_LOCAL_PATH/{env}/{userId}/{imageId}/{variant}.{ext}` (default `./.storage`).
 - **Lifecycle**: Originals retained; thumbs/watermarked/og can have policies (e.g. delete if image soft-deleted).
+- **Local testing**: Omit S3_* env vars (or set `STORAGE_PROVIDER=local`). Web and IMS use `STORAGE_LOCAL_PATH` (default `.storage`). For IMS + web together, set the same `STORAGE_LOCAL_PATH` (e.g. absolute path to repo `.storage`).
 
 ---
 
@@ -146,6 +147,7 @@
 - `VECTOR_DB_URL` — if different from Postgres.
 - `CDN_IMAGE_BASE` — if image URLs are rewritten to CDN.
 - `FEATURE_*` — overrides for feature flags (optional).
+- `FEATURE_LOGGER` — when `true`, enables debug logger with namespaced emojis (auth, api, storage, face, tags, votes). Default: off.
 
 ### 8.5 Loading
 
