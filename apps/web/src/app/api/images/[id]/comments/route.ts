@@ -5,6 +5,7 @@ import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { updateImageRankingScore } from "@/lib/rankings";
 import { createNotification } from "@/lib/notifications";
+import { awardXp } from "@/lib/xp";
 
 const PostBody = z.object({ body: z.string().min(1).max(2000) });
 
@@ -100,6 +101,7 @@ export async function POST(
       imageId: id,
     }).catch(() => {});
   }
+  awardXp(session.user.id, 3).catch(() => {});
 
   return NextResponse.json({
     id: comment.id,

@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
 import { updateImageRankingScore } from "@/lib/rankings";
 import { createNotification } from "@/lib/notifications";
+import { awardXp } from "@/lib/xp";
 
 /** Request body schema: imageId, direction (like|dislike|skip), optional categoryId when like. */
 const PostBody = z.object({
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
       actorId: session.user.id,
       imageId,
     }).catch(() => {});
+    awardXp(session.user.id, 5).catch(() => {});
   }
 
   log.api.swipe.info("swipe: success", {

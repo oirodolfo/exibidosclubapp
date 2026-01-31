@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
 import { updateImageRankingScore } from "@/lib/rankings";
 import { createNotification } from "@/lib/notifications";
+import { awardXp } from "@/lib/xp";
 
 const PostBody = z.object({
   tagId: z.string().min(1),
@@ -85,6 +86,7 @@ export async function POST(
       tagId,
     }).catch(() => {});
   }
+  awardXp(session.user.id, 2).catch(() => {});
 
   await prisma.auditLog.create({
     data: {

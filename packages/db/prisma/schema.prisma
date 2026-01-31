@@ -24,6 +24,8 @@ model User {
   image         String?   // Auth.js / OAuth; URL or avatar key
   birthdate     DateTime  // age-gate
   role          String    @default("user") // user | creator | admin | moderator
+  xp            Int       @default(0)   // gamification
+  level         Int       @default(1)   // derived from xp
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime? // soft delete
