@@ -7,6 +7,8 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { prisma } from "@exibidos/db/client";
 import type { ImageMlMetadataData } from "@exibidos/ml";
+import type { BlurMode } from "./contracts.js";
+import { resolveBlurMode } from "./blur-policies.js";
 import { parseTransformSpec } from "./parser.js";
 import { runPipeline } from "./pipeline.js";
 import { fetchFromS3, isStorageConfigured } from "./storage.js";
@@ -38,11 +40,16 @@ async function main() {
       return reply.status(400).send({ error: parsed.code, message: parsed.message });
     }
 
+    const needMlMetadata =
+      parsed.spec.crop ||
+      parsed.spec.blur === "face" ||
+      parsed.spec.blur === "eyes";
     const image = await prisma.image.findFirst({
       where: { id: imageId, deletedAt: null },
       select: {
         storageKey: true,
-        ...(parsed.spec.crop && {
+        blurSuggested: true,
+        ...(needMlMetadata && {
           imageMlMetadata: { select: { data: true } },
         }),
       },
@@ -68,12 +75,22 @@ async function main() {
         ? (image.imageMlMetadata.data as unknown as ImageMlMetadataData)
         : null;
 
+    const blurMode: BlurMode =
+      parsed.spec.blur ??
+      resolveBlurMode({
+        context: parsed.spec.context ?? "public",
+        mlSuggestedBlur: image.blurSuggested ?? false,
+        featureBlurForce: process.env.FEATURE_BLUR_FORCE as BlurMode | undefined,
+        featureBlurDisabled: process.env.FEATURE_BLUR_DISABLED === "true",
+      });
+
     try {
       const result = await runPipeline({
         buffer,
         contentType,
         spec: parsed.spec,
-        mlMetadata: parsed.spec.crop ? mlMetadata : undefined,
+        mlMetadata: needMlMetadata ? mlMetadata : undefined,
+        blurMode,
       });
       return reply
         .header("Content-Type", result.contentType)

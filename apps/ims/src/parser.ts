@@ -8,6 +8,8 @@ import {
   BOUNDS,
   DEFAULTS,
   TRANSFORM_CONTRACT_VERSION,
+  type BlurContext,
+  type BlurMode,
   type CropMode,
   type FitMode,
   type OutputFormat,
@@ -76,6 +78,22 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
   };
   const crop = cropRaw ? cropMap[cropRaw] : undefined;
 
+  const blurRaw = query.blur?.toLowerCase();
+  const blurMap: Record<string, BlurMode> = {
+    none: "none",
+    eyes: "eyes",
+    face: "face",
+    full: "full",
+  };
+  const blur = blurRaw ? blurMap[blurRaw] : undefined;
+
+  const contextRaw = query.context?.toLowerCase();
+  const contextMap: Record<string, BlurContext> = {
+    public: "public",
+    private: "private",
+  };
+  const context = contextRaw ? contextMap[contextRaw] : undefined;
+
   const spec: TransformSpec = {
     v,
     ...(w !== undefined && { w }),
@@ -84,6 +102,8 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
     fmt,
     q,
     ...(crop && { crop }),
+    ...(blur && { blur }),
+    ...(context && { context }),
   };
 
   return { ok: true, spec };

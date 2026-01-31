@@ -49,6 +49,8 @@ GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1&crop=face
 - `fmt` — jpeg | webp.
 - `q` — Quality 1–100.
 - `crop` — face | body | interest | explicit | center. ML-aware crop; fallback to center when confidence is low.
+- `blur` — none | eyes | face | full. Override policy; when absent, policy + context decide.
+- `context` — public | private. Blur policy context (forced blur for public, no blur for private by default). Overridable via FEATURE_BLUR_FORCE / FEATURE_BLUR_DISABLED.
 
 ## Environment
 

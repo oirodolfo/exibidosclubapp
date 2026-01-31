@@ -14,6 +14,12 @@ export type OutputFormat = "jpeg" | "webp";
 /** Crop mode: ML-aware or fallback. Product rules decide which mode to use. */
 export type CropMode = "face" | "body" | "interest" | "explicit" | "center";
 
+/** Blur mode: policy-driven; overridable via query or feature flags. */
+export type BlurMode = "none" | "eyes" | "face" | "full";
+
+/** Request context for blur policy (public vs private). */
+export type BlurContext = "public" | "private";
+
 /** Parsed and validated transformation spec (never raw params in pipeline) */
 export interface TransformSpec {
   /** Contract version — bump when semantics change; old URLs keep working */
@@ -30,6 +36,10 @@ export interface TransformSpec {
   q: number;
   /** Optional: intelligent crop mode; when set, crop step runs before resize */
   crop?: CropMode;
+  /** Optional: blur override (none|eyes|face|full); when absent, policy + context decide */
+  blur?: BlurMode;
+  /** Optional: context for blur policy (public|private) */
+  context?: BlurContext;
 }
 
 /** Defaults for missing params (per version) */

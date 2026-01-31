@@ -1,11 +1,13 @@
 /**
- * IMS pipeline: fetch → crop (optional) → resize → optimize → encode.
+ * IMS pipeline: fetch → crop (optional) → blur (optional) → resize → encode.
  * Order is fixed for deterministic output. Never serves original.
  */
 
 import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
+import type { BlurMode } from "./contracts.js";
 import type { TransformSpec } from "./contracts.js";
+import { applyBlur } from "./blur-engine.js";
 import { computeCropRegion } from "./crop-engine.js";
 
 export interface PipelineInput {
@@ -14,6 +16,8 @@ export interface PipelineInput {
   spec: TransformSpec;
   /** When spec.crop is set, ML metadata for intelligent crop; null = fallback to center */
   mlMetadata?: ImageMlMetadataData | null;
+  /** Resolved blur mode (from policy + context when not overridden by spec.blur) */
+  blurMode?: BlurMode;
 }
 
 export interface PipelineResult {
@@ -21,9 +25,9 @@ export interface PipelineResult {
   contentType: string;
 }
 
-/** Transformation order: 1) crop (if spec.crop) 2) resize 3) encode. */
+/** Transformation order: 1) crop (if spec.crop) 2) blur (if blurMode) 3) resize 4) encode. */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
-  const { buffer, spec, mlMetadata } = input;
+  const { buffer, spec, mlMetadata, blurMode } = input;
 
   let pipeline = sharp(buffer);
 
@@ -58,6 +62,12 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       wAfter = cropBox.width;
       hAfter = cropBox.height;
     }
+  }
+
+  if (blurMode && blurMode !== "none") {
+    const buf = await pipeline.toBuffer();
+    const blurred = await applyBlur(buf, wAfter, hAfter, blurMode, mlMetadata ?? null);
+    pipeline = sharp(blurred);
   }
 
   if (targetW > 0 && targetH > 0 && (targetW < wAfter || targetH < hAfter)) {
