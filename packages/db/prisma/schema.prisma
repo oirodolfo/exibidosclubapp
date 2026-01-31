@@ -168,6 +168,7 @@ model Image {
   duplicates     Image[] @relation("Duplicate")
   imageEmbedding ImageEmbedding?
   imageMlMetadata ImageMlMetadata?
+  weakLabels    WeakLabel[]
   imageTags      ImageTag[]
   votes       Vote[]
   swipes      Swipe[]
@@ -629,4 +630,26 @@ model ImageMlMetadata {
   image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
   @@index([contractVersion])
+}
+
+// ---------------------------------------------------------------------------
+// Weak labels (user-generated signals; never mixed with ground truth)
+// ---------------------------------------------------------------------------
+
+model WeakLabel {
+  id         String   @id @default(cuid())
+  imageId    String
+  source     String   // user_tag | vote | swipe
+  tagId      String?
+  categoryId String?
+  confidence Float    // 0..1
+  weight     Float    // < 1 vs human = 1
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([source])
+  @@index([createdAt])
 }

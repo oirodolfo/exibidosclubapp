@@ -32,3 +32,17 @@ export {
   type RegionType,
   type ClassLabel,
 } from "./taxonomy/v1.js";
+
+export {
+  normalizeUserTag,
+  normalizeVote,
+  normalizeSwipe,
+  WEAK_LABEL_MAX_WEIGHT,
+  createInMemoryWeakLabelStore,
+  type WeakLabelStore,
+  type WeakLabel,
+  type WeakLabelSource,
+  type UserTagInput,
+  type VoteInput,
+  type SwipeInput,
+} from "./weak-labels/index.js";
