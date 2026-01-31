@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { log } from "@/lib/logger";
 
 const PostBody = z.object({
   tagId: z.string().min(1),
@@ -63,5 +64,6 @@ export async function POST(
     },
   });
 
+  log.api.votes.info("vote: success", { imageId: id, tagId, weight, userId: session.user.id });
   return NextResponse.json({ ok: true }, { status: 200 });
 }

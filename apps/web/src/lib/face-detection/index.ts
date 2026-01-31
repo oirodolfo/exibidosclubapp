@@ -5,6 +5,7 @@
  */
 
 import sharp from "sharp";
+import { log } from "@/lib/logger";
 import * as tf from "@tensorflow/tfjs";
 import * as wasm from "@tensorflow/tfjs-backend-wasm";
 
@@ -18,6 +19,7 @@ async function ensureInitialized(): Promise<boolean> {
   if (initialized) return true;
   if (process.env.FEATURE_FACE_BLUR !== "true") return false;
   try {
+    log.face.debug("ensureInitialized: loading TF.js WASM backend");
     wasm.setWasmPaths(
       "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.22.0/dist/",
       true
@@ -25,8 +27,10 @@ async function ensureInitialized(): Promise<boolean> {
     await tf.setBackend("wasm");
     await tf.ready();
     initialized = true;
+    log.face.info("ensureInitialized: TF.js WASM ready");
     return true;
-  } catch {
+  } catch (e) {
+    log.face.warn("ensureInitialized: failed", e);
     return false;
   }
 }
@@ -50,7 +54,8 @@ export async function detectFaces(buffer: Buffer): Promise<FaceResult[]> {
   let faceapi: typeof import("@vladmandic/face-api");
   try {
     faceapi = await import("@vladmandic/face-api/dist/face-api.node-wasm.js");
-  } catch {
+  } catch (e) {
+    log.face.warn("detectFaces: face-api import failed", e);
     return [];
   }
 
@@ -60,7 +65,8 @@ export async function detectFaces(buffer: Buffer): Promise<FaceResult[]> {
     const modelPath = pathMod.join(pathMod.dirname(pkgPath), "model");
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
-  } catch {
+  } catch (e) {
+    log.face.warn("detectFaces: model load failed", e);
     return [];
   }
 
@@ -112,7 +118,8 @@ export async function detectFaces(buffer: Buffer): Promise<FaceResult[]> {
       }
       return { box: boxOut, eyes };
     });
-  } catch {
+  } catch (e) {
+    log.face.debug("detectFaces: detection error", e);
     if (tensor) tf.dispose(tensor);
     return [];
   }

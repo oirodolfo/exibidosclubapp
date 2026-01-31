@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { log } from "@/lib/logger";
 
 const PostBody = z.object({ tagId: z.string().min(1) });
 
@@ -71,7 +72,10 @@ export async function POST(
   const existing = await prisma.imageTag.findUnique({
     where: { imageId_tagId: { imageId: id, tagId } },
   });
-  if (existing) return NextResponse.json({ error: "already_tagged" }, { status: 409 });
+  if (existing) {
+    log.api.tags.info("tag add: conflict (already tagged)", { imageId: id, tagId });
+    return NextResponse.json({ error: "already_tagged" }, { status: 409 });
+  }
 
   await prisma.imageTag.create({
     data: { imageId: id, tagId, source: "user" },
@@ -87,5 +91,6 @@ export async function POST(
     },
   });
 
+  log.api.tags.info("tag add: success", { imageId: id, tagId, tagName: tag.name, userId: session.user.id });
   return NextResponse.json({ ok: true }, { status: 201 });
 }

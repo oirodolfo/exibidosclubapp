@@ -20,26 +20,37 @@ export interface WatermarkOptions {
   saliency?: { centerX: number; centerY: number };
 }
 
+/** Brand text for global watermark. */
 const BRAND_TEXT = "exibidos.club";
-const FONT_SIZE = 14;
-const PADDING = 8;
-const OPACITY = 0.7;
 
-/** Place in corner that minimizes overlap with saliency center. */
+/** Watermark SVG and placement (tune for readability vs. intrusiveness). */
+const WATERMARK_FONT_SIZE = 14;
+const WATERMARK_PADDING_PX = 8;
+const WATERMARK_FILL_OPACITY = 0.7;
+const WATERMARK_STROKE_OPACITY = 0.3;
+/** Approximate watermark overlay width/height for corner placement. */
+const WATERMARK_OVERLAY_WIDTH_PX = 120;
+const WATERMARK_OVERLAY_HEIGHT_PX = 24;
+/** SVG canvas size for the text overlay. */
+const WATERMARK_SVG_WIDTH = 200;
+const WATERMARK_SVG_HEIGHT = 30;
+const WATERMARK_TEXT_BASELINE_Y = 22;
+
+/** Place in corner that minimizes overlap with saliency center (default: bottom-right). */
 function placement(
   width: number,
   height: number,
   saliency?: { centerX: number; centerY: number }
 ): { left: number; top: number } {
-  const pad = PADDING;
+  const pad = WATERMARK_PADDING_PX;
   const corners = [
     { left: pad, top: pad },
-    { left: width - 120 - pad, top: pad },
-    { left: pad, top: height - 24 - pad },
-    { left: width - 120 - pad, top: height - 24 - pad },
+    { left: width - WATERMARK_OVERLAY_WIDTH_PX - pad, top: pad },
+    { left: pad, top: height - WATERMARK_OVERLAY_HEIGHT_PX - pad },
+    { left: width - WATERMARK_OVERLAY_WIDTH_PX - pad, top: height - WATERMARK_OVERLAY_HEIGHT_PX - pad },
   ];
   if (!saliency) {
-    return corners[3]!; // default bottom-right
+    return corners[3]!;
   }
   const cx = saliency.centerX * width;
   const cy = saliency.centerY * height;
@@ -55,12 +66,12 @@ function placement(
   return best;
 }
 
-/** Build SVG text for watermark. */
+/** Build SVG text for watermark (escaped for XML). */
 function svgText(text: string): string {
   const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return `
-<svg width="200" height="30" xmlns="http://www.w3.org/2000/svg">
-  <text x="0" y="22" font-family="Arial,sans-serif" font-size="${FONT_SIZE}" fill="white" fill-opacity="${OPACITY}" stroke="black" stroke-opacity="0.3" stroke-width="1">${escaped}</text>
+<svg width="${WATERMARK_SVG_WIDTH}" height="${WATERMARK_SVG_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+  <text x="0" y="${WATERMARK_TEXT_BASELINE_Y}" font-family="Arial,sans-serif" font-size="${WATERMARK_FONT_SIZE}" fill="white" fill-opacity="${WATERMARK_FILL_OPACITY}" stroke="black" stroke-opacity="${WATERMARK_STROKE_OPACITY}" stroke-width="1">${escaped}</text>
 </svg>`;
 }
 

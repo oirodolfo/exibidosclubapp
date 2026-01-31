@@ -7,11 +7,14 @@ import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
 import type { BlurMode } from "./contracts.js";
 
+/** Gaussian sigma for full-image blur (privacy / sensitive content). */
 const FULL_BLUR_SIGMA = 12;
+
+/** Gaussian sigma for region (face/eyes) blur patches. */
 const REGION_BLUR_SIGMA = 8;
 
 /**
- * Apply blur according to mode. Returns new buffer.
+ * Apply blur according to mode. Returns new buffer; no-op when mode is "none".
  */
 export async function applyBlur(
   buffer: Buffer,

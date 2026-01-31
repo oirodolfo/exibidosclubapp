@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { log } from "@/lib/logger";
 
 export async function DELETE(
   _req: Request,
@@ -36,5 +37,6 @@ export async function DELETE(
     },
   });
 
+  log.api.tags.info("tag remove: success", { imageId: id, tagId, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }

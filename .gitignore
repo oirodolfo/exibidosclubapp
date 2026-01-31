@@ -33,5 +33,8 @@ pnpm-debug.log*
 coverage
 .nyc_output
 
+# Local storage (fallback when S3 not used)
+.storage
+
 # Misc
 *.pem

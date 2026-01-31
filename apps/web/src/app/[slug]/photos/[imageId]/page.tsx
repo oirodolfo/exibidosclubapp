@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
-import { getSignedDownloadUrl, isS3Configured } from "@/lib/storage";
+import { getSignedDownloadUrl, isStorageConfigured } from "@/lib/storage";
 import { page, link } from "@/lib/variants";
 import { ImageDetailClient } from "./_components/ImageDetailClient";
 
@@ -53,7 +53,7 @@ export default async function ImageDetailPage({
   if (!image) notFound();
 
   let thumbUrl: string | null = null;
-  if (isS3Configured() && image.thumbKey) {
+  if (isStorageConfigured() && image.thumbKey) {
     try {
       thumbUrl = await getSignedDownloadUrl(image.thumbKey, 3600);
     } catch {

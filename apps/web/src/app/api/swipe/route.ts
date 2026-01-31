@@ -5,12 +5,17 @@ import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
 
+/** Request body schema: imageId, direction (like|dislike|skip), optional categoryId when like. */
 const PostBody = z.object({
   imageId: z.string().min(1),
   direction: z.enum(["like", "dislike", "skip"]),
   categoryId: z.string().optional(),
 });
 
+/**
+ * Record a swipe (like/dislike/skip) for an image.
+ * Category is required when direction is "like". Duplicate swipes return 409.
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {

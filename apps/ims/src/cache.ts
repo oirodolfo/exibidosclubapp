@@ -9,6 +9,12 @@ export interface CacheEntry {
   createdAt: number;
 }
 
+/** Default TTL for cache entries when IMS_MEMORY_CACHE_TTL is not set (seconds). */
+const DEFAULT_CACHE_TTL_SECONDS = 3600;
+
+/** Milliseconds per second (for expiry check). */
+const MS_PER_SECOND = 1000;
+
 /** Build deterministic cache key from imageId and query (sorted). */
 export function cacheKey(imageId: string, query: Record<string, string | undefined>): string {
   const entries = Object.entries(query).filter(
@@ -28,9 +34,9 @@ function getMax(): number {
 
 function getTtlSeconds(): number {
   const v = process.env.IMS_MEMORY_CACHE_TTL;
-  if (v === undefined || v === "") return 3600;
+  if (v === undefined || v === "") return DEFAULT_CACHE_TTL_SECONDS;
   const n = parseInt(v, 10);
-  return Number.isNaN(n) || n < 0 ? 3600 : n;
+  return Number.isNaN(n) || n < 0 ? DEFAULT_CACHE_TTL_SECONDS : n;
 }
 
 const maxSize = getMax();
@@ -49,7 +55,7 @@ export function memoryCacheGet(key: string): CacheEntry | null {
   if (maxSize === 0) return null;
   const entry = store.get(key);
   if (!entry) return null;
-  if (ttlSec > 0 && (Date.now() - entry.createdAt) / 1000 > ttlSec) {
+  if (ttlSec > 0 && (Date.now() - entry.createdAt) / MS_PER_SECOND > ttlSec) {
     store.delete(key);
     const i = order.indexOf(key);
     if (i >= 0) order.splice(i, 1);

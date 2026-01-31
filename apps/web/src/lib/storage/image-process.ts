@@ -1,16 +1,29 @@
 import sharp from "sharp";
-import { buildStorageKey, extFromMime, uploadToS3 } from "./s3";
+import { buildStorageKey, extFromMime } from "./s3";
+import { upload } from "./provider";
 import { applyWatermark } from "./watermark";
 import { detectFaces, type FaceResult } from "@/lib/face-detection";
+import { log } from "@/lib/logger";
 
+// --- Thumbnail: max width (height auto), JPEG quality ---
 const THUMB_MAX_WIDTH = 400;
 const THUMB_QUALITY = 85;
+
+// --- Blur preview: max width, Gaussian sigma, JPEG quality (lower than thumb for size) ---
 const BLUR_SIGMA = 12;
 const BLUR_MAX_WIDTH = 800;
+const BLUR_PREVIEW_QUALITY = 70;
+
+// --- Face/region blur: sigma for extracted patches; JPEG quality when compositing ---
 const FACE_BLUR_SIGMA = 20;
+const FACE_BLUR_JPEG_QUALITY = 90;
 
 export type BlurMode = "none" | "eyes" | "full";
 
+/**
+ * Blur face (or eyes-only) regions on a resized image.
+ * Scales detection boxes to target dimensions, extracts patches, blurs, composites back.
+ */
 async function applyFaceBlur(
   baseBuffer: Buffer,
   faces: FaceResult[],
@@ -35,7 +48,7 @@ async function applyFaceBlur(
       const patch = await sharp(baseBuffer)
         .extract({ left, top, width: w, height: h })
         .blur(FACE_BLUR_SIGMA)
-        .jpeg({ quality: 90 })
+        .jpeg({ quality: FACE_BLUR_JPEG_QUALITY })
         .toBuffer();
       composites.push({ input: patch, top, left });
     }
@@ -44,6 +57,10 @@ async function applyFaceBlur(
   return sharp(baseBuffer).composite(composites).jpeg({ quality: THUMB_QUALITY }).toBuffer();
 }
 
+/**
+ * Process uploaded image: store original, generate thumb + blur preview with optional face blur and watermark.
+ * Uses S3 or local storage according to provider. ML metadata is ingested separately after create.
+ */
 export async function processImage(
   userId: string,
   imageId: string,
@@ -61,15 +78,18 @@ export async function processImage(
   const ext = extFromMime(mime);
   const originalKey = buildStorageKey(userId, imageId, "original", ext);
 
+  log.storage.upload.info("processImage: start", { userId, imageId, mime, blurMode });
+
   const meta = await sharp(buffer).metadata();
   const origW = meta.width ?? 0;
   const origH = meta.height ?? 0;
 
-  await uploadToS3(originalKey, buffer, mime);
+  await upload(originalKey, buffer, mime);
 
   let faces: FaceResult[] = [];
   if (blurMode !== "none" || process.env.FEATURE_FACE_BLUR === "true") {
     faces = await detectFaces(buffer);
+    log.storage.face.debug("processImage: face detection", { count: faces.length });
   }
 
   const thumbBase = await sharp(buffer)
@@ -85,12 +105,12 @@ export async function processImage(
       : thumbBase;
   thumbBuffer = await applyWatermark(thumbBuffer, thumbW, thumbH, THUMB_QUALITY);
   const thumbKey = buildStorageKey(userId, imageId, "thumb", "jpg");
-  await uploadToS3(thumbKey, thumbBuffer, "image/jpeg");
+  await upload(thumbKey, thumbBuffer, "image/jpeg");
 
   const blurBase = await sharp(buffer)
     .resize(BLUR_MAX_WIDTH, undefined, { withoutEnlargement: true })
     .blur(BLUR_SIGMA)
-    .jpeg({ quality: 70 })
+    .jpeg({ quality: BLUR_PREVIEW_QUALITY })
     .toBuffer();
   const blurMeta = await sharp(blurBase).metadata();
   const blurW = blurMeta.width ?? origW;
@@ -99,9 +119,11 @@ export async function processImage(
     blurMode !== "none" && faces.length > 0
       ? await applyFaceBlur(blurBase, faces, origW, origH, blurW, blurH, blurMode)
       : blurBase;
-  blurBuffer = await applyWatermark(blurBuffer, blurW, blurH, 70);
+  blurBuffer = await applyWatermark(blurBuffer, blurW, blurH, BLUR_PREVIEW_QUALITY);
   const blurKey = buildStorageKey(userId, imageId, "blur", "jpg");
-  await uploadToS3(blurKey, blurBuffer, "image/jpeg");
+  await upload(blurKey, blurBuffer, "image/jpeg");
+
+  log.storage.upload.info("processImage: done", { imageId, blurSuggested: faces.length > 0 });
 
   return {
     storageKey: originalKey,

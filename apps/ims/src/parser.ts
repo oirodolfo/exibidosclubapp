@@ -1,6 +1,6 @@
 /**
  * Parse and validate URL/query params into TransformSpec.
- * Invalid or out-of-bounds values are rejected (400).
+ * Invalid or out-of-bounds values are rejected (400). Used by IMS to build cache-safe URLs.
  */
 
 import type { TransformSpec } from "./contracts.js";
@@ -16,6 +16,10 @@ import {
   type WatermarkKind,
 } from "./contracts.js";
 
+/** Allowed contract version range (1–99) for cache and backward compatibility. */
+const VERSION_MIN = 1;
+const VERSION_MAX = 99;
+
 export interface ParseResult {
   ok: true;
   spec: TransformSpec;
@@ -27,11 +31,12 @@ export interface ParseError {
   message: string;
 }
 
+/** Parse query string into a validated TransformSpec; returns error when invalid. */
 export function parseTransformSpec(query: Record<string, string | undefined>): ParseResult | ParseError {
   const vRaw = query.v ?? query.version;
   const v = vRaw !== undefined ? parseInt(vRaw, 10) : TRANSFORM_CONTRACT_VERSION;
-  if (Number.isNaN(v) || v < 1 || v > 99) {
-    return { ok: false, code: "invalid_version", message: "v must be 1–99" };
+  if (Number.isNaN(v) || v < VERSION_MIN || v > VERSION_MAX) {
+    return { ok: false, code: "invalid_version", message: `v must be ${VERSION_MIN}–${VERSION_MAX}` };
   }
 
   const wRaw = query.w ?? query.width;

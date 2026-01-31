@@ -18,7 +18,7 @@ import { logRequest, getMetrics } from "./observability.js";
 import { resolveBlurMode } from "./blur-policies.js";
 import { parseTransformSpec } from "./parser.js";
 import { runPipeline } from "./pipeline.js";
-import { fetchFromS3, isStorageConfigured } from "./storage.js";
+import { fetchFromStorage, isStorageConfigured } from "./storage.js";
 
 const app = Fastify({ logger: true });
 
@@ -76,7 +76,7 @@ async function main() {
     let buffer: Buffer;
     let contentType: string;
     try {
-      const origin = await fetchFromS3(image.storageKey);
+      const origin = await fetchFromStorage(image.storageKey);
       buffer = origin.buffer;
       contentType = origin.contentType;
     } catch (e) {
