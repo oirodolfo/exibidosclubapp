@@ -8,3 +8,5 @@ import { FeatureFlagService } from "./feature-flag.service.js";
   exports: [ConfigService, FeatureFlagService],
 })
 export class ConfigModule {}
+
+export { ConfigService } from "./config.service.js";
