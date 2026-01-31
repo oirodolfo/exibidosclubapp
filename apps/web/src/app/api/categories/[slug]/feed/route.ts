@@ -4,45 +4,43 @@ import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/storage";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
-export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (process.env.FEATURE_SWIPE !== "true") {
-    return NextResponse.json({ error: "swipe_disabled" }, { status: 403 });
-  }
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  const category = await prisma.category.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+  if (!category) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const { searchParams } = new URL(req.url);
   const cursor = searchParams.get("cursor");
-  const limit = Math.min(Number(searchParams.get("limit")) || PAGE_SIZE, 20);
+  const limit = Math.min(Number(searchParams.get("limit")) || PAGE_SIZE, 24);
 
-  const swipedIds = await prisma.swipe
-    .findMany({
-      where: { userId: session.user.id },
-      select: { imageId: true },
-    })
-    .then((r) => r.map((s) => s.imageId));
+  const tagIds = await prisma.tag.findMany({
+    where: { categoryId: category.id },
+    select: { id: true },
+  }).then((r) => r.map((t) => t.id));
+
+  if (tagIds.length === 0) {
+    return NextResponse.json({ feed: [], nextCursor: null, hasMore: false });
+  }
 
   const images = await prisma.image.findMany({
     where: {
-      id: { notIn: swipedIds },
-      userId: { not: session.user.id },
       deletedAt: null,
-      visibility: { in: ["public", "swipe_only"] },
+      visibility: "public",
       moderationStatus: { in: ["approved", "pending"] },
+      imageTags: { some: { tagId: { in: tagIds } } },
     },
     orderBy: [{ rankingScore: "desc" }, { createdAt: "desc" }],
     take: limit + 1,
     ...(cursor && { cursor: { id: cursor }, skip: 1 }),
-    select: {
-      id: true,
-      caption: true,
-      createdAt: true,
-      thumbKey: true,
-      watermarkedKey: true,
+    include: {
       user: {
         select: {
           id: true,
@@ -59,22 +57,14 @@ export async function GET(req: Request) {
 
   const withUrls = await (async () => {
     if (!isS3Configured()) {
-      return items.map((img) => ({
-        ...img,
-        thumbUrl: null as string | null,
-        imageUrl: null as string | null,
-      }));
+      return items.map((img) => ({ ...img, thumbUrl: null as string | null }));
     }
     return Promise.all(
       items.map(async (img) => {
         const thumbUrl = img.thumbKey
           ? await getSignedDownloadUrl(img.thumbKey, 3600).catch(() => null)
           : null;
-        const imageKey = img.watermarkedKey ?? img.thumbKey ?? null;
-        const imageUrl = imageKey
-          ? await getSignedDownloadUrl(imageKey, 3600).catch(() => null)
-          : thumbUrl;
-        return { ...img, thumbUrl, imageUrl };
+        return { ...img, thumbUrl };
       })
     );
   })();
@@ -82,7 +72,6 @@ export async function GET(req: Request) {
   const feed = withUrls.map((img) => ({
     id: img.id,
     thumbUrl: img.thumbUrl,
-    imageUrl: img.imageUrl ?? img.thumbUrl,
     caption: img.caption,
     createdAt: img.createdAt,
     owner: {

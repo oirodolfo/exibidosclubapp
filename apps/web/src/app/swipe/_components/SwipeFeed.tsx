@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { link } from "@/lib/variants";
 import { useSwipeFeed, useSwipeMutation } from "@/hooks/api";
@@ -71,10 +72,12 @@ export function SwipeFeed() {
         aria-label={item.caption ?? "Photo"}
       >
         {item.thumbUrl ? (
-          <img
+          <Image
             src={item.thumbUrl}
             alt={item.caption ?? ""}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="400px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>

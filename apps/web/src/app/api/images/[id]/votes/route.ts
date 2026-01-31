@@ -4,6 +4,9 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
+import { updateImageRankingScore } from "@/lib/rankings";
+import { createNotification } from "@/lib/notifications";
+import { awardXp } from "@/lib/xp";
 
 const PostBody = z.object({
   tagId: z.string().min(1),
@@ -29,7 +32,7 @@ export async function POST(
   const image = await prisma.image.findUnique({ where: { id, deletedAt: null } });
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+  const tag = await prisma.tag.findUnique({ where: { id: tagId }, select: { id: true, categoryId: true } });
   if (!tag) return NextResponse.json({ error: "tag_not_found" }, { status: 404 });
 
   const prev = await prisma.vote.findUnique({
@@ -42,7 +45,23 @@ export async function POST(
     },
   });
 
-  await prisma.vote.upsert({
+  // One vote per user per category per image: remove other votes in same category for this user+image
+  const otherTagsInCategory = await prisma.tag.findMany({
+    where: { categoryId: tag.categoryId, id: { not: tagId } },
+    select: { id: true },
+  });
+  const otherTagIds = otherTagsInCategory.map((t) => t.id);
+  if (otherTagIds.length > 0) {
+    await prisma.vote.deleteMany({
+      where: {
+        userId: session.user.id,
+        imageId: id,
+        tagId: { in: otherTagIds },
+      },
+    });
+  }
+
+  const vote = await prisma.vote.upsert({
     where: {
       userId_imageId_tagId: {
         userId: session.user.id,
@@ -53,6 +72,21 @@ export async function POST(
     create: { userId: session.user.id, imageId: id, tagId, weight },
     update: { weight },
   });
+
+  updateImageRankingScore(id).catch(() => {});
+
+  const image = await prisma.image.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+  if (image) {
+    createNotification(image.userId, "category_vote", "Vote", vote.id, {
+      actorId: session.user.id,
+      imageId: id,
+      tagId,
+    }).catch(() => {});
+  }
+  awardXp(session.user.id, 2).catch(() => {});
 
   await prisma.auditLog.create({
     data: {

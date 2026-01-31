@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { listReset, photoGrid } from "@/lib/variants";
 
 type ImageItem = {
@@ -23,9 +24,9 @@ export function PhotosTab({ images, isOwner, slug }: Props) {
         {images.map((img) => (
           <li key={img.id}>
             <Link href={`/${slug}/photos/${img.id}`}>
-              <div className="aspect-square bg-neutral-200 rounded-lg overflow-hidden flex items-center justify-center text-xs text-neutral-400">
+              <div className="aspect-square bg-neutral-200 rounded-lg overflow-hidden flex items-center justify-center text-xs text-neutral-400 relative">
                 {img.thumbUrl ? (
-                  <img src={img.thumbUrl} alt={img.caption ?? "Photo"} className="w-full h-full object-cover" />
+                  <Image src={img.thumbUrl} alt={img.caption ?? "Photo"} fill className="object-cover" sizes="(max-width: 768px) 50vw, 25vw" />
                 ) : (
                   <span>[img]</span>
                 )}

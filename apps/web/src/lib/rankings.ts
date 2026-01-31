@@ -1,9 +1,38 @@
 /**
  * Award badges to users based on achievements.
  * Called on relevant events (upload, swipe like, etc.).
+ * Feed ranking: compute and cache rankingScore on Image for feed ordering.
  */
 
 import { prisma } from "@exibidos/db/client";
+
+/** Compute ranking score from likes (swipes), comments, votes, recency. No new tables. */
+export async function updateImageRankingScore(imageId: string): Promise<void> {
+  const [image, likeCount, commentCount, voteSum] = await Promise.all([
+    prisma.image.findUnique({
+      where: { id: imageId },
+      select: { createdAt: true },
+    }),
+    prisma.swipe.count({ where: { imageId, direction: "like" } }),
+    prisma.comment.count({ where: { imageId, deletedAt: null } }),
+    prisma.vote.aggregate({ where: { imageId }, _sum: { weight: true } }),
+  ]);
+
+  if (!image) return;
+
+  const likes = likeCount;
+  const comments = commentCount;
+  const votes = voteSum._sum.weight ?? 0;
+  const hoursSinceCreated = (Date.now() - image.createdAt.getTime()) / (1000 * 60 * 60);
+  const recencyBonus = Math.max(0, 100 - hoursSinceCreated);
+
+  const score = likes * 2 + comments * 1.5 + votes * 0.3 + recencyBonus;
+
+  await prisma.image.update({
+    where: { id: imageId },
+    data: { rankingScore: score },
+  });
+}
 
 const BADGES: { key: string; name: string; description: string }[] = [
   { key: "first_upload", name: "First Upload", description: "Uploaded your first image" },
