@@ -1,5 +1,13 @@
-export { DeviceStatus, UserVerificationStatus } from "./enums/index.js";
-export type { DeviceStatusType, UserVerificationStatusType } from "./enums/index.js";
+export {
+  DeviceStatus,
+  UserVerificationStatus,
+  VerificationDecision,
+} from "./enums/index.js";
+export type {
+  DeviceStatusType,
+  UserVerificationStatusType,
+  VerificationDecisionType,
+} from "./enums/index.js";
 export type {
   VerificationAttempt,
   VerificationAttemptCreate,
