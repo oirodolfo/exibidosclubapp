@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { ensureMlMetadataForImage } from "@/lib/ml/ingest";
 import { isS3Configured, processImage } from "@/lib/storage";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
@@ -139,6 +140,14 @@ export async function POST(req: Request) {
       meta: { visibility, hasCaption: !!caption },
     },
   });
+
+  // ML metadata ingestion: run ONCE on upload; persisted for IMS (no inference in IMS requests)
+  try {
+    await ensureMlMetadataForImage(image.id);
+  } catch (e) {
+    console.error("ml metadata ingest error", e);
+    // Non-fatal: image is already created; metadata can be backfilled
+  }
 
   return NextResponse.json(image, { status: 201 });
 }
