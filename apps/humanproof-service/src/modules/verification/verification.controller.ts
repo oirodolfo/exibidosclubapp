@@ -2,11 +2,14 @@ import {
   Body,
   Controller,
   Post,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from "@nestjs/common";
 import { VerificationService } from "./verification.service.js";
+import { VerificationUploadService } from "./verification-upload.service.js";
 import { VerificationCodeRateLimitGuard } from "./verification-code-rate-limit.guard.js";
 
 class CreateCodeDto {
@@ -18,7 +21,10 @@ class CreateCodeDto {
 
 @Controller("verification")
 export class VerificationController {
-  constructor(private readonly verification: VerificationService) {}
+  constructor(
+    private readonly verification: VerificationService,
+    private readonly uploadService: VerificationUploadService
+  ) {}
 
   @Post("code")
   @HttpCode(HttpStatus.OK)
@@ -34,5 +40,35 @@ export class VerificationController {
       sessionId: body.sessionId,
       ipHash,
     });
+  }
+
+  @Post("upload")
+  @HttpCode(HttpStatus.OK)
+  async upload(
+    @Req() req: { file: () => Promise<{ file: AsyncIterable<Buffer> } | undefined> }
+  ): Promise<{
+    accepted: boolean;
+    failureReasons: string[];
+  }> {
+    const data = await req.file();
+    if (!data) {
+      throw new BadRequestException("Missing file in multipart upload");
+    }
+    const chunks: Buffer[] = [];
+    for await (const chunk of data.file) {
+      chunks.push(chunk as Buffer);
+    }
+    const buffer = Buffer.concat(chunks);
+    const result = await this.uploadService.analyzeUpload(buffer);
+    if (!result.accepted) {
+      return {
+        accepted: false,
+        failureReasons: [...result.failureReasons],
+      };
+    }
+    return {
+      accepted: true,
+      failureReasons: [],
+    };
   }
 }

@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import multipart from "@fastify/multipart";
 import { NestFactory } from "@nestjs/core";
 import {
   FastifyAdapter,
@@ -12,6 +13,14 @@ async function bootstrap(): Promise<void> {
     AppModule,
     new FastifyAdapter()
   );
+  const fastify = app.getHttpAdapter().getInstance();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await fastify.register(multipart as any, {
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+      files: 1,
+    },
+  });
   const config = app.get(HumanproofConfigService);
   const port = Number(config.port) || 4020;
   await app.listen(port, "0.0.0.0");
