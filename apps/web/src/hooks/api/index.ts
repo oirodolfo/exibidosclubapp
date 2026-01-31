@@ -1,4 +1,5 @@
 export { useSwipeFeed, useSwipeMutation } from "./useSwipeFeed";
+export { useComments, useAddComment } from "./useComments";
 export { useCategories } from "./useCategories";
 export {
   useImageTags,

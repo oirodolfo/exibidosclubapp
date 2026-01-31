@@ -49,6 +49,7 @@ model User {
   featureFlagOverrides FeatureFlagOverride[]
   moderationReportsCreated ModerationReport[] @relation("ReportCreatedBy")
   trackingEvents TrackingEvent[]
+  comments      Comment[]
 
   @@index([email])
   @@index([deletedAt])
@@ -174,6 +175,7 @@ model Image {
   imageTags      ImageTag[]
   votes       Vote[]
   swipes      Swipe[]
+  comments   Comment[]
   rankingSnapshots RankingSnapshot[]
   moderationReports ModerationReport[]
 
@@ -242,6 +244,26 @@ model ImageTag {
   @@unique([imageId, tagId])
   @@index([imageId])
   @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Comments (on images / feed items)
+// ---------------------------------------------------------------------------
+
+model Comment {
+  id        String   @id @default(cuid())
+  imageId   String
+  userId    String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // ---------------------------------------------------------------------------
