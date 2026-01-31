@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   EXIBIDOS Design System — CSS custom properties
+   Dark, joyful, neon-accented. Use in Tailwind via theme() or var().
+   --------------------------------------------------------------------------- */
+:root {
+  /* Base */
+  --exibidos-bg: #0a0a0c;
+  --exibidos-surface: #141418;
+  --exibidos-elevated: #1c1c22;
+  --exibidos-muted: #6b6b7a;
+  --exibidos-ink: #f4f4f6;
+  --exibidos-ink-soft: #b4b4be;
+  --exibidos-shadow: #1a0a1a;
+
+  /* Accents */
+  --exibidos-lime: #b8ff3c;
+  --exibidos-lime-dim: #8acc2e;
+  --exibidos-purple: #a855f7;
+  --exibidos-purple-dim: #7c3aed;
+  --exibidos-cyan: #22d3ee;
+  --exibidos-magenta: #ec4899;
+  --exibidos-amber: #fbbf24;
+
+  /* Radius */
+  --exibidos-radius-sm: 10px;
+  --exibidos-radius-md: 16px;
+  --exibidos-radius-lg: 20px;
+  --exibidos-radius-xl: 24px;
+  --exibidos-radius-2xl: 28px;
+
+  /* Motion */
+  --exibidos-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --exibidos-duration-fast: 150ms;
+  --exibidos-duration-normal: 200ms;
+  --exibidos-duration-slow: 250ms;
+}
+
+/* ---------------------------------------------------------------------------
+   Base layer — dark theme default, typography, selection
+   --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-exibidos-bg text-exibidos-ink min-h-screen;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Joyful dark: never dull. High contrast text. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-exibidos-ink tracking-tight;
+  }
+
+  h1 {
+    @apply text-2xl sm:text-3xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  a {
+    @apply text-exibidos-purple hover:text-exibidos-cyan transition-colors duration-200;
+  }
+
+  /* Selection: accent instead of default blue */
+  ::selection {
+    background-color: rgba(168, 85, 247, 0.35);
+    color: var(--exibidos-ink);
+  }
+
+  /* Focus ring: visible and on-brand */
+  :focus-visible {
+    @apply outline-none ring-2 ring-exibidos-lime ring-offset-2 ring-offset-exibidos-bg;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Component utilities — reusable EXIBIDOS patterns
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* Glass card: chunky, rounded, layered */
+  .exibidos-card {
+    @apply rounded-exibidos-lg bg-exibidos-surface/90 backdrop-blur-xl border border-white/10 shadow-exibidos-card;
+  }
+
+  .exibidos-card-glow {
+    @apply exibidos-card shadow-exibidos-card-glow;
+  }
+
+  /* Pill button base (use variants for color) */
+  .exibidos-pill {
+    @apply rounded-full px-5 py-2.5 min-h-[44px] inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out;
+  }
+
+  /* Touchable: hover glow + scale */
+  .exibidos-touchable {
+    @apply transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98];
+  }
+}

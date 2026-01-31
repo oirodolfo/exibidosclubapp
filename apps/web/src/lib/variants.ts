@@ -1,19 +1,33 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
+/* ---------------------------------------------------------------------------
+   EXIBIDOS Design System — component variants
+   Bold, playful, neon-accented, pill-shaped, touchable.
+   --------------------------------------------------------------------------- */
+
+/** Primary CTA: lime or gradient. Secondary: glass/outline. Ghost: text only. */
 export const button = cva(
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-full font-semibold min-h-[44px] px-5 py-2.5 transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exibidos-lime focus-visible:ring-offset-2 focus-visible:ring-offset-exibidos-bg disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        primary: "bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:ring-neutral-900",
-        secondary: "border border-neutral-300 bg-white hover:bg-neutral-50 focus-visible:ring-neutral-400",
-        ghost: "hover:bg-neutral-100 focus-visible:ring-neutral-400",
-        danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
+        primary:
+          "bg-exibidos-lime text-exibidos-bg hover:shadow-exibidos-glow-lime hover:scale-[1.02] focus-visible:ring-exibidos-lime",
+        gradient:
+          "bg-exibidos-gradient-lime-cyan text-exibidos-bg hover:shadow-exibidos-glow-lime hover:scale-[1.02] focus-visible:ring-exibidos-lime",
+        secondary:
+          "bg-white/10 text-exibidos-ink border border-white/20 hover:bg-white/15 hover:border-white/30 focus-visible:ring-exibidos-purple",
+        ghost:
+          "text-exibidos-ink hover:bg-white/10 focus-visible:ring-exibidos-muted",
+        danger:
+          "bg-exibidos-magenta text-white hover:shadow-exibidos-glow-magenta hover:scale-[1.02] focus-visible:ring-exibidos-magenta",
+        purple:
+          "bg-exibidos-purple text-white hover:bg-exibidos-purple-dim hover:shadow-exibidos-glow-purple hover:scale-[1.02] focus-visible:ring-exibidos-purple",
       },
       size: {
-        sm: "h-8 px-3 text-sm",
-        md: "h-10 px-4 text-sm",
-        lg: "h-11 px-6 text-base",
+        sm: "h-9 min-h-[36px] px-4 text-sm",
+        md: "min-h-[44px] px-5 text-base",
+        lg: "min-h-[52px] px-6 text-lg",
       },
     },
     defaultVariants: {
@@ -25,13 +39,14 @@ export const button = cva(
 
 export type ButtonVariants = VariantProps<typeof button>;
 
+/** Dark glass input, rounded-md, neon focus ring */
 export const input = cva(
-  "flex w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50",
+  "flex w-full rounded-exibidos-md border bg-exibidos-surface px-4 py-3 text-exibidos-ink placeholder:text-exibidos-muted focus:outline-none focus:ring-2 focus:ring-exibidos-purple/50 focus:border-exibidos-purple disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
   {
     variants: {
       error: {
-        true: "border-red-500 focus:ring-red-500",
-        false: "",
+        true: "border-exibidos-magenta focus:ring-exibidos-magenta/50 focus:border-exibidos-magenta",
+        false: "border-white/15 hover:border-white/25",
       },
     },
     defaultVariants: {
@@ -42,71 +57,124 @@ export const input = cva(
 
 export type InputVariants = VariantProps<typeof input>;
 
-/** Card / panel for forms and content */
-export const card = cva("rounded-lg border border-neutral-200 bg-white", {
+/** Chunky, rounded, layered card. Glass or solid. */
+export const card = cva(
+  "rounded-exibidos-lg border border-white/10 shadow-exibidos-card transition-all duration-200",
+  {
+    variants: {
+      variant: {
+        default: "bg-exibidos-surface/95 backdrop-blur-xl",
+        glass: "bg-white/5 backdrop-blur-xl",
+        elevated: "bg-exibidos-elevated shadow-exibidos-card-glow",
+      },
+      padding: {
+        none: "p-0",
+        sm: "p-4",
+        md: "p-5",
+        lg: "p-6",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      padding: "md",
+    },
+  }
+);
+
+export type CardVariants = VariantProps<typeof card>;
+
+/** Playful, colorful chip — collectible feel */
+export const chip = cva(
+  "inline-flex items-center gap-1.5 rounded-exibidos-sm px-3 py-1.5 text-sm font-medium transition-all duration-200",
+  {
+    variants: {
+      variant: {
+        lime: "bg-exibidos-lime/20 text-exibidos-lime border border-exibidos-lime/30",
+        purple: "bg-exibidos-purple/20 text-exibidos-purple border border-exibidos-purple/30",
+        cyan: "bg-exibidos-cyan/20 text-exibidos-cyan border border-exibidos-cyan/30",
+        magenta: "bg-exibidos-magenta/20 text-exibidos-magenta border border-exibidos-magenta/30",
+        amber: "bg-exibidos-amber/20 text-exibidos-amber border border-exibidos-amber/30",
+        muted: "bg-white/10 text-exibidos-ink-soft border border-white/15",
+      },
+    },
+    defaultVariants: {
+      variant: "purple",
+    },
+  }
+);
+
+export type ChipVariants = VariantProps<typeof chip>;
+
+/** Avatar container: rounded-full, optional glow */
+export const avatar = cva("rounded-full object-cover flex-shrink-0", {
   variants: {
-    padding: {
+    size: {
+      sm: "w-8 h-8",
+      md: "w-10 h-10",
+      lg: "w-14 h-14",
+      xl: "w-20 h-20",
+    },
+    ring: {
       none: "",
-      sm: "p-4",
-      md: "p-6",
+      lime: "ring-2 ring-exibidos-lime/50 shadow-exibidos-glow-lime",
+      purple: "ring-2 ring-exibidos-purple/50 shadow-exibidos-glow-purple",
+      cyan: "ring-2 ring-exibidos-cyan/50 shadow-exibidos-glow-cyan",
     },
   },
   defaultVariants: {
-    padding: "md",
+    size: "md",
+    ring: "none",
   },
 });
 
-/** Page container: max-width, centered, horizontal padding */
+export type AvatarVariants = VariantProps<typeof avatar>;
+
+/* ---------------------------------------------------------------------------
+   Layout & page
+   --------------------------------------------------------------------------- */
 export const page = {
   narrow: "mx-auto max-w-[360px] px-4 py-8",
-  default: "mx-auto max-w-[480px] px-4 py-6",
+  default: "mx-auto max-w-[420px] px-4 py-6",
   mid: "mx-auto max-w-[560px] px-4 py-6",
   wide: "mx-auto max-w-[720px] px-4 py-6",
-  /** Private profile gate: 560px, extra top margin */
   private: "mx-auto max-w-[560px] my-8 px-4",
 } as const;
 
-/** Simple main block for loading/error states */
 export const mainBlock = "p-4";
 
-/** Form field wrapper */
 export const field = "mb-3";
-export const fieldLabel = "mb-1 block text-sm font-medium text-neutral-700";
-export const fieldHint = "mt-1 text-sm text-neutral-500";
-/** Block-level hint (e.g. before a group of options) */
-export const blockHint = "mt-3 text-sm text-neutral-500";
+export const fieldLabel = "mb-1 block text-sm font-semibold text-exibidos-ink-soft";
+export const fieldHint = "mt-1 text-sm text-exibidos-muted";
+export const blockHint = "mt-3 text-sm text-exibidos-muted";
 
-/** Fieldset and form layout */
 export const fieldset = "mb-4";
 export const checkboxLabel = "flex items-center gap-2 mb-2";
 export const checkboxLabelLast = "flex items-center gap-2";
 export const formRow = "flex gap-2 mb-2";
 export const closeFriendRow = "flex justify-between items-center py-1";
 
-/** List resets and list item variants */
 export const listReset = "list-none p-0 m-0";
-export const listItemBordered = "py-2 border-b border-neutral-200";
-export const listItemRow = "flex items-center justify-between py-3 border-b border-neutral-200";
+export const listItemBordered = "py-3 border-b border-white/10";
+export const listItemRow = "flex items-center justify-between py-3 border-b border-white/10";
 
-/** Badge grid and card */
-export const badgeList = "list-none p-0 m-0 flex flex-wrap gap-4";
-export const badgeCard = "py-3 px-4 bg-neutral-100 rounded-lg min-w-[140px]";
+export const badgeList = "list-none p-0 m-0 flex flex-wrap gap-3";
+export const badgeCard =
+  "py-3 px-4 bg-exibidos-surface rounded-exibidos-md border border-white/10 min-w-[140px]";
 
-/** Photo grid: auto-fill 140px min */
-export const photoGrid = "grid gap-4 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]";
+export const photoGrid =
+  "grid gap-4 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]";
 
-/** @handle secondary text */
-export const slugHandle = "text-neutral-500 ml-2";
+export const slugHandle = "text-exibidos-muted ml-2";
 
-/** Text utilities */
 export const text = {
-  muted: "text-neutral-500",
-  mute: "text-neutral-500 text-sm",
-  error: "text-red-600",
-  success: "text-green-600",
+  muted: "text-exibidos-muted",
+  mute: "text-exibidos-muted text-sm",
+  error: "text-exibidos-magenta",
+  success: "text-exibidos-lime",
 } as const;
 
-export const link = "text-neutral-600 underline underline-offset-2 hover:text-neutral-900";
+export const link =
+  "text-exibidos-purple underline underline-offset-2 hover:text-exibidos-cyan transition-colors duration-200";
 
 export const textarea =
-  "flex w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-0 disabled:opacity-50";
+  "flex w-full rounded-exibidos-md border border-white/15 bg-exibidos-surface px-4 py-3 text-exibidos-ink placeholder:text-exibidos-muted focus:outline-none focus:ring-2 focus:ring-exibidos-purple/50 focus:border-exibidos-purple disabled:opacity-50 transition-all duration-200";
