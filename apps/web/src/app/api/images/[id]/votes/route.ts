@@ -29,7 +29,7 @@ export async function POST(
   const image = await prisma.image.findUnique({ where: { id, deletedAt: null } });
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+  const tag = await prisma.tag.findUnique({ where: { id: tagId }, select: { id: true, categoryId: true } });
   if (!tag) return NextResponse.json({ error: "tag_not_found" }, { status: 404 });
 
   const prev = await prisma.vote.findUnique({
@@ -41,6 +41,22 @@ export async function POST(
       },
     },
   });
+
+  // One vote per user per category per image: remove other votes in same category for this user+image
+  const otherTagsInCategory = await prisma.tag.findMany({
+    where: { categoryId: tag.categoryId, id: { not: tagId } },
+    select: { id: true },
+  });
+  const otherTagIds = otherTagsInCategory.map((t) => t.id);
+  if (otherTagIds.length > 0) {
+    await prisma.vote.deleteMany({
+      where: {
+        userId: session.user.id,
+        imageId: id,
+        tagId: { in: otherTagIds },
+      },
+    });
+  }
 
   await prisma.vote.upsert({
     where: {
