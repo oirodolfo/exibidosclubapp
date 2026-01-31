@@ -60,6 +60,9 @@ importers:
       '@exibidos/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@exibidos/ml':
+        specifier: workspace:*
+        version: link:../../packages/ml
       '@fastify/cors':
         specifier: ^9.0.1
         version: 9.0.1

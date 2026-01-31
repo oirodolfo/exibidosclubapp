@@ -6,6 +6,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { prisma } from "@exibidos/db/client";
+import type { ImageMlMetadataData } from "@exibidos/ml";
 import { parseTransformSpec } from "./parser.js";
 import { runPipeline } from "./pipeline.js";
 import { fetchFromS3, isStorageConfigured } from "./storage.js";
@@ -39,7 +40,12 @@ async function main() {
 
     const image = await prisma.image.findFirst({
       where: { id: imageId, deletedAt: null },
-      select: { storageKey: true },
+      select: {
+        storageKey: true,
+        ...(parsed.spec.crop && {
+          imageMlMetadata: { select: { data: true } },
+        }),
+      },
     });
 
     if (!image?.storageKey) {
@@ -57,11 +63,17 @@ async function main() {
       return reply.status(502).send({ error: "upstream_fetch_failed" });
     }
 
+    const mlMetadata =
+      image.imageMlMetadata && typeof image.imageMlMetadata.data === "object"
+        ? (image.imageMlMetadata.data as unknown as ImageMlMetadataData)
+        : null;
+
     try {
       const result = await runPipeline({
         buffer,
         contentType,
         spec: parsed.spec,
+        mlMetadata: parsed.spec.crop ? mlMetadata : undefined,
       });
       return reply
         .header("Content-Type", result.contentType)

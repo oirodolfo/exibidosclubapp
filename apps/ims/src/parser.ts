@@ -8,6 +8,7 @@ import {
   BOUNDS,
   DEFAULTS,
   TRANSFORM_CONTRACT_VERSION,
+  type CropMode,
   type FitMode,
   type OutputFormat,
 } from "./contracts.js";
@@ -65,6 +66,16 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
   };
   const fmt = fmtMap[fmtRaw] ?? DEFAULTS.fmt;
 
+  const cropRaw = query.crop?.toLowerCase();
+  const cropMap: Record<string, CropMode> = {
+    face: "face",
+    body: "body",
+    interest: "interest",
+    explicit: "explicit",
+    center: "center",
+  };
+  const crop = cropRaw ? cropMap[cropRaw] : undefined;
+
   const spec: TransformSpec = {
     v,
     ...(w !== undefined && { w }),
@@ -72,6 +83,7 @@ export function parseTransformSpec(query: Record<string, string | undefined>): P
     fit,
     fmt,
     q,
+    ...(crop && { crop }),
   };
 
   return { ok: true, spec };

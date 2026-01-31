@@ -11,6 +11,9 @@ export type FitMode = "cover" | "contain" | "fill" | "inside";
 /** Output encoding */
 export type OutputFormat = "jpeg" | "webp";
 
+/** Crop mode: ML-aware or fallback. Product rules decide which mode to use. */
+export type CropMode = "face" | "body" | "interest" | "explicit" | "center";
+
 /** Parsed and validated transformation spec (never raw params in pipeline) */
 export interface TransformSpec {
   /** Contract version — bump when semantics change; old URLs keep working */
@@ -25,6 +28,8 @@ export interface TransformSpec {
   fmt: OutputFormat;
   /** Quality 1–100 (applied per format) */
   q: number;
+  /** Optional: intelligent crop mode; when set, crop step runs before resize */
+  crop?: CropMode;
 }
 
 /** Defaults for missing params (per version) */

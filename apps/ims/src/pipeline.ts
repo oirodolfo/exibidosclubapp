@@ -1,15 +1,19 @@
 /**
- * IMS pipeline: fetch → resize → optimize → encode.
+ * IMS pipeline: fetch → crop (optional) → resize → optimize → encode.
  * Order is fixed for deterministic output. Never serves original.
  */
 
+import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
 import type { TransformSpec } from "./contracts.js";
+import { computeCropRegion } from "./crop-engine.js";
 
 export interface PipelineInput {
   buffer: Buffer;
   contentType: string;
   spec: TransformSpec;
+  /** When spec.crop is set, ML metadata for intelligent crop; null = fallback to center */
+  mlMetadata?: ImageMlMetadataData | null;
 }
 
 export interface PipelineResult {
@@ -17,9 +21,9 @@ export interface PipelineResult {
   contentType: string;
 }
 
-/** Transformation order: 1) resize 2) optimize 3) encode. No crop/blur/watermark in Stage 1. */
+/** Transformation order: 1) crop (if spec.crop) 2) resize 3) encode. */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
-  const { buffer, spec } = input;
+  const { buffer, spec, mlMetadata } = input;
 
   let pipeline = sharp(buffer);
 
@@ -30,7 +34,33 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   const targetW = spec.w ?? width;
   const targetH = spec.h ?? height;
 
-  if (targetW > 0 && targetH > 0 && (targetW < width || targetH < height)) {
+  let wAfter = width;
+  let hAfter = height;
+
+  if (spec.crop && width > 0 && height > 0 && targetW > 0 && targetH > 0) {
+    const region = computeCropRegion(
+      spec.crop,
+      width,
+      height,
+      targetW,
+      targetH,
+      mlMetadata ?? null
+    );
+    const fallback = computeCropRegion("center", width, height, targetW, targetH, null);
+    const cropBox = region ?? fallback;
+    if (cropBox) {
+      pipeline = pipeline.extract({
+        left: cropBox.left,
+        top: cropBox.top,
+        width: cropBox.width,
+        height: cropBox.height,
+      });
+      wAfter = cropBox.width;
+      hAfter = cropBox.height;
+    }
+  }
+
+  if (targetW > 0 && targetH > 0 && (targetW < wAfter || targetH < hAfter)) {
     pipeline = pipeline.resize(targetW, targetH, {
       fit: spec.fit,
       withoutEnlargement: true,

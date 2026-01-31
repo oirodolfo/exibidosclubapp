@@ -40,7 +40,7 @@ Success responses use `Cache-Control: public, max-age=31536000, immutable` (URL 
 ## URL format
 
 ```
-GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1
+GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1&crop=face
 ```
 
 - `v` — Contract version (default 1). Bump when transform semantics change.
@@ -48,6 +48,7 @@ GET /i/:imageId?w=400&h=300&fit=inside&fmt=webp&q=85&v=1
 - `fit` — cover | contain | fill | inside.
 - `fmt` — jpeg | webp.
 - `q` — Quality 1–100.
+- `crop` — face | body | interest | explicit | center. ML-aware crop; fallback to center when confidence is low.
 
 ## Environment
 
