@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
+import { updateImageRankingScore } from "@/lib/rankings";
 
 /** Request body schema: imageId, direction (like|dislike|skip), optional categoryId when like. */
 const PostBody = z.object({
@@ -62,6 +63,10 @@ export async function POST(req: Request) {
       categoryId: direction === "like" ? categoryId ?? null : null,
     },
   });
+
+  if (direction === "like") {
+    updateImageRankingScore(imageId).catch(() => {});
+  }
 
   log.api.swipe.info("swipe: success", {
     imageId,

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
+import { updateImageRankingScore } from "@/lib/rankings";
 
 const PostBody = z.object({
   tagId: z.string().min(1),
@@ -69,6 +70,8 @@ export async function POST(
     create: { userId: session.user.id, imageId: id, tagId, weight },
     update: { weight },
   });
+
+  updateImageRankingScore(id).catch(() => {});
 
   await prisma.auditLog.create({
     data: {

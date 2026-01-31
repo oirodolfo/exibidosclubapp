@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       visibility: { in: ["public", "swipe_only"] },
       moderationStatus: { in: ["approved", "pending"] },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ rankingScore: "desc" }, { createdAt: "desc" }],
     take: limit + 1,
     ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     include: {

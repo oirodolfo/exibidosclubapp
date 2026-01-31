@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { updateImageRankingScore } from "@/lib/rankings";
 
 const PostBody = z.object({ body: z.string().min(1).max(2000) });
 
@@ -85,6 +86,8 @@ export async function POST(
       },
     },
   });
+
+  updateImageRankingScore(id).catch(() => {});
 
   return NextResponse.json({
     id: comment.id,
