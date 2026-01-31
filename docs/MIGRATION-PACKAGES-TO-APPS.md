@@ -38,12 +38,12 @@
 
 ## Ordem de execução
 
-1. Mover pacotes de `packages/` para `apps/` (mesmo nome de pacote `@exibidos/...`; pnpm resolve por nome).
-2. Remover pastas antigas em `packages/` (exceto config, db, ui).
-3. Rodar `pnpm install` para atualizar lockfile.
-4. Migrar **api** para NestJS (health, estrutura mínima).
-5. Migrar **ims** para NestJS (rotas `/i/:imageId`, pipeline, cache, storage).
-6. Ajustar root scripts e CI se necessário.
+1. ~~Mover pacotes de `packages/` para `apps/` (mesmo nome de pacote `@exibidos/...`; pnpm resolve por nome).~~ ✅
+2. ~~Remover pastas antigas em `packages/` (exceto config, db, ui).~~ ✅
+3. ~~Rodar `pnpm install` para atualizar lockfile.~~ ✅
+4. ~~Migrar **api** para NestJS (health, estrutura mínima).~~ ✅
+5. ~~Migrar **ims** para NestJS (rotas `/i/:imageId`, pipeline, cache, storage).~~ ✅
+6. Ajustar root scripts e CI se necessário (Dockerfiles, infra/ci.yml).
 
 ## Notas
 
