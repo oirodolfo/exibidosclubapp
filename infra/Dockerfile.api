@@ -6,14 +6,13 @@ WORKDIR /app
 FROM base AS deps
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
-COPY packages/db/package.json packages/config/package.json ./packages/
+COPY packages/config/package.json ./packages/config/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @exibidos/db exec prisma generate
 RUN pnpm --filter @exibidos/api build
 
 FROM base AS runner
@@ -22,7 +21,6 @@ COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/apps/api/package.json ./apps/api/
-COPY --from=builder /app/packages/db/node_modules/.prisma ./packages/db/node_modules/.prisma
-COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+COPY --from=builder /app/packages/config ./packages/config
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/main.js"]
