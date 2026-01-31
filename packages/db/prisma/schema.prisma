@@ -159,6 +159,8 @@ model Image {
   caption         String?  @db.Text
   duplicateOfId   String?  // if duplicate detected
   contentHash     String?  // SHA-256 for duplicate detection
+  mediaType       String?  @default("image") // image | video (for feed/future)
+  rankingScore    Float?   // cached for feed ordering (likes, votes, recency)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   deletedAt       DateTime?
@@ -182,6 +184,7 @@ model Image {
   @@index([deletedAt])
   @@index([duplicateOfId])
   @@index([userId, contentHash])
+  @@index([rankingScore(sort: Desc), createdAt(sort: Desc)])
 }
 
 // ---------------------------------------------------------------------------
