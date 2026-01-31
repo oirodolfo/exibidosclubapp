@@ -1,0 +1,24 @@
+# @exibidos/image-service — NestJS Image Manipulation Service
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.14.2 --activate
+WORKDIR /app
+
+FROM base AS builder
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @exibidos/db exec prisma generate
+RUN pnpm --filter @exibidos/image-service build
+
+FROM base AS runner
+ENV NODE_ENV=production
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/image-service/dist ./apps/image-service/dist
+COPY --from=builder /app/apps/image-service/package.json ./apps/image-service/package.json
+WORKDIR /app/apps/image-service
+EXPOSE 4001
+ENV PORT=4001
+CMD ["node", "dist/main.js"]

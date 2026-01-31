@@ -3,7 +3,8 @@
 # =============================================================================
 # Full stack (from repo root):
 #   docker compose -f infra/docker-compose.yml up -d
-#   # Web: http://localhost:3000  API: http://localhost:4000  IMS: http://localhost:4001
+#   # Web: 3000  API: 4000  IMS: 4001  image-service: 4002
+#   # ml-ingestion: 4010  ml-training-orchestrator: 4011  ml-model-registry: 4012  ml-observability: 4013
 # Infra only (apps on host): comment out migrate, web, api, ims and run pnpm dev:web etc.
 # =============================================================================
 
@@ -164,6 +165,84 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+
+  # NestJS Image Manipulation Service (replacement for IMS)
+  image-service:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.image-service
+    container_name: exibidos-image-service
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://exibidos:exibidos@postgres:5432/exibidos
+      S3_BUCKET: exibidos
+      S3_ACCESS_KEY: exibidos
+      S3_SECRET_KEY: exibidos
+      S3_REGION: us-east-1
+      S3_ENDPOINT: http://minio:9000
+      S3_FORCE_PATH_STYLE: "true"
+      PORT: "4002"
+    ports:
+      - "4002:4002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  # NestJS ML Ingestion (Label Studio + weak labels)
+  ml-ingestion:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.ml-ingestion
+    container_name: exibidos-ml-ingestion
+    environment:
+      NODE_ENV: production
+      PORT: "4010"
+      LABEL_STUDIO_URL: ${LABEL_STUDIO_URL:-}
+      LABEL_STUDIO_API_KEY: ${LABEL_STUDIO_API_KEY:-}
+    ports:
+      - "4010:4010"
+    depends_on: []
+
+  # NestJS ML Training Orchestrator
+  ml-training-orchestrator:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.ml-training-orchestrator
+    container_name: exibidos-ml-training-orchestrator
+    environment:
+      NODE_ENV: production
+      PORT: "4011"
+    ports:
+      - "4011:4011"
+    depends_on: []
+
+  # NestJS Model Registry
+  ml-model-registry:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.ml-model-registry
+    container_name: exibidos-ml-model-registry
+    environment:
+      NODE_ENV: production
+      PORT: "4012"
+    ports:
+      - "4012:4012"
+    depends_on: []
+
+  # NestJS ML Observability
+  ml-observability:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.ml-observability
+    container_name: exibidos-ml-observability
+    environment:
+      NODE_ENV: production
+      PORT: "4013"
+    ports:
+      - "4013:4013"
+    depends_on: []
 
 volumes:
   postgres_data:

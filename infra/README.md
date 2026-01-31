@@ -23,7 +23,12 @@ docker compose -f infra/docker-compose.yml up -d
 | **migrate**   | —      | Roda `prisma migrate deploy` (one-off) |
 | **web**       | 3000   | Next.js — http://localhost:3000 |
 | **api**       | 4000   | API Fastify — http://localhost:4000 |
-| **ims**       | 4001   | Image Manipulation Service — http://localhost:4001 |
+| **ims**       | 4001   | Image Manipulation Service (legacy) — http://localhost:4001 |
+| **image-service** | 4002 | NestJS Image Manipulation Service — http://localhost:4002 |
+| **ml-ingestion** | 4010 | NestJS Label Studio + weak label ingestion — http://localhost:4010 |
+| **ml-training-orchestrator** | 4011 | NestJS training orchestration — http://localhost:4011 |
+| **ml-model-registry** | 4012 | NestJS model registry — http://localhost:4012 |
+| **ml-observability** | 4013 | NestJS observability & drift — http://localhost:4013 |
 
 - **migrate** roda após Postgres ficar healthy e termina; **web** e **api** só sobem depois do migrate.
 - Variáveis de ambiente (DB, Redis, S3, SESSION_SECRET) estão definidas no compose; para produção, use um `.env` e `SESSION_SECRET` real.
@@ -101,7 +106,12 @@ Se quiser rodar **apenas a infraestrutura** em containers e as apps (web, api, i
 
 - **Dockerfile.web**: imagem do Next.js.
 - **Dockerfile.api**: imagem da API (Fastify).
-- **Dockerfile.ims**: imagem do IMS (Image Manipulation Service).
+- **Dockerfile.ims**: imagem do IMS (Image Manipulation Service, legacy).
+- **Dockerfile.image-service**: NestJS Image Manipulation Service.
+- **Dockerfile.ml-ingestion**: NestJS Label Studio + weak label ingestion.
+- **Dockerfile.ml-training-orchestrator**: NestJS training orchestration.
+- **Dockerfile.ml-model-registry**: NestJS model registry.
+- **Dockerfile.ml-observability**: NestJS observability & drift.
 - **Dockerfile.migrate**: one-off para `prisma migrate deploy`.
 
 Usados pelo `docker-compose` (full stack) ou para deploy; em dev local você pode rodar só a infra e as apps no host.

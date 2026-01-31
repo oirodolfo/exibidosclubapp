@@ -1,0 +1,23 @@
+# @exibidos/ml-ingestion — NestJS Label Studio + weak label ingestion
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.14.2 --activate
+WORKDIR /app
+
+FROM base AS builder
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @exibidos/ml-ingestion build
+
+FROM base AS runner
+ENV NODE_ENV=production
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/ml-ingestion/dist ./apps/ml-ingestion/dist
+COPY --from=builder /app/apps/ml-ingestion/package.json ./apps/ml-ingestion/package.json
+WORKDIR /app/apps/ml-ingestion
+EXPOSE 4010
+ENV PORT=4010
+CMD ["node", "dist/main.js"]
