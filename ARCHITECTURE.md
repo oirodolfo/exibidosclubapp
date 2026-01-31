@@ -148,6 +148,7 @@
 - `CDN_IMAGE_BASE` — if image URLs are rewritten to CDN.
 - `FEATURE_*` — overrides for feature flags (optional).
 - `FEATURE_LOGGER` — when `true`, enables debug logger with namespaced emojis (auth, api, storage, face, tags, votes). Default: off.
+- `FEATURE_ML_PIPELINE` — when `true`, enables ML metadata pipeline (face regions, /api/ml/process). Default: off.
 
 ### 8.5 Loading
 
