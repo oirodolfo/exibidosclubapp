@@ -5,6 +5,7 @@ import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
 import { updateImageRankingScore } from "@/lib/rankings";
+import { createNotification } from "@/lib/notifications";
 
 const PostBody = z.object({
   tagId: z.string().min(1),
@@ -59,7 +60,7 @@ export async function POST(
     });
   }
 
-  await prisma.vote.upsert({
+  const vote = await prisma.vote.upsert({
     where: {
       userId_imageId_tagId: {
         userId: session.user.id,
@@ -72,6 +73,18 @@ export async function POST(
   });
 
   updateImageRankingScore(id).catch(() => {});
+
+  const image = await prisma.image.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+  if (image) {
+    createNotification(image.userId, "category_vote", "Vote", vote.id, {
+      actorId: session.user.id,
+      imageId: id,
+      tagId,
+    }).catch(() => {});
+  }
 
   await prisma.auditLog.create({
     data: {

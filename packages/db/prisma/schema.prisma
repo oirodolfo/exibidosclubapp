@@ -51,6 +51,7 @@ model User {
   trackingEvents TrackingEvent[]
   comments      Comment[]
   categoryFollows CategoryFollow[]
+  notifications Notification[]
 
   @@index([email])
   @@index([deletedAt])
@@ -555,6 +556,27 @@ model TrackingEvent {
 
   @@index([name])
   @@index([userId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String
+  type       String    // category_vote | feed_like | feed_comment
+  entityType String?   // Vote | Swipe | Comment
+  entityId   String?
+  meta       Json?     // { actorId, imageId, slug, ... }
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
   @@index([createdAt])
 }
 

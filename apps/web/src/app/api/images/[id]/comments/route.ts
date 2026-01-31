@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { updateImageRankingScore } from "@/lib/rankings";
+import { createNotification } from "@/lib/notifications";
 
 const PostBody = z.object({ body: z.string().min(1).max(2000) });
 
@@ -88,6 +89,17 @@ export async function POST(
   });
 
   updateImageRankingScore(id).catch(() => {});
+
+  const image = await prisma.image.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+  if (image) {
+    createNotification(image.userId, "feed_comment", "Comment", comment.id, {
+      actorId: session.user.id,
+      imageId: id,
+    }).catch(() => {});
+  }
 
   return NextResponse.json({
     id: comment.id,
