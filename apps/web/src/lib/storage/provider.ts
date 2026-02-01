@@ -1,6 +1,7 @@
 /**
  * Unified storage: S3 or local filesystem (fallback for local testing).
  * Use upload() and getSignedDownloadUrl() so callers don't depend on provider.
+ * When S3 is configured we try S3 first; on failure we fall back to local if enabled.
  */
 
 import {
@@ -13,13 +14,14 @@ import {
   isLocalStorageEnabled,
   uploadToLocal,
 } from "./local";
+import { log } from "@/lib/logger";
 
 /** True when S3 is configured or local fallback is enabled (e.g. development without S3). */
 export function isStorageConfigured(): boolean {
   return isS3Configured() || isLocalStorageEnabled();
 }
 
-/** Current provider: S3 or local. Call isStorageConfigured() before relying on storage. */
+/** Current provider: S3 or local. Prefers S3 when configured; otherwise local when enabled. */
 export function getStorageProvider(): "s3" | "local" {
   if (isS3Configured()) return "s3";
 
@@ -28,14 +30,24 @@ export function getStorageProvider(): "s3" | "local" {
   return "s3";
 }
 
-/** Upload by key; uses S3 or local according to getStorageProvider(). */
+/** Upload by key; uses S3 or local. Tries S3 first when configured; on failure falls back to local if enabled. */
 export async function upload(
   key: string,
   body: Buffer | Uint8Array,
   contentType: string
 ): Promise<void> {
   if (getStorageProvider() === "s3") {
-    return uploadToS3(key, body, contentType);
+    try {
+      return await uploadToS3(key, body, contentType);
+    } catch (err) {
+      if (isLocalStorageEnabled()) {
+        log.storage.warn("upload: S3 failed, falling back to local", { key, error: err });
+
+        return uploadToLocal(key, body, contentType);
+      }
+
+      throw err;
+    }
   }
 
   return uploadToLocal(key, body, contentType);

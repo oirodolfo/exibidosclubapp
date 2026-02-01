@@ -35,6 +35,12 @@ export default async function Home() {
                 >
                   Feed
                 </Link>
+                <Link
+                  href="/upload"
+                  className={cn(button({ variant: "secondary", size: "md" }))}
+                >
+                  Upload
+                </Link>
                 {process.env.FEATURE_SWIPE === "true" && (
                   <Link
                     href="/swipe"

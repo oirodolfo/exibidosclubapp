@@ -1,6 +1,6 @@
 /**
  * Auth configuration: NextAuth with credentials + OAuth (Google, Twitter).
- * Session: DB-backed, 30d max. OAuth users without slug → /auth/complete-signup.
+ * Session: JWT (required for credentials); 30d max. OAuth users without slug → /auth/complete-signup.
  */
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -18,7 +18,8 @@ const hasTwitter = Boolean(process.env.TWITTER_CLIENT_ID?.trim() && process.env.
 
 export const authOptions: NextAuthOptions = {
     adapter: ExibidosPrismaAdapter(),
-    session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
+    secret: process.env.NEXTAUTH_SECRET || process.env.SESSION_SECRET,
+    session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
     pages: {
       signIn: "/auth/login",
       error: "/auth/error",
@@ -80,6 +81,27 @@ export const authOptions: NextAuthOptions = {
         : []),
     ],
     callbacks: {
+      async jwt({ token, user }) {
+        if (user) {
+          token.id = user.id;
+          token.email = user.email ?? undefined;
+          token.name = user.name ?? undefined;
+          token.picture = user.image ?? undefined;
+        }
+
+        return token;
+      },
+      async session({ session, token }) {
+        if (session.user) {
+          session.user.id = token.sub!;
+          if (token.id) session.user.id = token.id as string;
+          session.user.email = token.email ?? null;
+          session.user.name = token.name ?? null;
+          session.user.image = token.picture ?? null;
+        }
+
+        return session;
+      },
       async signIn({ user, account }) {
         if (account?.provider === "credentials") return true;
         log.auth.debug("signIn: OAuth", { provider: account?.provider, userId: user.id });
