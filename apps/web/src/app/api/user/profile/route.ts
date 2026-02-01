@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
+import { getSignedDownloadUrl, isStorageConfigured } from "@/lib/storage";
 
 const PatchBody = z.object({
   displayName: z.string().min(0).max(100).optional(),
@@ -28,6 +29,7 @@ const profileSelect = {
   badgesPublic: true,
   acceptFollowRequestsAlways: true,
   acceptMessageRequestsAlways: true,
+  avatarKey: true,
 } as const;
 
 export async function GET() {
@@ -42,7 +44,20 @@ export async function GET() {
 
   if (!profile) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  return NextResponse.json(profile);
+  let avatarUrl: string | null = null;
+
+  if (profile.avatarKey && isStorageConfigured()) {
+    try {
+      avatarUrl = await getSignedDownloadUrl(profile.avatarKey, 3600);
+    } catch {
+      // ignore
+    }
+  }
+
+  return NextResponse.json({
+    ...profile,
+    avatarUrl,
+  });
 }
 
 export async function PATCH(req: Request) {

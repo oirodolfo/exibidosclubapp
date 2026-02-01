@@ -21,6 +21,7 @@ import {
   text,
   textarea,
 } from "@/lib/variants";
+import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
 
 type Profile = {
   displayName: string | null;
@@ -33,6 +34,7 @@ type Profile = {
   badgesPublic: boolean;
   acceptFollowRequestsAlways: boolean;
   acceptMessageRequestsAlways: boolean;
+  avatarUrl?: string | null;
 };
 
 export default function SettingsPage() {
@@ -143,6 +145,21 @@ export default function SettingsPage() {
       </p>
       {error && <p className={text.error}>{error}</p>}
       {success && <p className={text.success}>Saved.</p>}
+
+      <fieldset className={fieldset}>
+        <legend>Profile photo</legend>
+        <ProfilePhotoEditor
+          avatarUrl={profile.avatarUrl ?? null}
+          displayName={profile.displayName ?? null}
+          onSuccess={async () => {
+            const res = await fetch("/api/user/profile");
+            if (res.ok) {
+              const p = (await res.json()) as Profile;
+              setProfile(p);
+            }
+          }}
+        />
+      </fieldset>
 
       <form onSubmit={onSubmit}>
         <fieldset className={fieldset}>

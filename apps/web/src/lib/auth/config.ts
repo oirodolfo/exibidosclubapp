@@ -9,6 +9,7 @@ import TwitterProvider from "next-auth/providers/twitter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@exibidos/db/client";
 import { ExibidosPrismaAdapter } from "./adapter";
+import { getSignedDownloadUrl, isStorageConfigured } from "@/lib/storage";
 import { log } from "@/lib/logger";
 
 const AGE_GATE_MIN_YEARS = 18;
@@ -98,6 +99,23 @@ export const authOptions: NextAuthOptions = {
           session.user.email = token.email ?? null;
           session.user.name = token.name ?? null;
           session.user.image = token.picture ?? null;
+
+          const userId = session.user.id;
+          const profile = await prisma.profile.findUnique({
+            where: { userId },
+            select: { avatarKey: true },
+          });
+
+          if (profile?.avatarKey && isStorageConfigured()) {
+            try {
+              session.user.image = await getSignedDownloadUrl(
+                profile.avatarKey,
+                3600
+              );
+            } catch {
+              // keep existing token.picture
+            }
+          }
         }
 
         return session;

@@ -53,7 +53,8 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
             alt={alt}
             width={px}
             height={px}
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full rounded-full"
+            unoptimized
             {...imgProps}
           />
         ) : (
