@@ -26,7 +26,7 @@ export function VerticalFeedClient() {
 
   useEffect(() => {
     loadMoreIfNeeded();
-  }, [currentIndexRef.current, allItems.length, loadMoreIfNeeded]);
+  }, [allItems.length, loadMoreIfNeeded]);
 
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;

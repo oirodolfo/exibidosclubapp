@@ -18,6 +18,13 @@ module.exports = {
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-require-imports": "off",
+        "padding-line-between-statements": [
+          "error",
+          { blankLine: "always", prev: "*", next: "return" },
+          { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+          { blankLine: "any", prev: ["const", "let", "var"], next: ["const", "let", "var"] },
+          { blankLine: "always", prev: "*", next: ["if", "switch", "for", "while", "try", "throw"] },
+        ],
       },
     },
   ],

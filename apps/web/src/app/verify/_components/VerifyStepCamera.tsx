@@ -48,8 +48,11 @@ export function VerifyStepCamera({
   }, []);
 
   useEffect(() => {
-    startCamera();
+    const id = setTimeout(() => {
+      startCamera();
+    }, 0);
     return () => {
+      clearTimeout(id);
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     };

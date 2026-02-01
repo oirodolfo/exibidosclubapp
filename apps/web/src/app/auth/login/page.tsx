@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { signIn, getProviders } from "next-auth/react";
-import type { ClientSafeProvider } from "next-auth/react/types";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { page, field, fieldLabel, text, link as linkCls } from "@/lib/variants";
@@ -14,7 +13,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [oauthProviders, setOauthProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
+  const [oauthProviders, setOauthProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const params = useSearchParams();
   const registered = params.get("registered") === "1";
   const callbackUrl = params.get("callbackUrl") ?? "/";
@@ -22,7 +21,7 @@ function LoginForm() {
   useEffect(() => {
     getProviders().then((providers) => {
       if (!providers) return;
-      const { credentials: _c, ...rest } = providers;
+      const rest = Object.fromEntries(Object.entries(providers).filter(([k]) => k !== "credentials"));
       if (Object.keys(rest).length > 0) setOauthProviders(rest);
     });
   }, []);
