@@ -49,6 +49,8 @@ model User {
   featureFlagOverrides FeatureFlagOverride[]
   moderationReportsCreated ModerationReport[] @relation("ReportCreatedBy")
   trackingEvents TrackingEvent[]
+  comments Comment[]
+  reactions Reaction[]
 
   @@index([email])
   @@index([deletedAt])
@@ -172,6 +174,8 @@ model Image {
   imageTags      ImageTag[]
   votes       Vote[]
   swipes      Swipe[]
+  comments    Comment[]
+  reactions   Reaction[]
   rankingSnapshots RankingSnapshot[]
   moderationReports ModerationReport[]
 
@@ -182,6 +186,41 @@ model Image {
   @@index([deletedAt])
   @@index([duplicateOfId])
   @@index([userId, contentHash])
+}
+
+// ---------------------------------------------------------------------------
+// Comments & Reactions (Facebook/Instagram style)
+// ---------------------------------------------------------------------------
+
+model Comment {
+  id        String    @id @default(cuid())
+  imageId   String
+  userId    String
+  body      String    @db.Text
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  imageId   String
+  userId    String
+  type      String   // like | love | haha | wow | sad | angry
+  createdAt DateTime @default(now())
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, imageId])
+  @@index([imageId])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
