@@ -7,7 +7,6 @@ import { cn } from "@/lib/cn";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-
   return (
     <main className={page.default}>
       <div className="flex flex-col gap-8 pt-12">
@@ -34,12 +33,6 @@ export default async function Home() {
                   className={cn(button({ variant: "primary", size: "md" }))}
                 >
                   Feed
-                </Link>
-                <Link
-                  href="/upload"
-                  className={cn(button({ variant: "secondary", size: "md" }))}
-                >
-                  Upload
                 </Link>
                 {process.env.FEATURE_SWIPE === "true" && (
                   <Link

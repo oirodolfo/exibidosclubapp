@@ -4,6 +4,9 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 import { log } from "@/lib/logger";
+import { updateImageRankingScore } from "@/lib/rankings";
+import { createNotification } from "@/lib/notifications";
+import { awardXp } from "@/lib/xp";
 
 /** Request body schema: imageId, direction (like|dislike|skip), optional categoryId when like. */
 const PostBody = z.object({
@@ -61,7 +64,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "already_swiped" }, { status: 409 });
   }
 
-  await prisma.swipe.create({
+  const swipe = await prisma.swipe.create({
     data: {
       userId: session.user.id,
       imageId,
@@ -69,6 +72,15 @@ export async function POST(req: Request) {
       categoryId: direction === "like" ? categoryId ?? null : null,
     },
   });
+
+  if (direction === "like") {
+    updateImageRankingScore(imageId).catch(() => {});
+    createNotification(image.userId, "feed_like", "Swipe", swipe.id, {
+      actorId: session.user.id,
+      imageId,
+    }).catch(() => {});
+    awardXp(session.user.id, 5).catch(() => {});
+  }
 
   log.api.swipe.info("swipe: success", {
     imageId,

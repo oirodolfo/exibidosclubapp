@@ -19,7 +19,6 @@ export default async function ImageDetailPage({
     where: { slug, user: { deletedAt: null } },
     include: { user: { include: { profile: true } } },
   });
-
   if (!slugRow?.user) notFound();
 
   const user = slugRow.user;
@@ -28,13 +27,11 @@ export default async function ImageDetailPage({
   const isOwner = !!session?.user?.id && session.user.id === user.id;
 
   let isFollower = false;
-
   if (session?.user?.id && !isOwner) {
     const f = await prisma.follow.findUnique({
       where: { fromId_toId: { fromId: session.user.id, toId: user.id } },
       select: { status: true },
     });
-
     isFollower = f?.status === "accepted";
   }
 
@@ -46,7 +43,6 @@ export default async function ImageDetailPage({
     badgesPublic: true,
   };
   const photosVisible = isOwner || p.photosPublic;
-
   if (!photosVisible && (profile?.isPrivate ?? false) && !isFollower) notFound();
 
   const image = await prisma.image.findFirst({
@@ -55,11 +51,9 @@ export default async function ImageDetailPage({
       imageTags: { include: { tag: { include: { category: true } } } },
     },
   });
-
   if (!image) notFound();
 
   let thumbUrl: string | null = null;
-
   if (isStorageConfigured() && image.thumbKey) {
     try {
       thumbUrl = await getSignedDownloadUrl(image.thumbKey, 3600);
@@ -101,7 +95,7 @@ export default async function ImageDetailPage({
         <div className="flex-shrink-0">
           <div className="aspect-square max-w-md rounded-lg overflow-hidden bg-neutral-200 relative">
             {thumbUrl ? (
-              <Image src={thumbUrl} alt={image.caption ?? "Photo"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 28rem" unoptimized />
+              <Image src={thumbUrl} alt={image.caption ?? "Photo"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 28rem" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>
             )}

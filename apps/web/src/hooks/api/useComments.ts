@@ -1,38 +1,36 @@
-/**
- * Comments for an image (vertical feed).
- */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export type CommentItem = {
   id: string;
   body: string;
   createdAt: string;
-  user: { id: string; name: string | null; slug: string | null };
+  user: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    slug: string | null;
+  };
 };
 
 async function fetchComments(imageId: string): Promise<{ comments: CommentItem[] }> {
   const res = await fetch(`/api/images/${imageId}/comments`);
-
   if (!res.ok) {
     const d = (await res.json().catch(() => ({}))) as { error?: string };
-
     throw new Error(d.error ?? "Failed to load comments");
   }
-
   return res.json();
 }
 
-export function useComments(imageId: string) {
+export function useComments(imageId: string | null) {
   return useQuery({
     queryKey: ["comments", imageId],
-    queryFn: () => fetchComments(imageId),
+    queryFn: () => fetchComments(imageId!),
     enabled: !!imageId,
   });
 }
 
-export function useAddComment(imageId: string) {
+export function useAddComment(imageId: string | null) {
   const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async (body: string) => {
       const res = await fetch(`/api/images/${imageId}/comments`, {
@@ -40,15 +38,14 @@ export function useAddComment(imageId: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ body }),
       });
-
       if (!res.ok) {
         const d = (await res.json().catch(() => ({}))) as { error?: string };
-
-        throw new Error(d.error ?? "Failed to post comment");
+        throw new Error(d.error ?? "Failed to add comment");
       }
-
       return res.json() as Promise<CommentItem>;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["comments", imageId] }),
+    onSuccess: (_, __, context) => {
+      if (imageId) qc.invalidateQueries({ queryKey: ["comments", imageId] });
+    },
   });
 }

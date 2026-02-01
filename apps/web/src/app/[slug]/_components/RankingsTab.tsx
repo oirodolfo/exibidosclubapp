@@ -13,11 +13,8 @@ export function RankingsTab({ rankingsEnabled = true }: Props) {
   const { data: rankings, isLoading, error } = useRankings(period);
 
   if (!rankingsEnabled) return <p className="text-neutral-500">Rankings are disabled.</p>;
-
   if (error) return <p className="text-red-600">{error.message}</p>;
-
   if (isLoading) return <p className="text-neutral-500">Loading rankings…</p>;
-
   if (!rankings?.length) {
     return <p className="text-neutral-500">No rankings yet. Like images in Swipe to build them!</p>;
   }
@@ -42,7 +39,7 @@ export function RankingsTab({ rankingsEnabled = true }: Props) {
             <span className="font-bold text-lg w-8">#{r.rank}</span>
             <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-neutral-200 relative">
               {r.thumbUrl ? (
-                <Image src={r.thumbUrl} alt="" fill className="object-cover" sizes="3rem" unoptimized />
+                <Image src={r.thumbUrl} alt="" fill className="object-cover" sizes="3rem" />
               ) : (
                 <span className="text-xs text-neutral-400 flex items-center justify-center h-full">
                   —

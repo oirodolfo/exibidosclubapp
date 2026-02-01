@@ -13,16 +13,13 @@ const HUMANPROOF_BASE =
  */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const base = HUMANPROOF_BASE.replace(/\/$/, "");
   const url = `${base}/verification/upload`;
-
   try {
     const contentType = req.headers.get("Content-Type") ?? "";
-
     if (!contentType.includes("multipart/form-data")) {
       return NextResponse.json(
         {
@@ -42,14 +39,12 @@ export async function POST(req: Request) {
       duplex: "half",
     } as RequestInit);
     const data = await res.json().catch(() => ({}));
-
     if (!res.ok) {
       return NextResponse.json(
         data as { statusCode?: number; error?: string; message?: string },
         { status: res.status }
       );
     }
-
     return NextResponse.json(data as { accepted: boolean; failureReasons: string[] });
   } catch (e) {
     return NextResponse.json(

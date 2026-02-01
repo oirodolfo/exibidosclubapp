@@ -35,7 +35,6 @@ export function SwipeFeed() {
   };
 
   if (isLoading) return <p className="text-neutral-500 py-8">Loading...</p>;
-
   if (error)
     return (
       <p className="text-red-600 py-4">
@@ -45,7 +44,6 @@ export function SwipeFeed() {
         </button>
       </p>
     );
-
   if (allItems.length === 0)
     return (
       <div className="py-12 text-center">
@@ -80,7 +78,6 @@ export function SwipeFeed() {
             fill
             className="object-cover"
             sizes="400px"
-            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>

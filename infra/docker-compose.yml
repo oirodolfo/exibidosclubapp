@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: exibidos
       POSTGRES_DB: exibidos
     ports:
-      - "5433:5432"   # host 5433 to avoid conflict with local Postgres on 5432
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -77,7 +77,7 @@ services:
   # One-off: run Prisma migrations (web/api depend on this)
   migrate:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.migrate
     container_name: exibidos-migrate
     environment:
@@ -89,7 +89,7 @@ services:
 
   web:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.web
     container_name: exibidos-web
     environment:
@@ -125,7 +125,7 @@ services:
 
   api:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.api
     container_name: exibidos-api
     environment:
@@ -145,7 +145,7 @@ services:
 
   ims:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ims
     container_name: exibidos-ims
     environment:
@@ -169,7 +169,7 @@ services:
   # NestJS Image Manipulation Service (replacement for IMS)
   image-service:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.image-service
     container_name: exibidos-image-service
     environment:
@@ -193,7 +193,7 @@ services:
   # NestJS ML Ingestion (Label Studio + weak labels)
   ml-ingestion:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ml-ingestion
     container_name: exibidos-ml-ingestion
     environment:
@@ -208,7 +208,7 @@ services:
   # NestJS ML Training Orchestrator
   ml-training-orchestrator:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ml-training-orchestrator
     container_name: exibidos-ml-training-orchestrator
     environment:
@@ -221,7 +221,7 @@ services:
   # NestJS Model Registry
   ml-model-registry:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ml-model-registry
     container_name: exibidos-ml-model-registry
     environment:
@@ -234,7 +234,7 @@ services:
   # NestJS ML Observability
   ml-observability:
     build:
-      context: ..
+      context: .
       dockerfile: infra/Dockerfile.ml-observability
     container_name: exibidos-ml-observability
     environment:

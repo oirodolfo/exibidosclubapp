@@ -1,14 +1,5 @@
 export { useSwipeFeed, useSwipeMutation } from "./useSwipeFeed";
 export { useComments, useAddComment } from "./useComments";
-export {
-  useReactions,
-  useSetReaction,
-  useRemoveReaction,
-  REACTION_EMOJIS,
-  REACTION_TYPES,
-  type ReactionType,
-  type ReactionsData,
-} from "./useReactions";
 export { useCategories } from "./useCategories";
 export {
   useImageTags,

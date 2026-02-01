@@ -75,8 +75,8 @@ Production monorepo for **exibidos.club**. Single Git repository, multiple apps 
 
 1. `pnpm install`
 2. `docker compose -f infra/docker-compose.yml up -d` (Postgres, Redis, MinIO)
-3. `cp env.example .env` and set `DATABASE_URL`, etc. (root `.env` is loaded by db scripts.)
-4. `pnpm --filter @exibidos/db run db:migrate` (when schema exists)
+3. `cp .env.example .env` and set `DATABASE_URL`, etc.
+4. `pnpm --filter @exibidos/db exec prisma migrate dev` (when schema exists)
 5. `pnpm dev` or `pnpm dev:web` and `pnpm dev:api`
 
 ---

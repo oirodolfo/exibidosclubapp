@@ -24,6 +24,8 @@ model User {
   image         String?   // Auth.js / OAuth; URL or avatar key
   birthdate     DateTime  // age-gate
   role          String    @default("user") // user | creator | admin | moderator
+  xp            Int       @default(0)   // gamification
+  level         Int       @default(1)   // derived from xp
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime? // soft delete
@@ -49,8 +51,9 @@ model User {
   featureFlagOverrides FeatureFlagOverride[]
   moderationReportsCreated ModerationReport[] @relation("ReportCreatedBy")
   trackingEvents TrackingEvent[]
-  comments Comment[]
-  reactions Reaction[]
+  comments      Comment[]
+  categoryFollows CategoryFollow[]
+  notifications Notification[]
 
   @@index([email])
   @@index([deletedAt])
@@ -161,6 +164,8 @@ model Image {
   caption         String?  @db.Text
   duplicateOfId   String?  // if duplicate detected
   contentHash     String?  // SHA-256 for duplicate detection
+  mediaType       String?  @default("image") // image | video (for feed/future)
+  rankingScore    Float?   // cached for feed ordering (likes, votes, recency)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   deletedAt       DateTime?
@@ -174,8 +179,7 @@ model Image {
   imageTags      ImageTag[]
   votes       Vote[]
   swipes      Swipe[]
-  comments    Comment[]
-  reactions   Reaction[]
+  comments   Comment[]
   rankingSnapshots RankingSnapshot[]
   moderationReports ModerationReport[]
 
@@ -186,41 +190,7 @@ model Image {
   @@index([deletedAt])
   @@index([duplicateOfId])
   @@index([userId, contentHash])
-}
-
-// ---------------------------------------------------------------------------
-// Comments & Reactions (Facebook/Instagram style)
-// ---------------------------------------------------------------------------
-
-model Comment {
-  id        String    @id @default(cuid())
-  imageId   String
-  userId    String
-  body      String    @db.Text
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-
-  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([imageId])
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model Reaction {
-  id        String   @id @default(cuid())
-  imageId   String
-  userId    String
-  type      String   // like | love | haha | wow | sad | angry
-  createdAt DateTime @default(now())
-
-  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, imageId])
-  @@index([imageId])
-  @@index([userId])
+  @@index([rankingScore(sort: Desc), createdAt(sort: Desc)])
 }
 
 // ---------------------------------------------------------------------------
@@ -242,10 +212,25 @@ model Category {
   tags     Tag[]
   swipes   Swipe[]    // category chosen after like
   groups   Group[]
+  categoryFollows CategoryFollow[]
   rankingSnapshots RankingSnapshot[]
 
   @@index([parentId])
   @@index([slug])
+}
+
+model CategoryFollow {
+  id         String   @id @default(cuid())
+  userId     String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId])
+  @@index([userId])
+  @@index([categoryId])
 }
 
 model Tag {
@@ -278,6 +263,26 @@ model ImageTag {
   @@unique([imageId, tagId])
   @@index([imageId])
   @@index([tagId])
+}
+
+// ---------------------------------------------------------------------------
+// Comments (on images / feed items)
+// ---------------------------------------------------------------------------
+
+model Comment {
+  id        String   @id @default(cuid())
+  imageId   String
+  userId    String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // ---------------------------------------------------------------------------
@@ -553,6 +558,27 @@ model TrackingEvent {
 
   @@index([name])
   @@index([userId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String
+  type       String    // category_vote | feed_like | feed_comment
+  entityType String?   // Vote | Swipe | Comment
+  entityId   String?
+  meta       Json?     // { actorId, imageId, slug, ... }
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
   @@index([createdAt])
 }
 
