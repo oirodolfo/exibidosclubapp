@@ -4,9 +4,8 @@ import { z } from "zod";
 import { prisma } from "@exibidos/db/client";
 import { authOptions } from "@/lib/auth/config";
 
-/** Facebook/Instagram-style reaction types (emoji keys). */
-export const REACTION_TYPES = ["like", "love", "haha", "wow", "sad", "angry"] as const;
-export type ReactionType = (typeof REACTION_TYPES)[number];
+/** Allowed reaction types (must match hooks/api/useReactions). */
+const REACTION_TYPES = ["like", "love", "haha", "wow", "sad", "angry"] as const;
 
 const PostBody = z.object({
   type: z.enum(REACTION_TYPES as unknown as [string, ...string[]]),
@@ -45,7 +44,7 @@ export async function GET(
   const byType: Record<string, number> = {};
   for (const t of REACTION_TYPES) byType[t] = 0;
   for (const row of counts) byType[row.type] = row._count;
-  const total = counts.reduce((s, r) => s + r._count, 0);
+  const total = counts.reduce((s: number, r: { _count: number }) => s + r._count, 0);
 
   return NextResponse.json({
     byType,
