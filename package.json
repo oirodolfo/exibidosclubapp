@@ -5,6 +5,7 @@
   "description": "exibidos.club — Production monorepo",
   "scripts": {
     "build": "pnpm -r run build",
+    "predev": "pnpm --filter @exibidos/ml --filter @exibidos/taxonomy run build",
     "dev": "pnpm -r --parallel --if-present run dev",
     "dev:web": "pnpm --filter @exibidos/web dev",
     "dev:api": "pnpm --filter @exibidos/api dev",
