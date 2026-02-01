@@ -13,6 +13,9 @@ import { log } from "@/lib/logger";
 
 const AGE_GATE_MIN_YEARS = 18;
 
+const hasGoogle = Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
+const hasTwitter = Boolean(process.env.TWITTER_CLIENT_ID?.trim() && process.env.TWITTER_CLIENT_SECRET?.trim());
+
 export const authOptions: NextAuthOptions = {
     adapter: ExibidosPrismaAdapter(),
     session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
@@ -50,15 +53,23 @@ export const authOptions: NextAuthOptions = {
           return { id: user.id, email: user.email, name: user.name, image: user.image };
         },
       }),
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      }),
-      TwitterProvider({
-        clientId: process.env.TWITTER_CLIENT_ID ?? "",
-        clientSecret: process.env.TWITTER_CLIENT_SECRET ?? "",
-        version: "2.0",
-      }),
+      ...(hasGoogle
+        ? [
+            GoogleProvider({
+              clientId: process.env.GOOGLE_CLIENT_ID!,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            }),
+          ]
+        : []),
+      ...(hasTwitter
+        ? [
+            TwitterProvider({
+              clientId: process.env.TWITTER_CLIENT_ID!,
+              clientSecret: process.env.TWITTER_CLIENT_SECRET!,
+              version: "2.0",
+            }),
+          ]
+        : []),
     ],
     callbacks: {
       async signIn({ user, account }) {
