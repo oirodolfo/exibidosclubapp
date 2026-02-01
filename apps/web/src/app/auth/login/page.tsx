@@ -22,6 +22,7 @@ function LoginForm() {
     getProviders().then((providers) => {
       if (!providers) return;
       const rest = Object.fromEntries(Object.entries(providers).filter(([k]) => k !== "credentials"));
+
       if (Object.keys(rest).length > 0) setOauthProviders(rest);
     });
   }, []);
@@ -31,19 +32,26 @@ function LoginForm() {
     setError(null);
     setLoading(true);
     const res = await signIn("credentials", { email, password, redirect: false, callbackUrl });
+
     setLoading(false);
+
     if (res?.error) {
       setError("Invalid email or password.");
+
       return;
     }
+
     if (res?.ok && res?.url) {
       window.location.href = res.url;
+
       return;
     }
   }
 
   const socialLinks: { id: string; label: string }[] = [];
+
   if (oauthProviders?.google) socialLinks.push({ id: "google", label: "Google" });
+
   if (oauthProviders?.twitter) socialLinks.push({ id: "twitter", label: "Twitter/X" });
 
   return (

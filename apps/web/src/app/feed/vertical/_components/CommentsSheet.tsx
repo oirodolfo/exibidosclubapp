@@ -17,6 +17,7 @@ export function CommentsSheet({ imageId, onClose }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = body.trim();
+
     if (!trimmed || addComment.isPending) return;
     addComment.mutate(trimmed, {
       onSuccess: () => setBody(""),

@@ -13,6 +13,8 @@ export async function GET(
     where: { slug },
     include: { tags: { orderBy: { name: "asc" } } },
   });
+
   if (!category) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
   return NextResponse.json({ category, tags: category.tags });
 }

@@ -13,12 +13,14 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const key = searchParams.get("key");
+
   if (!key || key.includes("..")) {
     return NextResponse.json({ error: "invalid_key" }, { status: 400 });
   }
 
   try {
     const { buffer, contentType } = readFromLocal(key);
+
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": contentType,

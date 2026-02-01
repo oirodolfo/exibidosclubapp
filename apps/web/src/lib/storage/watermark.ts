@@ -26,6 +26,7 @@ function createWatermarkSvg(): Buffer {
   >${WATERMARK_TEXT}</text>
 </svg>
   `.trim();
+
   return Buffer.from(svg);
 }
 
@@ -42,6 +43,7 @@ export async function applyWatermark(
   const svg = createWatermarkSvg();
   const left = Math.max(0, width - SVG_WIDTH - PADDING);
   const top = Math.max(0, height - SVG_HEIGHT - PADDING);
+
   return sharp(input)
     .composite([{ input: svg, left, top }])
     .jpeg({ quality })

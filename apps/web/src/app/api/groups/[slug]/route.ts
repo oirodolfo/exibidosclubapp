@@ -19,6 +19,7 @@ export async function GET(
       members: { include: { user: { select: { id: true, name: true }, include: { slugs: { select: { slug: true }, take: 1 } } } } },
     },
   });
+
   if (!group) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   return NextResponse.json({
@@ -41,20 +42,24 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_GROUPS !== "true") {
     return NextResponse.json({ error: "groups_disabled" }, { status: 403 });
   }
 
   const { slug } = await params;
   const group = await prisma.group.findUnique({ where: { slug } });
+
   if (!group) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const existing = await prisma.groupMember.findUnique({
     where: { groupId_userId: { groupId: group.id, userId: session.user.id } },
   });
+
   if (existing) {
     return NextResponse.json({ error: "already_member" }, { status: 409 });
   }

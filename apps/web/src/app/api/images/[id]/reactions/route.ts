@@ -23,6 +23,7 @@ export async function GET(
     where: { id: imageId, deletedAt: null },
     select: { id: true },
   });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const [counts, myReaction] = await Promise.all([
@@ -33,16 +34,18 @@ export async function GET(
     }),
     session?.user?.id
       ? prisma.reaction.findUnique({
-          where: {
-            userId_imageId: { userId: session.user.id, imageId },
-          },
-          select: { type: true },
-        })
+        where: {
+          userId_imageId: { userId: session.user.id, imageId },
+        },
+        select: { type: true },
+      })
       : null,
   ]);
 
   const byType: Record<string, number> = {};
+
   for (const t of REACTION_TYPES) byType[t] = 0;
+
   for (const row of counts) byType[row.type] = row._count;
   const total = counts.reduce((s: number, r: { _count: number }) => s + r._count, 0);
 
@@ -59,6 +62,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
@@ -68,9 +72,11 @@ export async function POST(
     where: { id: imageId, deletedAt: null },
     select: { id: true },
   });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) {
     return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   }
@@ -93,11 +99,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const { id: imageId } = await params;
+
   await prisma.reaction.deleteMany({
     where: { imageId, userId: session.user.id },
   });

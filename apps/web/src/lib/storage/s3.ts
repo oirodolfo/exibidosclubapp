@@ -15,7 +15,9 @@ const env = process.env.NODE_ENV ?? "development";
 
 function getBucket(): string {
   const b = process.env.S3_BUCKET;
+
   if (!b) throw new Error("S3_BUCKET is required for image storage");
+
   return b;
 }
 
@@ -28,6 +30,7 @@ export function getS3Client(): S3Client {
   const secretKey = process.env.S3_SECRET_KEY;
   const region = process.env.S3_REGION ?? "us-east-1";
   const forcePathStyle = process.env.S3_FORCE_PATH_STYLE === "true";
+
   if (!accessKey || !secretKey) {
     throw new Error("S3_ACCESS_KEY and S3_SECRET_KEY are required for image storage");
   }
@@ -39,6 +42,7 @@ export function getS3Client(): S3Client {
     }),
     credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
   });
+
   return _client;
 }
 
@@ -66,8 +70,11 @@ export type ProcessResult = {
 /** Map MIME type to file extension for storage keys; defaults to jpg for unknown. */
 export function extFromMime(mime: string): string {
   if (mime === "image/jpeg" || mime === "image/jpg") return "jpg";
+
   if (mime === "image/png") return "png";
+
   if (mime === "image/webp") return "webp";
+
   return "jpg";
 }
 
@@ -78,6 +85,7 @@ export async function uploadToS3(
 ): Promise<void> {
   const client = getS3Client();
   const bucket = getBucket();
+
   log.storage.debug("uploadToS3", { key, size: body.byteLength });
   const input: PutObjectCommandInput = {
     Bucket: bucket,
@@ -85,6 +93,7 @@ export async function uploadToS3(
     Body: body,
     ContentType: contentType,
   };
+
   await client.send(new PutObjectCommand(input));
 }
 
@@ -95,6 +104,7 @@ export async function getSignedDownloadUrl(
   const client = getS3Client();
   const bucket = getBucket();
   const cmd = new GetObjectCommand({ Bucket: bucket, Key: key });
+
   return getSignedUrl(client, cmd, { expiresIn: expiresInSeconds });
 }
 

@@ -13,6 +13,7 @@ const Body = z.object({
 
 export async function POST(req: Request) {
   const parse = Body.safeParse(await req.json());
+
   if (!parse.success) {
     return NextResponse.json({ error: "validation_failed", details: parse.error.flatten() }, { status: 400 });
   }
@@ -23,11 +24,13 @@ export async function POST(req: Request) {
   }
 
   const existing = await prisma.user.findFirst({ where: { email, deletedAt: null } });
+
   if (existing) {
     return NextResponse.json({ error: "email_taken", message: "An account with this email already exists." }, { status: 409 });
   }
 
   const slugRow = await prisma.slug.findUnique({ where: { slug } });
+
   if (slugRow) {
     return NextResponse.json({ error: "slug_taken", message: "This handle is already taken." }, { status: 409 });
   }
@@ -46,6 +49,7 @@ export async function POST(req: Request) {
         role: "user",
       },
     });
+
     await tx.profile.create({ data: { userId: user.id } });
     await tx.slug.create({ data: { userId: user.id, slug } });
   });

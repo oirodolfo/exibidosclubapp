@@ -44,6 +44,7 @@ export async function ensureMlMetadataForImage(
   const existing = await prisma.imageMlMetadata.findUnique({
     where: { imageId },
   });
+
   if (existing) return;
 
   let data: ImageMlMetadataData = emptyMlMetadata(ML_METADATA_CONTRACT_VERSION);
@@ -61,6 +62,7 @@ export async function ensureMlMetadataForImage(
         h: f.box.height,
         confidence: 0.8,
       }));
+
       data = { ...data, faceRegions };
     } catch {
       // keep empty metadata

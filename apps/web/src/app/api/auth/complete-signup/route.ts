@@ -11,11 +11,13 @@ const Body = z.object({
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const parse = Body.safeParse(await req.json());
+
   if (!parse.success) {
     return NextResponse.json({ error: "validation_failed", details: parse.error.flatten() }, { status: 400 });
   }
@@ -29,12 +31,15 @@ export async function POST(req: Request) {
     where: { id: session.user.id, deletedAt: null },
     include: { slugs: true, profile: true },
   });
+
   if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
   if (user.slugs.length > 0) {
     return NextResponse.json({ ok: true, slug: user.slugs[0]!.slug }, { status: 200 });
   }
 
   const taken = await prisma.slug.findUnique({ where: { slug } });
+
   if (taken) {
     return NextResponse.json({ error: "slug_taken", message: "This handle is already taken." }, { status: 409 });
   }
@@ -44,6 +49,7 @@ export async function POST(req: Request) {
       where: { id: session.user!.id },
       data: { birthdate },
     });
+
     if (!user.profile) {
       await tx.profile.create({ data: { userId: session.user!.id } });
     }

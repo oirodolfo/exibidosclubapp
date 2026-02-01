@@ -15,21 +15,26 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_TAGGING !== "true") {
     return NextResponse.json({ error: "tagging_disabled" }, { status: 403 });
   }
   const { id } = await params;
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   const { tagId, weight } = parse.data;
 
   const image = await prisma.image.findUnique({ where: { id, deletedAt: null } });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+
   if (!tag) return NextResponse.json({ error: "tag_not_found" }, { status: 404 });
 
   const prev = await prisma.vote.findUnique({
@@ -65,5 +70,6 @@ export async function POST(
   });
 
   log.api.votes.info("vote: success", { imageId: id, tagId, weight, userId: session.user.id });
+
   return NextResponse.json({ ok: true }, { status: 200 });
 }

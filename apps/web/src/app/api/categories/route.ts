@@ -12,5 +12,6 @@ export async function GET() {
       _count: { select: { tags: true } },
     },
   });
+
   return NextResponse.json({ categories });
 }

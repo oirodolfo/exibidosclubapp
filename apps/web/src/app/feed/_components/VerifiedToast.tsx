@@ -19,6 +19,7 @@ export function VerifiedToast() {
       setShow(true);
     });
     const t = setTimeout(() => setShow(false), 4000);
+
     return () => {
       cancelAnimationFrame(id);
       clearTimeout(t);

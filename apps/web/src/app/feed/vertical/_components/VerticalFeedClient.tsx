@@ -19,6 +19,7 @@ export function VerticalFeedClient() {
 
   const loadMoreIfNeeded = useCallback(() => {
     const idx = currentIndexRef.current;
+
     if (idx >= allItems.length - 2 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -33,6 +34,7 @@ export function VerticalFeedClient() {
     const scrollTop = containerRef.current.scrollTop;
     const viewportHeight = containerRef.current.clientHeight;
     const index = Math.round(scrollTop / viewportHeight);
+
     if (index !== currentIndexRef.current) {
       currentIndexRef.current = index;
       loadMoreIfNeeded();

@@ -15,10 +15,13 @@ export type FeedItem = {
 async function fetchFeed(cursor?: string | null) {
   const url = cursor ? `/api/swipe/feed?cursor=${cursor}` : "/api/swipe/feed";
   const res = await fetch(url);
+
   if (!res.ok) {
     const d = (await res.json().catch(() => ({}))) as { error?: string };
+
     throw new Error(d.error ?? "Failed to load");
   }
+
   return res.json() as Promise<{ feed: FeedItem[]; nextCursor: string | null }>;
 }
 
@@ -33,6 +36,7 @@ export function useSwipeFeed() {
 
 export function useSwipeMutation() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: async ({ imageId, direction }: { imageId: string; direction: "like" | "dislike" | "skip" }) => {
       const res = await fetch("/api/swipe", {
@@ -40,8 +44,10 @@ export function useSwipeMutation() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageId, direction }),
       });
+
       if (!res.ok) {
         const d = (await res.json().catch(() => ({}))) as { error?: string };
+
         throw new Error(d.error ?? "Failed");
       }
     },

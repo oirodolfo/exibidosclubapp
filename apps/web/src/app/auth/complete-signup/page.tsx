@@ -18,8 +18,10 @@ export default function CompleteSignupPage() {
     (async () => {
       const res = await fetch("/api/auth/session");
       const data = await res.json();
+
       if (!data?.user?.id) {
         router.replace("/auth/login");
+
         return;
       }
       setChecking(false);
@@ -30,6 +32,7 @@ export default function CompleteSignupPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
       const res = await fetch("/api/auth/complete-signup", {
         method: "POST",
@@ -37,9 +40,11 @@ export default function CompleteSignupPage() {
         body: JSON.stringify({ birthdate: birthdate || undefined, slug: slug.toLowerCase().trim() }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; message?: string; slug?: string };
+
       if (!res.ok) {
         setError(data.message ?? data.error ?? "Failed.");
         setLoading(false);
+
         return;
       }
       router.replace(`/${data.slug ?? ""}`);

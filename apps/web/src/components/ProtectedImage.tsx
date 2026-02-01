@@ -11,6 +11,7 @@ type Props = React.ComponentProps<typeof Image>;
 
 export function ProtectedImage(props: Props) {
   const { className, style, src, alt, ...rest } = props;
+
   return (
     <span className={`relative block w-full h-full ${className ?? ""}`.trim()} style={style}>
       <Image

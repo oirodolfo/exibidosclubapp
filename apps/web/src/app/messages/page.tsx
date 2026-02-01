@@ -7,9 +7,11 @@ import { MessagesClient } from "./_components/MessagesClient";
 
 export default async function MessagesPage() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect("/auth/login?callbackUrl=/messages");
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return (
       <main className={page.default}>
@@ -21,6 +23,7 @@ export default async function MessagesPage() {
       </main>
     );
   }
+
   return (
     <main className={page.default}>
       <header className="mb-4 flex items-center justify-between">

@@ -19,20 +19,24 @@ const SESSION_KEY = "humanproof_session";
 function getDeviceFingerprint(): string {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem(DEVICE_KEY);
+
   if (!id) {
     id = crypto.randomUUID();
     localStorage.setItem(DEVICE_KEY, id);
   }
+
   return id;
 }
 
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
   let id = sessionStorage.getItem(SESSION_KEY);
+
   if (!id) {
     id = crypto.randomUUID();
     sessionStorage.setItem(SESSION_KEY, id);
   }
+
   return id;
 }
 
@@ -62,10 +66,12 @@ export default function VerifyPage() {
   // Request code when step is code and we don't have one yet (TanStack Query mutation)
   useEffect(() => {
     if (verifyStep !== "code" || verifyCode) return;
+
     if (codeRequestedRef.current) return;
     codeRequestedRef.current = true;
     const deviceFingerprint = getDeviceFingerprint();
     const sessionId = getSessionId();
+
     codeMutation.mutate(
       { deviceFingerprint, sessionId },
       {
@@ -93,6 +99,7 @@ export default function VerifyPage() {
           if (data.accepted) {
             setVerifyStep("success");
             router.push("/feed?verified=1");
+
             return;
           }
           setVerifyError(
@@ -110,6 +117,7 @@ export default function VerifyPage() {
 
   const handleCheckStatus = useCallback(async () => {
     const result = await refetchStatus();
+
     if (result.data?.userVerificationStatus === "VERIFIED") {
       router.push("/feed?verified=1");
     }

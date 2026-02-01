@@ -8,6 +8,7 @@ export function GroupsClient() {
   const { data: groups, isLoading } = useGroups();
 
   if (isLoading) return <p className="text-neutral-500">Loading…</p>;
+
   if (!groups?.length) return <p className="text-neutral-500">No groups yet.</p>;
 
   return (

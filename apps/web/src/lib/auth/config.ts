@@ -30,26 +30,34 @@ export const authOptions: NextAuthOptions = {
         async authorize(creds) {
           if (!creds?.email || !creds?.password) {
             log.auth.debug("authorize: missing email or password");
+
             return null;
           }
           const user = await prisma.user.findFirst({
             where: { email: creds.email, deletedAt: null },
             include: { slugs: true },
           });
+
           if (!user?.passwordHash) {
             log.auth.debug("authorize: user not found or no password", { email: creds.email });
+
             return null;
           }
           const ok = await bcrypt.compare(creds.password, user.passwordHash);
+
           if (!ok) {
             log.auth.warn("authorize: invalid password", { email: creds.email });
+
             return null;
           }
+
           if (user.slugs.length === 0) {
             log.auth.debug("authorize: user has no slug", { userId: user.id });
+
             return null;
           }
           log.auth.info("authorize: success", { userId: user.id, email: creds.email });
+
           return { id: user.id, email: user.email, name: user.name, image: user.image };
         },
       }),
@@ -79,19 +87,26 @@ export const authOptions: NextAuthOptions = {
           where: { id: user.id!, deletedAt: null },
           include: { slugs: true },
         });
+
         if (exists && exists.slugs.length > 0) {
           log.auth.info("signIn: existing user", { userId: user.id });
+
           return true;
         }
+
         if (exists && exists.slugs.length === 0) {
           log.auth.info("signIn: redirect to complete-signup", { userId: user.id });
+
           return "/auth/complete-signup";
         }
+
         return true;
       },
       async redirect({ url, baseUrl }) {
         if (url.startsWith("/")) return `${baseUrl}${url}`;
+
         if (new URL(url).origin === baseUrl) return url;
+
         return baseUrl;
       },
     },
@@ -99,8 +114,10 @@ export const authOptions: NextAuthOptions = {
       async createUser({ user }) {
         if (!user.id) return;
         const u = await prisma.user.findUnique({ where: { id: user.id }, include: { slugs: true } });
+
         if (u?.slugs.length) return;
         const sentinel = new Date("2000-01-01");
+
         if (u?.birthdate.getTime() !== sentinel.getTime()) return;
         // OAuth-created user with placeholder birthdate; Profile/Slug created in /auth/complete-signup
       },
@@ -111,7 +128,9 @@ export function isAgeAllowed(birthdate: Date): boolean {
   const now = new Date();
   let age = now.getFullYear() - birthdate.getFullYear();
   const m = now.getMonth() - birthdate.getMonth();
+
   if (m < 0 || (m === 0 && now.getDate() < birthdate.getDate())) age--;
+
   return age >= AGE_GATE_MIN_YEARS;
 }
 

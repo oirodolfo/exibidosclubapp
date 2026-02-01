@@ -18,6 +18,7 @@ const TABS: TabId[] = ["overview", "photos", "activity", "rankings", "badges"];
 
 function parseTab(t: string | undefined): TabId {
   if (t && TABS.includes(t as TabId)) return t as TabId;
+
   return "overview";
 }
 
@@ -27,12 +28,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     where: { slug, user: { deletedAt: null } },
     include: { user: { include: { profile: true } } },
   });
+
   if (!slugRow?.user) return { title: "exibidos.club" };
   const user = slugRow.user;
   const profile = user.profile;
   const displayName = profile?.displayName ?? user.name ?? slug;
   const title = `${displayName} | exibidos.club`;
   const description = profile?.bio ?? `View @${slug} on exibidos.club`;
+
   return {
     title,
     description,
@@ -65,6 +68,7 @@ export default async function SlugPage({
       orderBy: { createdAt: "desc" },
       include: { user: { include: { slugs: true } } },
     });
+
     if (history?.user?.slugs[0]) redirect(`/${history.user.slugs[0].slug}`);
     notFound();
   }
@@ -76,11 +80,13 @@ export default async function SlugPage({
 
   let isFollower = false;
   let followStatus: "none" | "pending" | "accepted" = "none";
+
   if (session?.user?.id && !isOwner) {
     const f = await prisma.follow.findUnique({
       where: { fromId_toId: { fromId: session.user.id, toId: user.id } },
       select: { status: true },
     });
+
     isFollower = f?.status === "accepted";
     followStatus = (f?.status === "accepted" || f?.status === "pending" ? f.status : "none") as "none" | "pending" | "accepted";
   }
@@ -160,14 +166,17 @@ export default async function SlugPage({
     const withUrls = await Promise.all(
       images.map(async (img) => {
         if (!img.thumbKey) return { ...img, thumbUrl: null as string | null };
+
         try {
           const thumbUrl = await getSignedDownloadUrl(img.thumbKey, 3600);
+
           return { ...img, thumbUrl };
         } catch {
           return { ...img, thumbUrl: null as string | null };
         }
       })
     );
+
     return withUrls;
   })();
 

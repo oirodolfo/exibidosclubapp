@@ -16,8 +16,10 @@ export function useGroups() {
     queryKey: ["groups"],
     queryFn: async () => {
       const res = await fetch("/api/groups");
+
       if (!res.ok) return [];
       const d = (await res.json()) as { groups?: Group[] };
+
       return d.groups ?? [];
     },
     staleTime: 10 * 60 * 1000,

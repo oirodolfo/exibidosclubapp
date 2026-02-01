@@ -22,7 +22,9 @@ export function isStorageConfigured(): boolean {
 /** Current provider: S3 or local. Call isStorageConfigured() before relying on storage. */
 export function getStorageProvider(): "s3" | "local" {
   if (isS3Configured()) return "s3";
+
   if (isLocalStorageEnabled()) return "local";
+
   return "s3";
 }
 
@@ -35,6 +37,7 @@ export async function upload(
   if (getStorageProvider() === "s3") {
     return uploadToS3(key, body, contentType);
   }
+
   return uploadToLocal(key, body, contentType);
 }
 
@@ -46,5 +49,6 @@ export async function getSignedDownloadUrl(
   if (getStorageProvider() === "s3") {
     return getS3SignedUrl(key, expiresInSeconds);
   }
+
   return getLocalDownloadUrl(key);
 }

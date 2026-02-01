@@ -8,9 +8,11 @@ const PAGE_SIZE = 10;
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_SWIPE !== "true") {
     return NextResponse.json({ error: "swipe_disabled" }, { status: 403 });
   }
@@ -56,11 +58,13 @@ export async function GET(req: Request) {
     if (!isS3Configured()) {
       return items.map((img) => ({ ...img, thumbUrl: null as string | null }));
     }
+
     return Promise.all(
       items.map(async (img) => {
         const thumbUrl = img.thumbKey
           ? await getSignedDownloadUrl(img.thumbKey, 3600).catch(() => null)
           : null;
+
         return { ...img, thumbUrl };
       })
     );

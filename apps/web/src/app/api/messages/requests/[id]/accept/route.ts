@@ -8,9 +8,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return NextResponse.json({ error: "messaging_disabled" }, { status: 403 });
   }
@@ -20,9 +22,11 @@ export async function POST(
     where: { id },
     include: { from: true },
   });
+
   if (!mr || mr.toId !== session.user.id) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
+
   if (mr.status !== "pending") {
     return NextResponse.json({ error: "already_handled", status: mr.status }, { status: 409 });
   }
@@ -41,6 +45,7 @@ export async function POST(
     },
     include: { participants: true },
   });
+
   if (!existing || existing.participants.length !== 2) {
     await prisma.conversation.create({
       data: {
@@ -50,6 +55,7 @@ export async function POST(
       },
     });
   }
+
   if (mr.message) {
     const conv = await prisma.conversation.findFirst({
       where: {
@@ -59,6 +65,7 @@ export async function POST(
         ],
       },
     });
+
     if (conv) {
       await prisma.message.create({
         data: { conversationId: conv.id, senderId: mr.fromId, body: mr.message },

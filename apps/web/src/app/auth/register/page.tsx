@@ -18,6 +18,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -25,9 +26,11 @@ export default function RegisterPage() {
         body: JSON.stringify({ email, password, birthdate: birthdate || undefined, slug: slug.toLowerCase().trim() }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; message?: string; details?: unknown };
+
       if (!res.ok) {
         setError(data.message ?? data.error ?? "Registration failed.");
         setLoading(false);
+
         return;
       }
       window.location.href = "/auth/login?registered=1";
