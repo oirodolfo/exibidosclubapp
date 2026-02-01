@@ -78,6 +78,7 @@ export function SwipeFeed() {
             fill
             className="object-cover"
             sizes="400px"
+            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>

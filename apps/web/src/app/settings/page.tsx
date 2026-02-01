@@ -192,10 +192,23 @@ export default function SettingsPage() {
 
         <fieldset className={fieldset}>
           <legend>Close friends</legend>
-          <form onSubmit={addCloseFriend} className={formRow}>
-            <Input value={closeFriendSlug} onChange={(e) => setCloseFriendSlug(e.target.value)} placeholder="Handle (slug)" className="flex-1" />
-            <Button type="submit">Add</Button>
-          </form>
+          <div className={formRow} role="group" aria-label="Add close friend">
+            <Input
+              value={closeFriendSlug}
+              onChange={(e) => setCloseFriendSlug(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCloseFriend(e as unknown as React.FormEvent);
+                }
+              }}
+              placeholder="Handle (slug)"
+              className="flex-1"
+            />
+            <Button type="button" onClick={() => addCloseFriend({ preventDefault: () => {} } as React.FormEvent)}>
+              Add
+            </Button>
+          </div>
           <ul className={listReset}>
             {closeFriends.map((c) => (
               <li key={c.slug} className={closeFriendRow}>

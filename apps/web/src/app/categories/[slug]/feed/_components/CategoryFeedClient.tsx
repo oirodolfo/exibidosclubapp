@@ -51,6 +51,7 @@ export function CategoryFeedClient({ slug }: { slug: string }) {
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 50vw, 33vw"
+                unoptimized
               />
             </div>
           ) : (

@@ -71,8 +71,41 @@ export async function detectFaces(buffer: Buffer): Promise<FaceResult[]> {
 
   try {
     const pathMod = await import("path");
-    const pkgPath = require.resolve("@vladmandic/face-api/package.json");
-    const modelPath = pathMod.join(pathMod.dirname(pkgPath), "model");
+    const fsMod = await import("fs");
+
+    const manifestName = "ssd_mobilenetv1_model-weights_manifest.json";
+    let modelPath: string | null = null;
+
+    const cwd = process.cwd();
+    const candidates = [
+      pathMod.join(cwd, "node_modules", "@vladmandic", "face-api", "model"),
+      pathMod.join(cwd, "..", "node_modules", "@vladmandic", "face-api", "model"),
+      pathMod.join(cwd, "..", "..", "node_modules", "@vladmandic", "face-api", "model"),
+      pathMod.join(cwd, "..", "..", "..", "node_modules", "@vladmandic", "face-api", "model"),
+    ];
+
+    for (const dir of candidates) {
+      const manifestPath = pathMod.join(dir, manifestName);
+      if (fsMod.existsSync(manifestPath)) {
+        modelPath = dir;
+        break;
+      }
+    }
+
+    if (!modelPath) {
+      try {
+        const pkgPath = require.resolve("@vladmandic/face-api/package.json");
+        const dir = pathMod.join(pathMod.dirname(pkgPath), "model");
+        if (fsMod.existsSync(pathMod.join(dir, manifestName))) modelPath = dir;
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!modelPath) {
+      log.face.warn("detectFaces: model directory not found (tried cwd and require.resolve)");
+      return [];
+    }
 
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);

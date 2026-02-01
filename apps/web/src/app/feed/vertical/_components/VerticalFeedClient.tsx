@@ -103,6 +103,7 @@ export function VerticalFeedClient() {
                 fill
                 className="object-contain"
                 sizes="100vw"
+                unoptimized
               />
             ) : (
               <div className="h-full w-full flex items-center justify-center text-exibidos-muted">
