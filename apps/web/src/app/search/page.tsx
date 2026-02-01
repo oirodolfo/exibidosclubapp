@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useSearch, type SearchEntityType, type SearchResult } from "@/hooks/api/useSearch";
 import { useCategories } from "@/hooks/api/useCategories";
+import { useSearchStore } from "@/stores/searchStore";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -20,10 +21,15 @@ const TYPES: { value: SearchEntityType; label: string }[] = [
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
-  const q = searchParams.get("q") ?? "";
+  const qFromUrl = searchParams.get("q") ?? "";
   const typesParam = searchParams.get("types") ?? "";
-  const [localQ, setLocalQ] = useState(q);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const {
+    fullSearchQuery,
+    fullSearchFiltersOpen,
+    setFullSearchQuery,
+    setFullSearchFiltersOpen,
+  } = useSearchStore();
 
   const typeList = ["profile", "photo", "category", "tag"] as const;
   const types: SearchEntityType[] | undefined = typesParam
@@ -31,7 +37,7 @@ export default function SearchPage() {
     : undefined;
 
   const params = {
-    q: localQ || q,
+    q: fullSearchQuery || qFromUrl,
     limit: 20,
     offset: 0,
     types,
@@ -41,10 +47,10 @@ export default function SearchPage() {
   const { data: categories } = useCategories();
 
   useEffect(() => {
-    setLocalQ(q);
-  }, [q]);
+    setFullSearchQuery(qFromUrl);
+  }, [qFromUrl, setFullSearchQuery]);
 
-  const hasQuery = (localQ || q).trim().length >= 1;
+  const hasQuery = (fullSearchQuery || qFromUrl).trim().length >= 1;
 
   return (
     <main className={cn(page.wide, "min-h-screen pb-24 md:pb-8")}>
@@ -65,8 +71,8 @@ export default function SearchPage() {
           <div className="md:hidden flex items-center gap-2 py-3">
             <input
               type="search"
-              value={localQ}
-              onChange={(e) => setLocalQ(e.target.value)}
+              value={fullSearchQuery}
+              onChange={(e) => setFullSearchQuery(e.target.value)}
               placeholder="Buscar…"
               className={cn(
                 "flex-1 rounded-exibidos-md border border-white/15 bg-exibidos-surface px-4 py-2.5 text-exibidos-ink placeholder:text-exibidos-muted focus:outline-none focus:ring-2 focus:ring-exibidos-purple/50"
@@ -74,7 +80,7 @@ export default function SearchPage() {
             />
             <button
               type="button"
-              onClick={() => setFiltersOpen(true)}
+              onClick={() => setFullSearchFiltersOpen(true)}
               className="rounded-full border border-white/15 bg-exibidos-surface px-4 py-2.5 text-sm text-exibidos-ink"
             >
               Filtros
@@ -101,7 +107,7 @@ export default function SearchPage() {
             <SearchResults data={data} />
           )}
 
-          {filtersOpen && (
+          {fullSearchFiltersOpen && (
             <SearchFiltersSheet
               types={types}
               onTypesChange={(t) => {
@@ -110,7 +116,7 @@ export default function SearchPage() {
                 else sp.delete("types");
                 window.history.replaceState(null, "", `?${sp}`);
               }}
-              onClose={() => setFiltersOpen(false)}
+              onClose={() => setFullSearchFiltersOpen(false)}
             />
           )}
         </div>
