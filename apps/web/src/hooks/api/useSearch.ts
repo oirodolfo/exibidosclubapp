@@ -70,11 +70,20 @@ async function fetchSearch(params: SearchParams, signal?: AbortSignal): Promise<
   return res.json();
 }
 
+/** Normalize types for cache key: same set of types = same key (e.g. profile,photo === photo,profile). */
+function typesKey(types: SearchEntityType[] | undefined): string {
+  if (!types?.length) return "";
+  return [...types].sort().join(",");
+}
+
 export function useSearch(params: SearchParams) {
+  const typesKeyStable = typesKey(params.types);
+
   return useQuery({
-    queryKey: ["search", params.q, params.limit, params.offset, params.types?.join(",")],
+    queryKey: ["search", params.q.trim(), params.limit, params.offset, typesKeyStable],
     queryFn: ({ signal }) => fetchSearch(params, signal),
     enabled: params.q.trim().length >= 1,
     staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
