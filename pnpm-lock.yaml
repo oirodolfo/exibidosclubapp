@@ -443,9 +443,9 @@ importers:
       '@exibidos/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@exibidos/ml':
+      '@exibidos/ml-contracts':
         specifier: workspace:*
-        version: link:../ml
+        version: link:../ml-contracts
       '@exibidos/ml-registry-client':
         specifier: workspace:*
         version: link:../ml-registry-client
