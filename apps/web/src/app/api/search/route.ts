@@ -1,10 +1,11 @@
 /**
  * GET /api/search — full search, pagination, filters.
- * Delegates to search domain controller; no business logic here.
+ * Delegates to search domain controller; enriches photos with thumbUrl for UI.
  */
 
 import { NextResponse } from "next/server";
 import { search } from "@/search/controllers/search.controller";
+import { getSignedDownloadUrl, isStorageConfigured } from "@/lib/storage";
 import type { SearchEntityType } from "@/search/types/search.types";
 
 const VALID_TYPES: SearchEntityType[] = ["profile", "photo", "category", "tag"];
@@ -44,5 +45,21 @@ export async function GET(req: Request) {
     );
   }
 
-  return NextResponse.json(result.data);
+  const data = result.data;
+
+  if (isStorageConfigured() && data.photos.length > 0) {
+    const photosWithUrl = await Promise.all(
+      data.photos.map(async (p) => {
+        const thumbUrl = p.thumbKey
+          ? await getSignedDownloadUrl(p.thumbKey, 3600)
+          : null;
+
+        return { ...p, thumbUrl };
+      })
+    );
+
+    return NextResponse.json({ ...data, photos: photosWithUrl });
+  }
+
+  return NextResponse.json(data);
 }
