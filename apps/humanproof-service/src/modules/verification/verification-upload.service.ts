@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import type {
   MetadataAnalyzer,
   MetadataAnalysisResult,
-} from "../../application/ports/metadata-analyzer.port.js";
+} from "../../application/ports/metadata-analyzer.port";
 
 @Injectable()
 export class VerificationUploadService {

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { UserTagInput, VoteInput, SwipeInput, WeakLabel } from "@exibidos/ml-contracts";
-import { WeakLabelNormalizerService } from "./weak-label-normalizer.service.js";
-import { WeakLabelStoreService } from "./weak-label-store.service.js";
+import { WeakLabelNormalizerService } from "./weak-label-normalizer.service";
+import { WeakLabelStoreService } from "./weak-label-store.service";
 
 @Injectable()
 export class WeakLabelIngestionService {

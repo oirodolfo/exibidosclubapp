@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { ModelDeployment } from "@exibidos/ml-contracts";
-import { ModelRegistryService } from "./model-registry.service.js";
+import { ModelRegistryService } from "./model-registry.service";
 
 function rolloutPctToStage(pct: number): "pct_5" | "pct_25" | "pct_100" {
   if (pct >= 100) return "pct_100";

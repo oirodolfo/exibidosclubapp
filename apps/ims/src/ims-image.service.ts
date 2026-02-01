@@ -3,18 +3,18 @@
  */
 import { prisma } from "@exibidos/db/client";
 import type { ImageMlMetadataData } from "@exibidos/ml";
-import type { BlurMode } from "./contracts.js";
+import type { BlurMode } from "./contracts";
 import {
   cacheKey,
   memoryCacheGet,
   memoryCacheSet,
   isMemoryCacheEnabled,
-} from "./cache.js";
-import { logRequest } from "./observability.js";
-import { resolveBlurMode } from "./blur-policies.js";
-import { parseTransformSpec } from "./parser.js";
-import { runPipeline } from "./pipeline.js";
-import { fetchFromStorage, isStorageConfigured } from "./storage.js";
+} from "./cache";
+import { logRequest } from "./observability";
+import { resolveBlurMode } from "./blur-policies";
+import { parseTransformSpec } from "./parser";
+import { runPipeline } from "./pipeline";
+import { fetchFromStorage, isStorageConfigured } from "./storage";
 
 export interface ImageHandlerResult {
   statusCode: number;

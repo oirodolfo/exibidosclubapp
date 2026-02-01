@@ -6,4 +6,4 @@ export {
   type MaxThreshold,
   type RangeThreshold,
   type Percentile,
-} from "./confidence.js";
+} from "./confidence";

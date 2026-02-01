@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { ImageMlMetadataData } from "@exibidos/ml-contracts";
 import sharp from "sharp";
-import type { WatermarkKind } from "./contracts.js";
+import type { WatermarkKind } from "./contracts";
 
 export interface WatermarkOptions {
   kind: WatermarkKind;

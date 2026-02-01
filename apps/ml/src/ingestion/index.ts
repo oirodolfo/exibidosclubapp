@@ -1,18 +1,18 @@
 export {
   canonicalPayload,
   type DatasetArtifact,
-} from "./artifact.js";
+} from "./artifact";
 export {
   InvalidOrMixedVersionError,
   runIngestion,
   type IngestionConfig,
-} from "./ingest.js";
+} from "./ingest";
 export {
   exportHasNewOrUpdatedAnnotations,
   fetchLabelStudioExport,
   type LabelStudioConfig,
-} from "./label-studio-client.js";
+} from "./label-studio-client";
 export {
   createInMemoryDatasetStore,
   type VersionedDatasetStore,
-} from "./versioned-store.js";
+} from "./versioned-store";

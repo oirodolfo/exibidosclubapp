@@ -1,20 +1,20 @@
 export {
   DEFAULT_TRAINING_CONFIG,
   type TrainingConfig,
-} from "./config.js";
+} from "./config";
 export {
   createMetricsPlaceholder,
   prepareTrainingRun,
   type TrainingPipelineInput,
   type TrainingPipelineOutput,
-} from "./pipeline.js";
+} from "./pipeline";
 export {
   deterministicSplits,
   type SplitKind,
   type SplitResult,
-} from "./splits.js";
+} from "./splits";
 export type {
   TrainingMetricsArtifact,
   ClassMetrics,
   RegionMetrics,
-} from "./metrics.js";
+} from "./metrics";

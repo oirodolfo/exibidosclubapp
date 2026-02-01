@@ -2,13 +2,13 @@ export {
   DeviceStatus,
   UserVerificationStatus,
   VerificationDecision,
-} from "./enums/index.js";
+} from "./enums/index";
 export type {
   DeviceStatusType,
   UserVerificationStatusType,
   VerificationDecisionType,
-} from "./enums/index.js";
+} from "./enums/index";
 export type {
   VerificationAttempt,
   VerificationAttemptCreate,
-} from "./entities/index.js";
+} from "./entities/index";

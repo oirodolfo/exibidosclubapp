@@ -4,10 +4,10 @@
  * Actual training runs in a separate job (e.g. Python); this defines inputs/outputs and orchestration.
  */
 
-import type { ValidationReport } from "../validation/index.js";
-import type { TrainingConfig } from "./config.js";
-import { deterministicSplits } from "./splits.js";
-import type { TrainingMetricsArtifact } from "./metrics.js";
+import type { ValidationReport } from "../validation/index";
+import type { TrainingConfig } from "./config";
+import { deterministicSplits } from "./splits";
+import type { TrainingMetricsArtifact } from "./metrics";
 
 export interface TrainingPipelineInput {
   /** Dataset version that passed validation */
@@ -48,7 +48,7 @@ export function prepareTrainingRun(input: TrainingPipelineInput): {
     );
   }
 
-  const export_ = JSON.parse(input.payload) as import("../taxonomy/v1.js").TaxonomyV1Export;
+  const export_ = JSON.parse(input.payload) as import("../taxonomy/v1").TaxonomyV1Export;
   const splits = deterministicSplits(
     export_,
     input.config,

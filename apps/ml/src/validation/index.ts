@@ -1,2 +1,2 @@
-export { validateDataset, type ValidateInput } from "./validate.js";
-export type { ValidationReport, ValidationCheck } from "./types.js";
+export { validateDataset, type ValidateInput } from "./validate";
+export type { ValidationReport, ValidationCheck } from "./types";

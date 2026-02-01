@@ -9,8 +9,8 @@ import {
   TAXONOMY_VERSION,
   isTaxonomyV1Export,
   type TaxonomyV1Export,
-} from "../taxonomy/v1.js";
-import type { ValidationCheck, ValidationReport } from "./types.js";
+} from "../taxonomy/v1";
+import type { ValidationCheck, ValidationReport } from "./types";
 
 export interface ValidateInput {
   dataset_version: string;

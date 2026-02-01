@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { VerificationDecision } from "../../domain/enums/verification-decision.js";
-import type { MetadataAnalysisResult } from "../../application/ports/metadata-analyzer.port.js";
-import type { MlClassifierOutput } from "../../application/ports/ml-classifier.port.js";
-import type { HashCheckResult } from "../hash/hash.service.js";
-import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
+import { VerificationDecision } from "../../domain/enums/verification-decision";
+import type { MetadataAnalysisResult } from "../../application/ports/metadata-analyzer.port";
+import type { MlClassifierOutput } from "../../application/ports/ml-classifier.port";
+import type { HashCheckResult } from "../hash/hash.service";
+import { HumanproofConfigService } from "../../config/humanproof-config.service";
 
 export interface AntifraudSignals {
   readonly ipRiskScore?: number;

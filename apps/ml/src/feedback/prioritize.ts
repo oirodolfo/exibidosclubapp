@@ -3,8 +3,8 @@
  * Human corrections feed back into next dataset version; loop runs continuously.
  */
 
-import type { FeedbackCandidate, FeedbackLoopConfig } from "./types.js";
-import { DEFAULT_FEEDBACK_CONFIG } from "./types.js";
+import type { FeedbackCandidate, FeedbackLoopConfig } from "./types";
+import { DEFAULT_FEEDBACK_CONFIG } from "./types";
 
 export interface CandidateInput {
   imageId: string;

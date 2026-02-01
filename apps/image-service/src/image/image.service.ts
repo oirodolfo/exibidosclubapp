@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { prisma } from "@exibidos/db/client";
 import type { ImageMlMetadataData } from "@exibidos/ml-contracts";
-import type { BlurMode } from "../transform/contracts.js";
-import { CacheService } from "../cache/cache.service.js";
-import { BlurPolicyService } from "../policy/blur-policy.service.js";
-import { StorageService } from "./storage.service.js";
-import { TransformService } from "../transform/transform.service.js";
-import { ParserService, type ParseError, type ParseResult } from "../transform/parser.service.js";
+import type { BlurMode } from "../transform/contracts";
+import { CacheService } from "../cache/cache.service";
+import { BlurPolicyService } from "../policy/blur-policy.service";
+import { StorageService } from "./storage.service";
+import { TransformService } from "../transform/transform.service";
+import { ParserService, type ParseError, type ParseResult } from "../transform/parser.service";
 
 export interface ServeResult {
   buffer: Buffer;

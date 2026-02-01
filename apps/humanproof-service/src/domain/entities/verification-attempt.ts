@@ -1,4 +1,4 @@
-import type { UserVerificationStatus } from "../enums/user-verification-status.js";
+import type { UserVerificationStatus } from "../enums/user-verification-status";
 
 /**
  * Verification attempt entity (proof-of-life code attempt).

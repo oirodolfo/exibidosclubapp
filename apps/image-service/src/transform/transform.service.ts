@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import type { ImageMlMetadataData } from "@exibidos/ml-contracts";
 import sharp from "sharp";
-import type { BlurMode, TransformSpec, WatermarkKind } from "./contracts.js";
-import { BlurEngineService } from "./blur-engine.service.js";
-import { CropStrategyService } from "./crop-strategy.service.js";
-import { WatermarkEngineService } from "./watermark-engine.service.js";
+import type { BlurMode, TransformSpec, WatermarkKind } from "./contracts";
+import { BlurEngineService } from "./blur-engine.service";
+import { CropStrategyService } from "./crop-strategy.service";
+import { WatermarkEngineService } from "./watermark-engine.service";
 
 export interface PipelineInput {
   buffer: Buffer;

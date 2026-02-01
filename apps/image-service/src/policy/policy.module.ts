@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { BlurPolicyService } from "./blur-policy.service.js";
+import { BlurPolicyService } from "./blur-policy.service";
 
 @Module({
   providers: [BlurPolicyService],

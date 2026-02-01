@@ -4,7 +4,7 @@ import type { DatasetArtifact } from "@exibidos/ml-contracts";
 import { canonicalPayload } from "@exibidos/ml-contracts";
 import { TAXONOMY_VERSION } from "@exibidos/taxonomy";
 import type { TaxonomyV1Export } from "@exibidos/taxonomy";
-import { InMemoryDatasetStoreService } from "./in-memory-dataset-store.service.js";
+import { InMemoryDatasetStoreService } from "./in-memory-dataset-store.service";
 
 export interface VersionedDatasetStore {
   write(artifact: DatasetArtifact, payload: string): Promise<void>;

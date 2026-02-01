@@ -1,4 +1,4 @@
-import type { EnvSchema } from "./env.schema.js";
+import type { EnvSchema } from "./env.schema";
 
 export function configuration(): EnvSchema {
   return {

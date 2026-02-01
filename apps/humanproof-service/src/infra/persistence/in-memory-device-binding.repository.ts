@@ -1,6 +1,6 @@
-import type { DeviceBinding } from "../../domain/entities/device-binding.js";
-import { DeviceStatus } from "../../domain/enums/device-status.js";
-import { DeviceBindingRepository } from "../../application/ports/device-binding.repository.js";
+import type { DeviceBinding } from "../../domain/entities/device-binding";
+import { DeviceStatus } from "../../domain/enums/device-status";
+import { DeviceBindingRepository } from "../../application/ports/device-binding.repository";
 
 export class InMemoryDeviceBindingRepository extends DeviceBindingRepository {
   private readonly store = new Map<string, DeviceBinding>();

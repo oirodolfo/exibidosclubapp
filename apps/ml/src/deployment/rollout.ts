@@ -3,8 +3,8 @@
  * Models are versioned; no in-place overwrite. Rollback = set active version to previous.
  */
 
-import { DEFAULT_ROLLOUT_STAGES } from "./types.js";
-import type { ModelDeployment, RolloutConfig, RolloutStage } from "./types.js";
+import { DEFAULT_ROLLOUT_STAGES } from "./types";
+import type { ModelDeployment, RolloutConfig, RolloutStage } from "./types";
 
 export interface RolloutStateStore {
   /** Get current deployment (which version at which %) */

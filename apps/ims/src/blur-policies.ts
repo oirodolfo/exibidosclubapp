@@ -3,7 +3,7 @@
  * Face blur, selective blur (eyes/face), forced blur for public, no blur for private.
  */
 
-import type { BlurContext, BlurMode } from "./contracts.js";
+import type { BlurContext, BlurMode } from "./contracts";
 
 export const BLUR_POLICY_VERSION = 1;
 

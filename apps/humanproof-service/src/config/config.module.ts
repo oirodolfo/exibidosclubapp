@@ -1,8 +1,8 @@
 import { Module, Global } from "@nestjs/common";
 import { ConfigModule as NestConfigModule } from "@nestjs/config";
-import { envSchema } from "./env.schema.js";
-import { configuration } from "./configuration.js";
-import { HumanproofConfigService } from "./humanproof-config.service.js";
+import { envSchema } from "./env.schema";
+import { configuration } from "./configuration";
+import { HumanproofConfigService } from "./humanproof-config.service";
 
 @Global()
 @Module({

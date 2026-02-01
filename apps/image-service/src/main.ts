@@ -4,9 +4,9 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
-import { AppModule } from "./app.module.js";
-import { StorageService } from "./image/storage.service.js";
-import { CacheService } from "./cache/cache.service.js";
+import { AppModule } from "./app.module";
+import { StorageService } from "./image/storage.service";
+import { CacheService } from "./cache/cache.service";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(

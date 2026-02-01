@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ImsModule } from "./ims.module.js";
+import { ImsModule } from "./ims.module";
 
 @Module({
   imports: [ImsModule],

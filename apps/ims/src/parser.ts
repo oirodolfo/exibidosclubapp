@@ -3,7 +3,7 @@
  * Invalid or out-of-bounds values are rejected (400). Used by IMS to build cache-safe URLs.
  */
 
-import type { TransformSpec } from "./contracts.js";
+import type { TransformSpec } from "./contracts";
 import {
   BOUNDS,
   DEFAULTS,
@@ -14,7 +14,7 @@ import {
   type FitMode,
   type OutputFormat,
   type WatermarkKind,
-} from "./contracts.js";
+} from "./contracts";
 
 /** Allowed contract version range (1–99) for cache and backward compatibility. */
 const VERSION_MIN = 1;

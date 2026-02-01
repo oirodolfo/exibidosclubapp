@@ -2,7 +2,7 @@ import exifr from "exifr";
 import {
   type MetadataAnalysisResult,
   MetadataAnalyzer,
-} from "../../application/ports/metadata-analyzer.port.js";
+} from "../../application/ports/metadata-analyzer.port";
 
 /**
  * Real EXIF-based metadata analyzer.

@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DecisionService } from "./decision.service.js";
+import { DecisionService } from "./decision.service";
 
 @Module({
   providers: [DecisionService],

@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { WeakLabelNormalizerService } from "./weak-label-normalizer.service.js";
-import { WeakLabelStoreService } from "./weak-label-store.service.js";
-import { WeakLabelStatsService } from "./weak-label-stats.service.js";
-import { WeakLabelIngestionService } from "./weak-label-ingestion.service.js";
+import { WeakLabelNormalizerService } from "./weak-label-normalizer.service";
+import { WeakLabelStoreService } from "./weak-label-store.service";
+import { WeakLabelStatsService } from "./weak-label-stats.service";
+import { WeakLabelIngestionService } from "./weak-label-ingestion.service";
 
 @Module({
   providers: [

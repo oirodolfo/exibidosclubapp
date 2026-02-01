@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import type {
   ApprovedImageHashRepository,
   RejectedImageHashRepository,
-} from "../../application/ports/image-hash.repository.js";
-import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
-import { dHashFromBuffer } from "../../shared/perceptual-hash.js";
+} from "../../application/ports/image-hash.repository";
+import { HumanproofConfigService } from "../../config/humanproof-config.service";
+import { dHashFromBuffer } from "../../shared/perceptual-hash";
 
 export interface HashCheckResult {
   readonly accepted: boolean;

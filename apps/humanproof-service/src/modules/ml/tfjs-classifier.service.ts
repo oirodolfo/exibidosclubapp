@@ -4,7 +4,7 @@ import sharp from "sharp";
 import {
   type MlClassifierOutput,
   MlClassifierPort,
-} from "../../application/ports/ml-classifier.port.js";
+} from "../../application/ports/ml-classifier.port";
 
 const IMG_SIZE = 64;
 const CHANNELS = 3;

@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import type { EventBusPort } from "../../application/ports/event-bus.port.js";
-import type { VerificationAttempt } from "../../domain/entities/verification-attempt.js";
-import type { VerificationCodeRepository } from "../../application/ports/verification-code.repository.js";
-import { UserVerificationStatus } from "../../domain/enums/user-verification-status.js";
-import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
+import type { EventBusPort } from "../../application/ports/event-bus.port";
+import type { VerificationAttempt } from "../../domain/entities/verification-attempt";
+import type { VerificationCodeRepository } from "../../application/ports/verification-code.repository";
+import { UserVerificationStatus } from "../../domain/enums/user-verification-status";
+import { HumanproofConfigService } from "../../config/humanproof-config.service";
 import { randomBytes } from "node:crypto";
 
 const CODE_LENGTH = 6;

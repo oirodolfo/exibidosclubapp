@@ -16,7 +16,7 @@
     "@aws-sdk/client-s3": "^3.700.0",
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@exibidos/db": "workspace:*",
-    "@exibidos/ml": "workspace:*",
+    "@exibidos/ml-contracts": "workspace:*",
     "@exibidos/ml-registry-client": "workspace:*",
     "@tanstack/react-query": "^5.90.20",
     "@tensorflow/tfjs": "^4.22.0",

@@ -9,4 +9,4 @@ export {
   type TaxonomyRegion,
   type RegionType,
   type ClassLabel,
-} from "./v1.js";
+} from "./v1";

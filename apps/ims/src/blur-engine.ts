@@ -5,7 +5,7 @@
 
 import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
-import type { BlurMode } from "./contracts.js";
+import type { BlurMode } from "./contracts";
 
 /** Gaussian sigma for full-image blur (privacy / sensitive content). */
 const FULL_BLUR_SIGMA = 12;

@@ -1,1 +1,1 @@
-export { VerificationCodeRepository } from "./ports/verification-code.repository.js";
+export { VerificationCodeRepository } from "./ports/verification-code.repository";

@@ -2,9 +2,9 @@
  * Semantic builder for IMS URLs. Use this instead of raw query params.
  */
 
-import type { ImageUrlParams, PresetName } from "./types.js";
-import { IMS_CONTRACT_VERSION } from "./types.js";
-import { PRESETS } from "./presets.js";
+import type { ImageUrlParams, PresetName } from "./types";
+import { IMS_CONTRACT_VERSION } from "./types";
+import { PRESETS } from "./presets";
 
 export interface ImageUrlBuilderOptions {
   /** Feature flag: disable blur (overrides context) */

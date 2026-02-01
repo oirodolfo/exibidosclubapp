@@ -1,6 +1,6 @@
 import { Global, Module } from "@nestjs/common";
-import { ConfigService } from "./config.service.js";
-import { FeatureFlagService } from "./feature-flag.service.js";
+import { ConfigService } from "./config.service";
+import { FeatureFlagService } from "./feature-flag.service";
 
 @Global()
 @Module({
@@ -9,4 +9,4 @@ import { FeatureFlagService } from "./feature-flag.service.js";
 })
 export class ConfigModule {}
 
-export { ConfigService } from "./config.service.js";
+export { ConfigService } from "./config.service";

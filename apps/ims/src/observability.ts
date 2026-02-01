@@ -3,7 +3,7 @@
  * Signals feed ML training, crop strategy evolution, product decisions.
  */
 
-import type { TransformSpec } from "./contracts.js";
+import type { TransformSpec } from "./contracts";
 
 export interface RequestMetric {
   imageId: string;

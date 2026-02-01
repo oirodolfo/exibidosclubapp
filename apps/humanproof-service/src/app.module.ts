@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
-import { HumanproofConfigModule } from "./config/config.module.js";
-import { DecisionModule } from "./modules/decision/decision.module.js";
-import { EventsModule } from "./modules/events/events.module.js";
-import { HashModule } from "./modules/hash/hash.module.js";
-import { HealthModule } from "./modules/health/health.module.js";
-import { MlModule } from "./modules/ml/ml.module.js";
-import { VerificationModule } from "./modules/verification/verification.module.js";
+import { HumanproofConfigModule } from "./config/config.module";
+import { DecisionModule } from "./modules/decision/decision.module";
+import { EventsModule } from "./modules/events/events.module";
+import { HashModule } from "./modules/hash/hash.module";
+import { HealthModule } from "./modules/health/health.module";
+import { MlModule } from "./modules/ml/ml.module";
+import { VerificationModule } from "./modules/verification/verification.module";
 
 @Module({
   imports: [

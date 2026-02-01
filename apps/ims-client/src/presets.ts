@@ -3,8 +3,8 @@
  * Enforce safety (context=public) and watermark where required.
  */
 
-import type { ImageUrlParams, PresetName } from "./types.js";
-import { IMS_CONTRACT_VERSION } from "./types.js";
+import type { ImageUrlParams, PresetName } from "./types";
+import { IMS_CONTRACT_VERSION } from "./types";
 
 const V = IMS_CONTRACT_VERSION;
 

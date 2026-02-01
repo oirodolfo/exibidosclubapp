@@ -3,9 +3,9 @@ export {
   DEFAULT_GATING_CONFIG,
   type GatingConfig,
   type EvaluateInput,
-} from "./gating.js";
+} from "./gating";
 export type {
   GateDecision,
   GateDecisionArtifact,
   GateCheck,
-} from "./types.js";
+} from "./types";

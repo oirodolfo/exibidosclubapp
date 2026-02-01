@@ -1,14 +1,14 @@
 import { Injectable, ConflictException } from "@nestjs/common";
 import { randomBytes } from "node:crypto";
-import type { DeviceBindingRepository } from "../../application/ports/device-binding.repository.js";
-import type { EventBusPort } from "../../application/ports/event-bus.port.js";
+import type { DeviceBindingRepository } from "../../application/ports/device-binding.repository";
+import type { EventBusPort } from "../../application/ports/event-bus.port";
 import type {
   DeviceBinding,
   VerificationStatusResponse,
-} from "../../domain/entities/device-binding.js";
-import { DeviceStatus } from "../../domain/enums/device-status.js";
-import { UserVerificationStatus } from "../../domain/enums/user-verification-status.js";
-import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
+} from "../../domain/entities/device-binding";
+import { DeviceStatus } from "../../domain/enums/device-status";
+import { UserVerificationStatus } from "../../domain/enums/user-verification-status";
+import { HumanproofConfigService } from "../../config/humanproof-config.service";
 
 @Injectable()
 export class DeviceService {

@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Body } from "@nestjs/common";
-import { ModelRegistryService } from "./model-registry.service.js";
-import { DeploymentService } from "./deployment.service.js";
+import { ModelRegistryService } from "./model-registry.service";
+import { DeploymentService } from "./deployment.service";
 
 @Controller()
 export class RegistryController {

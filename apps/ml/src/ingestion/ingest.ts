@@ -9,10 +9,10 @@ import {
   TAXONOMY_VERSION,
   isTaxonomyV1Export,
   type TaxonomyV1Export,
-} from "../taxonomy/v1.js";
-import { canonicalPayload, type DatasetArtifact } from "./artifact.js";
-import { exportHasNewOrUpdatedAnnotations, fetchLabelStudioExport, type LabelStudioConfig } from "./label-studio-client.js";
-import type { VersionedDatasetStore } from "./versioned-store.js";
+} from "../taxonomy/v1";
+import { canonicalPayload, type DatasetArtifact } from "./artifact";
+import { exportHasNewOrUpdatedAnnotations, fetchLabelStudioExport, type LabelStudioConfig } from "./label-studio-client";
+import type { VersionedDatasetStore } from "./versioned-store";
 
 export interface IngestionConfig {
   labelStudio: LabelStudioConfig;

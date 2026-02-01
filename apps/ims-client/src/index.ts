@@ -8,8 +8,8 @@ export {
   imageUrl,
   ImageUrlBuilder,
   type ImageUrlBuilderOptions,
-} from "./builder.js";
-export { PRESETS } from "./presets.js";
+} from "./builder";
+export { PRESETS } from "./presets";
 export {
   IMS_CONTRACT_VERSION,
   type BlurContext,
@@ -20,4 +20,4 @@ export {
   type OutputFormat,
   type PresetName,
   type WatermarkKind,
-} from "./types.js";
+} from "./types";

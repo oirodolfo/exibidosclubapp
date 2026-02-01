@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { BlurContext, BlurMode } from "../transform/contracts.js";
+import type { BlurContext, BlurMode } from "../transform/contracts";
 
 export const BLUR_POLICY_VERSION = 1;
 

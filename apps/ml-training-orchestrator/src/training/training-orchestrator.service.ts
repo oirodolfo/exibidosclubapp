@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import type { ValidationReport } from "@exibidos/ml-contracts";
-import type { TrainingJobInput, TrainingJobResult } from "./training-job-runner.service.js";
-import { TrainingJobRunnerService } from "./training-job-runner.service.js";
+import type { TrainingJobInput, TrainingJobResult } from "./training-job-runner.service";
+import { TrainingJobRunnerService } from "./training-job-runner.service";
 
 export interface OrchestratorInput {
   dataset_version: string;

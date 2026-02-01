@@ -5,7 +5,7 @@
 
 import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
-import type { WatermarkKind } from "./contracts.js";
+import type { WatermarkKind } from "./contracts";
 
 export type { WatermarkKind };
 

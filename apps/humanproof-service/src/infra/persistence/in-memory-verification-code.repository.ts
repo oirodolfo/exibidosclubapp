@@ -1,5 +1,5 @@
-import type { VerificationAttempt } from "../../domain/entities/verification-attempt.js";
-import { VerificationCodeRepository } from "../../application/ports/verification-code.repository.js";
+import type { VerificationAttempt } from "../../domain/entities/verification-attempt";
+import { VerificationCodeRepository } from "../../application/ports/verification-code.repository";
 
 export class InMemoryVerificationCodeRepository extends VerificationCodeRepository {
   private readonly store = new Map<string, VerificationAttempt>();

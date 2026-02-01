@@ -3,7 +3,7 @@
  * Never mix these with ground-truth datasets.
  */
 
-import type { SwipeInput, UserTagInput, VoteInput, WeakLabel } from "./types.js";
+import type { SwipeInput, UserTagInput, VoteInput, WeakLabel } from "./types";
 
 /** Default weight for weak labels (human = 1.0). */
 export const WEAK_LABEL_MAX_WEIGHT = 0.5;

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { ImageMlMetadataData, RegionWithConfidence, SaliencySignal } from "@exibidos/ml-contracts";
-import type { CropMode } from "./contracts.js";
+import type { CropMode } from "./contracts";
 
 const MIN_CONFIDENCE = 0.5;
 

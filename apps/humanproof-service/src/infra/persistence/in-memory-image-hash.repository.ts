@@ -1,8 +1,8 @@
 import {
   ApprovedImageHashRepository,
   RejectedImageHashRepository,
-} from "../../application/ports/image-hash.repository.js";
-import { hammingDistance } from "../../shared/perceptual-hash.js";
+} from "../../application/ports/image-hash.repository";
+import { hammingDistance } from "../../shared/perceptual-hash";
 
 type Entry = { hash: string; at: Date; userId?: string; reason?: string };
 

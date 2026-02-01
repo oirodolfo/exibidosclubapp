@@ -10,10 +10,10 @@ import {
   HttpStatus,
   BadRequestException,
 } from "@nestjs/common";
-import { DeviceService } from "../device/device.service.js";
-import { VerificationService } from "./verification.service.js";
-import { VerificationUploadService } from "./verification-upload.service.js";
-import { VerificationCodeRateLimitGuard } from "./verification-code-rate-limit.guard.js";
+import { DeviceService } from "../device/device.service";
+import { VerificationService } from "./verification.service";
+import { VerificationUploadService } from "./verification-upload.service";
+import { VerificationCodeRateLimitGuard } from "./verification-code-rate-limit.guard";
 
 class CreateCodeDto {
   userId!: string;

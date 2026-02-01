@@ -1,7 +1,7 @@
 import {
   EventBusPort,
   type HumanproofDomainEvent,
-} from "../../application/ports/event-bus.port.js";
+} from "../../application/ports/event-bus.port";
 
 /**
  * In-memory event bus with structured audit logging.

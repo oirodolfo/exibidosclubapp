@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { cacheKey } from "./cache.js";
+import { cacheKey } from "./cache";
 
 describe("cacheKey", () => {
   it("returns imageId when query is empty", () => {

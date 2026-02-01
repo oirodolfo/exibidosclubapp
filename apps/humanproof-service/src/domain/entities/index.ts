@@ -1,4 +1,4 @@
 export type {
   VerificationAttempt,
   VerificationAttemptCreate,
-} from "./verification-attempt.js";
+} from "./verification-attempt";

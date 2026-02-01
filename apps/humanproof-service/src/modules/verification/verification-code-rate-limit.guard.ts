@@ -5,8 +5,8 @@ import {
   HttpStatus,
   Injectable,
 } from "@nestjs/common";
-import type { VerificationCodeRepository } from "../../application/ports/verification-code.repository.js";
-import { HumanproofConfigService } from "../../config/humanproof-config.service.js";
+import type { VerificationCodeRepository } from "../../application/ports/verification-code.repository";
+import { HumanproofConfigService } from "../../config/humanproof-config.service";
 
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 

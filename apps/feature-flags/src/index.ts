@@ -5,4 +5,4 @@ export {
   type FeatureFlagOverride,
   type FeatureFlagDefinition,
   type MlFlagKey,
-} from "./types.js";
+} from "./types";

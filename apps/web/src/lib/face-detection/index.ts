@@ -53,7 +53,7 @@ export async function detectFaces(buffer: Buffer): Promise<FaceResult[]> {
 
   let faceapi: typeof import("@vladmandic/face-api");
   try {
-    faceapi = await import("@vladmandic/face-api/dist/face-api.node-wasm.js");
+    faceapi = await import("@vladmandic/face-api/dist/face-api.node-wasm");
   } catch (e) {
     log.face.warn("detectFaces: face-api import failed", e);
     return [];

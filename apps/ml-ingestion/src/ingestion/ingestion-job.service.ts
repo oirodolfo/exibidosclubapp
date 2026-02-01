@@ -2,10 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { canonicalPayload } from "@exibidos/ml-contracts";
 import type { DatasetArtifact } from "@exibidos/ml-contracts";
-import { LabelStudioClientService, type LabelStudioConfig } from "./label-studio-client.service.js";
-import { TaxonomyValidatorService } from "./taxonomy-validator.service.js";
-import { DatasetArtifactService } from "./dataset-artifact.service.js";
-import { InMemoryDatasetStoreService } from "./in-memory-dataset-store.service.js";
+import { LabelStudioClientService, type LabelStudioConfig } from "./label-studio-client.service";
+import { TaxonomyValidatorService } from "./taxonomy-validator.service";
+import { DatasetArtifactService } from "./dataset-artifact.service";
+import { InMemoryDatasetStoreService } from "./in-memory-dataset-store.service";
 
 export const DATASET_READY_EVENT = "ml.dataset.ready";
 

@@ -5,12 +5,12 @@ export {
   type RegionWithConfidence,
   type SaliencySignal,
   type ImageMlMetadataData,
-} from "./metadata.js";
+} from "./metadata";
 
 export {
   canonicalPayload,
   type DatasetArtifact,
-} from "./dataset.js";
+} from "./dataset";
 
 export {
   DEFAULT_ROLLOUT_STAGES,
@@ -18,24 +18,24 @@ export {
   type ModelDeployment,
   type RolloutConfig,
   type ModelVersionDescriptor,
-} from "./model-version.js";
+} from "./model-version";
 
 export {
   type GateDecision,
   type GateCheck,
   type GateDecisionArtifact,
-} from "./gating.js";
+} from "./gating";
 
 export {
   type ValidationCheck,
   type ValidationReport,
-} from "./validation.js";
+} from "./validation";
 
 export {
   type ClassMetrics,
   type RegionMetrics,
   type TrainingMetricsArtifact,
-} from "./metrics.js";
+} from "./metrics";
 
 export {
   type WeakLabelSource,
@@ -43,7 +43,7 @@ export {
   type UserTagInput,
   type VoteInput,
   type SwipeInput,
-} from "./weak-labels.js";
+} from "./weak-labels";
 
 export {
   DEFAULT_OBSERVABILITY_CONFIG,
@@ -53,4 +53,4 @@ export {
   type ModelPerformanceSnapshot,
   type DriftSignal,
   type ObservabilityConfig,
-} from "./observability.js";
+} from "./observability";

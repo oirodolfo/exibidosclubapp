@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { TrainingJobRunnerService } from "./training-job-runner.service.js";
-import { TrainingOrchestratorService } from "./training-orchestrator.service.js";
+import { TrainingJobRunnerService } from "./training-job-runner.service";
+import { TrainingOrchestratorService } from "./training-orchestrator.service";
 
 @Module({
   providers: [TrainingJobRunnerService, TrainingOrchestratorService],

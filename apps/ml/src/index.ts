@@ -5,7 +5,7 @@ export {
   type Region,
   type RegionWithConfidence,
   type SaliencySignal,
-} from "./contracts.js";
+} from "./contracts";
 
 export {
   runIngestion,
@@ -18,7 +18,7 @@ export {
   type IngestionConfig,
   type LabelStudioConfig,
   type VersionedDatasetStore,
-} from "./ingestion/index.js";
+} from "./ingestion/index";
 
 export {
   TAXONOMY_VERSION,
@@ -31,7 +31,7 @@ export {
   type TaxonomyRegion,
   type RegionType,
   type ClassLabel,
-} from "./taxonomy/v1.js";
+} from "./taxonomy/v1";
 
 export {
   normalizeUserTag,
@@ -45,14 +45,14 @@ export {
   type UserTagInput,
   type VoteInput,
   type SwipeInput,
-} from "./weak-labels/index.js";
+} from "./weak-labels/index";
 
 export {
   validateDataset,
   type ValidateInput,
   type ValidationReport,
   type ValidationCheck,
-} from "./validation/index.js";
+} from "./validation/index";
 
 export {
   DEFAULT_TRAINING_CONFIG,
@@ -67,7 +67,7 @@ export {
   type RegionMetrics,
   type SplitKind,
   type SplitResult,
-} from "./training/index.js";
+} from "./training/index";
 
 export {
   evaluateAndGate,
@@ -77,7 +77,7 @@ export {
   type GateDecision,
   type GateDecisionArtifact,
   type GateCheck,
-} from "./evaluation/index.js";
+} from "./evaluation/index";
 
 export {
   promoteToNextStage,
@@ -93,7 +93,7 @@ export {
   type ModelDeployment,
   type RolloutConfig,
   type RolloutStage,
-} from "./deployment/index.js";
+} from "./deployment/index";
 
 export {
   computePriorityScore,
@@ -103,7 +103,7 @@ export {
   type FeedbackCandidate,
   type FeedbackLoopConfig,
   type CandidateInput,
-} from "./feedback/index.js";
+} from "./feedback/index";
 
 export {
   detectDrift,
@@ -115,4 +115,4 @@ export {
   type AnnotationCorrectionRate,
   type ModelPerformanceSnapshot,
   type DriftSignal,
-} from "./observability/index.js";
+} from "./observability/index";

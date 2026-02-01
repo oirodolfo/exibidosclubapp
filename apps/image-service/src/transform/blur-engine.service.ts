@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { ImageMlMetadataData } from "@exibidos/ml-contracts";
 import sharp from "sharp";
-import type { BlurMode } from "./contracts.js";
+import type { BlurMode } from "./contracts";
 
 const FULL_BLUR_SIGMA = 12;
 const REGION_BLUR_SIGMA = 8;

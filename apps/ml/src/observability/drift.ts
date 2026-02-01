@@ -9,8 +9,8 @@ import type {
   DriftSignal,
   ModelPerformanceSnapshot,
   ObservabilityConfig,
-} from "./types.js";
-import { DEFAULT_OBSERVABILITY_CONFIG } from "./types.js";
+} from "./types";
+import { DEFAULT_OBSERVABILITY_CONFIG } from "./types";
 
 export interface DriftInput {
   /** Current confidence distribution */

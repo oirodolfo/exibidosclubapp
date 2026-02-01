@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { IngestionJobService } from "./ingestion-job.service.js";
-import type { LabelStudioConfig } from "./label-studio-client.service.js";
+import { IngestionJobService } from "./ingestion-job.service";
+import type { LabelStudioConfig } from "./label-studio-client.service";
 
 @Injectable()
 export class IngestionSchedulerService {

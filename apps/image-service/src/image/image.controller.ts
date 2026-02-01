@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
-import { ImageService } from "./image.service.js";
+import { ImageService } from "./image.service";
 
 interface HttpResponse {
   status(n: number): { send(body: unknown): void };

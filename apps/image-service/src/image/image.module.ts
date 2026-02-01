@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { ImageController } from "./image.controller.js";
-import { ImageService } from "./image.service.js";
-import { StorageService } from "./storage.service.js";
-import { CacheModule } from "../cache/cache.module.js";
-import { PolicyModule } from "../policy/policy.module.js";
-import { TransformModule } from "../transform/transform.module.js";
+import { ImageController } from "./image.controller";
+import { ImageService } from "./image.service";
+import { StorageService } from "./storage.service";
+import { CacheModule } from "../cache/cache.module";
+import { PolicyModule } from "../policy/policy.module";
+import { TransformModule } from "../transform/transform.module";
 
 @Module({
   imports: [CacheModule, PolicyModule, TransformModule],

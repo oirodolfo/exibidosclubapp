@@ -1,4 +1,4 @@
-import type { VerificationAttempt } from "../../domain/entities/verification-attempt.js";
+import type { VerificationAttempt } from "../../domain/entities/verification-attempt";
 
 /**
  * Port for verification code storage.

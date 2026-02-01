@@ -1,5 +1,5 @@
-import type { DeviceStatus } from "../enums/device-status.js";
-import type { UserVerificationStatus } from "../enums/user-verification-status.js";
+import type { DeviceStatus } from "../enums/device-status";
+import type { UserVerificationStatus } from "../enums/user-verification-status";
 
 /**
  * Device bound to a user.

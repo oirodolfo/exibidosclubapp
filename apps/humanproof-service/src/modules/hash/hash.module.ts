@@ -2,12 +2,12 @@ import { Module } from "@nestjs/common";
 import {
   ApprovedImageHashRepository,
   RejectedImageHashRepository,
-} from "../../application/ports/image-hash.repository.js";
+} from "../../application/ports/image-hash.repository";
 import {
   InMemoryApprovedImageHashRepository,
   InMemoryRejectedImageHashRepository,
-} from "../../infra/persistence/in-memory-image-hash.repository.js";
-import { HashService } from "./hash.service.js";
+} from "../../infra/persistence/in-memory-image-hash.repository";
+import { HashService } from "./hash.service";
 
 @Module({
   providers: [

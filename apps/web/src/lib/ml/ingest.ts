@@ -10,7 +10,7 @@ import {
   ML_METADATA_CONTRACT_VERSION,
   type ImageMlMetadataData,
   type RegionWithConfidence,
-} from "@exibidos/ml";
+} from "@exibidos/ml-contracts";
 import { detectFaces } from "@/lib/face-detection";
 
 /** Persist ML metadata for image (idempotent upsert by imageId). */

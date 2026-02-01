@@ -3,7 +3,7 @@
  * Every dataset is versioned and checksummed; no overwrite.
  */
 
-import type { TaxonomyV1Export } from "../taxonomy/v1.js";
+import type { TaxonomyV1Export } from "../taxonomy/v1";
 
 export interface DatasetArtifact {
   /** Unique immutable version (e.g. timestamp or sequence) */

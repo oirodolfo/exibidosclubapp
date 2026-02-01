@@ -4,16 +4,16 @@ export {
   rolloutPctToStage,
   nextRolloutStage,
   type RolloutStateStore,
-} from "./rollout.js";
+} from "./rollout";
 export {
   checkThresholds,
   DEFAULT_MONITORING_THRESHOLDS,
   type MonitoringThresholds,
   type DeploymentMetrics,
-} from "./monitoring.js";
+} from "./monitoring";
 export {
   DEFAULT_ROLLOUT_STAGES,
   type ModelDeployment,
   type RolloutConfig,
   type RolloutStage,
-} from "./types.js";
+} from "./types";

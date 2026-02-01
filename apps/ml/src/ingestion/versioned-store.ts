@@ -3,7 +3,7 @@
  * Datasets are stored by version; no overwrite.
  */
 
-import type { DatasetArtifact } from "./artifact.js";
+import type { DatasetArtifact } from "./artifact";
 
 export interface VersionedDatasetStore {
   /** Write artifact and payload to version path. Fails if version exists. */

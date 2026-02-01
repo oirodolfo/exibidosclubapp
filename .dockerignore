@@ -1,0 +1,42 @@
+# Dependencies — exclude from context; images run pnpm install
+node_modules
+**/node_modules
+.pnpm-store
+**/.pnpm-store
+
+# Git
+.git
+.gitignore
+
+# Build outputs
+dist
+.next
+out
+build
+*.tsbuildinfo
+
+# Env (never send to image)
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs / coverage
+*.log
+coverage
+.nyc_output
+
+# Local storage
+.storage
+
+# Misc
+*.pem
+README.md
+docs

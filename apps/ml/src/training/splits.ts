@@ -3,8 +3,8 @@
  * Splits by user (or task owner) so the same user never appears in multiple splits.
  */
 
-import type { TaxonomyV1Export } from "../taxonomy/v1.js";
-import type { TrainingConfig } from "./config.js";
+import type { TaxonomyV1Export } from "../taxonomy/v1";
+import type { TrainingConfig } from "./config";
 
 export type SplitKind = "train" | "val" | "test";
 

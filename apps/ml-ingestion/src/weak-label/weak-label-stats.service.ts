@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { WeakLabelStoreService } from "./weak-label-store.service.js";
+import { WeakLabelStoreService } from "./weak-label-store.service";
 
 export interface WeakLabelStats {
   totalLabels: number;

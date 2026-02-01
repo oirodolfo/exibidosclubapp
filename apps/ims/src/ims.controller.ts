@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import type { FastifyReply } from "fastify";
-import { getMetrics } from "./observability.js";
-import { ImsImageService } from "./ims-image.service.js";
+import { getMetrics } from "./observability";
+import { ImsImageService } from "./ims-image.service";
 
 @Controller()
 export class ImsController {

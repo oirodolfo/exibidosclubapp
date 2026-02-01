@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { imageUrl, ImageUrlBuilder, PRESETS, IMS_CONTRACT_VERSION } from "./index.js";
+import { imageUrl, ImageUrlBuilder, PRESETS, IMS_CONTRACT_VERSION } from "./index";
 
 const IMS_BASE = "https://ims.example.com";
 

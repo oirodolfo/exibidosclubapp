@@ -5,12 +5,12 @@
 
 import type { ImageMlMetadataData } from "@exibidos/ml";
 import sharp from "sharp";
-import type { BlurMode } from "./contracts.js";
-import type { TransformSpec } from "./contracts.js";
-import type { WatermarkKind } from "./contracts.js";
-import { applyBlur } from "./blur-engine.js";
-import { computeCropRegion } from "./crop-engine.js";
-import { applyWatermark } from "./watermark-engine.js";
+import type { BlurMode } from "./contracts";
+import type { TransformSpec } from "./contracts";
+import type { WatermarkKind } from "./contracts";
+import { applyBlur } from "./blur-engine";
+import { computeCropRegion } from "./crop-engine";
+import { applyWatermark } from "./watermark-engine";
 
 export interface PipelineInput {
   buffer: Buffer;

@@ -1,7 +1,7 @@
 export {
   detectDrift,
   type DriftInput,
-} from "./drift.js";
+} from "./drift";
 export {
   DEFAULT_OBSERVABILITY_CONFIG,
   type ObservabilityConfig,
@@ -10,4 +10,4 @@ export {
   type AnnotationCorrectionRate,
   type ModelPerformanceSnapshot,
   type DriftSignal,
-} from "./types.js";
+} from "./types";

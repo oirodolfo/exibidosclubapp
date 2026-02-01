@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { ModelRegistryService } from "./model-registry.service.js";
-import { DeploymentService } from "./deployment.service.js";
-import { GateEnforcementService } from "./gate-enforcement.service.js";
-import { RegistryController } from "./registry.controller.js";
+import { ModelRegistryService } from "./model-registry.service";
+import { DeploymentService } from "./deployment.service";
+import { GateEnforcementService } from "./gate-enforcement.service";
+import { RegistryController } from "./registry.controller";
 
 @Module({
   controllers: [RegistryController],

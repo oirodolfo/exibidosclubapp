@@ -5,9 +5,9 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
-import { AppModule } from "./app.module.js";
-import { HumanproofConfigService } from "./config/humanproof-config.service.js";
-import { HumanproofHttpExceptionFilter } from "./shared/http-exception.filter.js";
+import { AppModule } from "./app.module";
+import { HumanproofConfigService } from "./config/humanproof-config.service";
+import { HumanproofHttpExceptionFilter } from "./shared/http-exception.filter";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(

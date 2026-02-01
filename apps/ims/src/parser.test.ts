@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTransformSpec } from "./parser.js";
-import { DEFAULTS, TRANSFORM_CONTRACT_VERSION } from "./contracts.js";
+import { parseTransformSpec } from "./parser";
+import { DEFAULTS, TRANSFORM_CONTRACT_VERSION } from "./contracts";
 
 describe("parseTransformSpec", () => {
   it("returns default spec when query is empty", () => {

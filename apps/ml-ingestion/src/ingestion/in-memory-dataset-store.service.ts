@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { DatasetArtifact } from "@exibidos/ml-contracts";
-import type { VersionedDatasetStore } from "./dataset-artifact.service.js";
+import type { VersionedDatasetStore } from "./dataset-artifact.service";
 
 @Injectable()
 export class InMemoryDatasetStoreService implements VersionedDatasetStore {

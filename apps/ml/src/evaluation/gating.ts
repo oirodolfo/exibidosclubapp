@@ -4,8 +4,8 @@
  * produces approve / reject / require_manual_review with decision artifact.
  */
 
-import type { TrainingMetricsArtifact } from "../training/metrics.js";
-import type { GateCheck, GateDecision, GateDecisionArtifact } from "./types.js";
+import type { TrainingMetricsArtifact } from "../training/metrics";
+import type { GateCheck, GateDecision, GateDecisionArtifact } from "./types";
 
 export interface GatingConfig {
   /** Minimum macro F1 to approve (no production baseline) */

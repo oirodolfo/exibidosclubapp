@@ -1,5 +1,5 @@
-import type { DeviceBinding } from "../../domain/entities/device-binding.js";
-import type { DeviceStatus } from "../../domain/enums/device-status.js";
+import type { DeviceBinding } from "../../domain/entities/device-binding";
+import type { DeviceStatus } from "../../domain/enums/device-status";
 
 /**
  * Port for device binding storage.

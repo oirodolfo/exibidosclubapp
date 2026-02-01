@@ -3,7 +3,7 @@
  * Weak labels are stored separately from ground truth; never mixed.
  */
 
-import type { WeakLabel } from "./types.js";
+import type { WeakLabel } from "./types";
 
 export interface WeakLabelStore {
   /** Append weak labels (idempotent by imageId+source+tagId/categoryId if needed). */

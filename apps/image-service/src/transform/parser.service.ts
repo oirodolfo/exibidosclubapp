@@ -10,7 +10,7 @@ import {
   type OutputFormat,
   type TransformSpec,
   type WatermarkKind,
-} from "./contracts.js";
+} from "./contracts";
 
 const VERSION_MIN = 1;
 const VERSION_MAX = 99;

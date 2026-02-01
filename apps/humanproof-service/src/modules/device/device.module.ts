@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { DeviceBindingRepository } from "../../application/ports/device-binding.repository.js";
-import { InMemoryDeviceBindingRepository } from "../../infra/persistence/in-memory-device-binding.repository.js";
-import { DeviceService } from "./device.service.js";
+import { DeviceBindingRepository } from "../../application/ports/device-binding.repository";
+import { InMemoryDeviceBindingRepository } from "../../infra/persistence/in-memory-device-binding.repository";
+import { DeviceService } from "./device.service";
 
 @Module({
   providers: [

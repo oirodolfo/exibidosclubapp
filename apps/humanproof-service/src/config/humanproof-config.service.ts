@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { EnvSchema } from "./env.schema.js";
+import type { EnvSchema } from "./env.schema";
 
 @Injectable()
 export class HumanproofConfigService {
