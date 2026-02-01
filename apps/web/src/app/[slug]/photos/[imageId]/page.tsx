@@ -101,7 +101,7 @@ export default async function ImageDetailPage({
         <div className="flex-shrink-0">
           <div className="aspect-square max-w-md rounded-lg overflow-hidden bg-neutral-200 relative">
             {thumbUrl ? (
-              <Image src={thumbUrl} alt={image.caption ?? "Photo"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 28rem" />
+              <Image src={thumbUrl} alt={image.caption ?? "Photo"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 28rem" unoptimized />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-neutral-400">[img]</div>
             )}
