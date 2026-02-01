@@ -9,7 +9,9 @@ async function fetchCategoryFeed(slug: string, cursor?: string | null) {
     ? `/api/categories/${slug}/feed?cursor=${cursor}`
     : `/api/categories/${slug}/feed`;
   const res = await fetch(url);
+
   if (!res.ok) throw new Error("Failed to load");
+
   return res.json() as Promise<{
     feed: { id: string; thumbUrl: string | null; caption: string | null; owner: { slug: string | null } }[];
     nextCursor: string | null;
@@ -29,7 +31,9 @@ export function CategoryFeedClient({ slug }: { slug: string }) {
   const items = data?.pages.flatMap((p) => p.feed) ?? [];
 
   if (isLoading) return <p className="text-exibidos-muted py-8">Loading...</p>;
+
   if (error) return <p className="text-exibidos-magenta py-4">{String(error)}</p>;
+
   if (items.length === 0)
     return (
       <p className="text-exibidos-muted py-8">No images in this category yet.</p>

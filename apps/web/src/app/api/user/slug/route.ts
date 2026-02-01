@@ -11,23 +11,28 @@ const Body = z.object({
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const parse = Body.safeParse(await req.json());
+
   if (!parse.success) {
     return NextResponse.json({ error: "validation_failed", details: parse.error.flatten() }, { status: 400 });
   }
   const { newSlug } = parse.data;
 
   const current = await prisma.slug.findUnique({ where: { userId: session.user.id } });
+
   if (!current) return NextResponse.json({ error: "no_slug" }, { status: 400 });
+
   if (current.slug === newSlug) {
     return NextResponse.json({ ok: true, slug: newSlug }, { status: 200 });
   }
 
   const taken = await prisma.slug.findUnique({ where: { slug: newSlug } });
+
   if (taken) {
     return NextResponse.json({ error: "slug_taken", message: "This handle is already taken." }, { status: 409 });
   }

@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
+
   return (
     <main className={page.default}>
       <div className="flex flex-col gap-8 pt-12">

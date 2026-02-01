@@ -8,6 +8,7 @@ export function MessagesClient() {
   const { data: convs, isLoading } = useConversations();
 
   if (isLoading) return <p className="text-neutral-500">Loading…</p>;
+
   if (!convs?.length) {
     return (
       <p className="text-neutral-500">

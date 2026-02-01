@@ -53,18 +53,23 @@ export default function SettingsPage() {
         fetch("/api/user/me"),
         fetch("/api/close-friends"),
       ]);
+
       if (profRes.status === 401 || meRes.status === 401) {
         router.replace("/auth/login?callbackUrl=/settings");
+
         return;
       }
+
       if (!profRes.ok) {
         setError("Could not load profile.");
         setLoading(false);
+
         return;
       }
       const p = (await profRes.json()) as Profile;
       const me = (await meRes.json()) as { slug?: string | null };
       const cf = (cfRes.ok ? ((await cfRes.json()) as { closeFriends?: { slug: string | null; displayName: string | null }[] }) : { closeFriends: [] });
+
       setProfile(p);
       setSlug(me.slug ?? null);
       setCloseFriends((cf.closeFriends ?? []).filter((c): c is { slug: string; displayName: string | null } => c.slug != null).map((c) => ({ slug: c.slug!, displayName: c.displayName })));
@@ -74,37 +79,46 @@ export default function SettingsPage() {
 
   async function addCloseFriend(e: React.FormEvent) {
     e.preventDefault();
+
     if (!closeFriendSlug.trim()) return;
     const res = await fetch("/api/close-friends", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: closeFriendSlug.trim() }) });
+
     if (res.ok) {
       setCloseFriendSlug("");
       const r = await fetch("/api/close-friends");
       const d = (await r.json()) as { closeFriends?: { slug: string | null; displayName: string | null }[] };
+
       setCloseFriends((d.closeFriends ?? []).filter((c): c is { slug: string; displayName: string | null } => c.slug != null).map((c) => ({ slug: c.slug!, displayName: c.displayName })));
     }
   }
 
   async function removeCloseFriend(s: string) {
     const res = await fetch(`/api/close-friends/${encodeURIComponent(s)}`, { method: "DELETE" });
+
     if (res.ok) setCloseFriends((prev) => prev.filter((c) => c.slug !== s));
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     if (!profile) return;
     setError(null);
     setSuccess(false);
     setSaving(true);
+
     try {
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
+
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
+
         setError((d as { message?: string }).message ?? "Failed to save.");
         setSaving(false);
+
         return;
       }
       setSuccess(true);
@@ -115,6 +129,7 @@ export default function SettingsPage() {
   }
 
   if (loading) return <main className={mainBlock}>Loading…</main>;
+
   if (!profile) return <main className={mainBlock}>Not found.</main>;
 
   return (

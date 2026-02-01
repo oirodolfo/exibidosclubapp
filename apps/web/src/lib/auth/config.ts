@@ -17,112 +17,112 @@ const hasGoogle = Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GO
 const hasTwitter = Boolean(process.env.TWITTER_CLIENT_ID?.trim() && process.env.TWITTER_CLIENT_SECRET?.trim());
 
 export const authOptions: NextAuthOptions = {
-  adapter: ExibidosPrismaAdapter(),
-  session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
-  pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
-  },
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: { email: { label: "Email", type: "email" }, password: { label: "Password", type: "password" } },
-      async authorize(creds) {
-        if (!creds?.email || !creds?.password) {
-          log.auth.debug("authorize: missing email or password");
+    adapter: ExibidosPrismaAdapter(),
+    session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
+    pages: {
+      signIn: "/auth/login",
+      error: "/auth/error",
+    },
+    providers: [
+      CredentialsProvider({
+        name: "credentials",
+        credentials: { email: { label: "Email", type: "email" }, password: { label: "Password", type: "password" } },
+        async authorize(creds) {
+          if (!creds?.email || !creds?.password) {
+            log.auth.debug("authorize: missing email or password");
 
-          return null;
-        }
-        const user = await prisma.user.findFirst({
-          where: { email: creds.email, deletedAt: null },
+            return null;
+          }
+          const user = await prisma.user.findFirst({
+            where: { email: creds.email, deletedAt: null },
+            include: { slugs: true },
+          });
+
+          if (!user?.passwordHash) {
+            log.auth.debug("authorize: user not found or no password", { email: creds.email });
+
+            return null;
+          }
+          const ok = await bcrypt.compare(creds.password, user.passwordHash);
+
+          if (!ok) {
+            log.auth.warn("authorize: invalid password", { email: creds.email });
+
+            return null;
+          }
+
+          if (user.slugs.length === 0) {
+            log.auth.debug("authorize: user has no slug", { userId: user.id });
+
+            return null;
+          }
+          log.auth.info("authorize: success", { userId: user.id, email: creds.email });
+
+          return { id: user.id, email: user.email, name: user.name, image: user.image };
+        },
+      }),
+      ...(hasGoogle
+        ? [
+            GoogleProvider({
+              clientId: process.env.GOOGLE_CLIENT_ID!,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            }),
+          ]
+        : []),
+      ...(hasTwitter
+        ? [
+            TwitterProvider({
+              clientId: process.env.TWITTER_CLIENT_ID!,
+              clientSecret: process.env.TWITTER_CLIENT_SECRET!,
+              version: "2.0",
+            }),
+          ]
+        : []),
+    ],
+    callbacks: {
+      async signIn({ user, account }) {
+        if (account?.provider === "credentials") return true;
+        log.auth.debug("signIn: OAuth", { provider: account?.provider, userId: user.id });
+        const exists = await prisma.user.findFirst({
+          where: { id: user.id!, deletedAt: null },
           include: { slugs: true },
         });
 
-        if (!user?.passwordHash) {
-          log.auth.debug("authorize: user not found or no password", { email: creds.email });
+        if (exists && exists.slugs.length > 0) {
+          log.auth.info("signIn: existing user", { userId: user.id });
 
-          return null;
-        }
-        const ok = await bcrypt.compare(creds.password, user.passwordHash);
-
-        if (!ok) {
-          log.auth.warn("authorize: invalid password", { email: creds.email });
-
-          return null;
+          return true;
         }
 
-        if (user.slugs.length === 0) {
-          log.auth.debug("authorize: user has no slug", { userId: user.id });
+        if (exists && exists.slugs.length === 0) {
+          log.auth.info("signIn: redirect to complete-signup", { userId: user.id });
 
-          return null;
+          return "/auth/complete-signup";
         }
-        log.auth.info("authorize: success", { userId: user.id, email: creds.email });
-
-        return { id: user.id, email: user.email, name: user.name, image: user.image };
-      },
-    }),
-    ...(hasGoogle
-      ? [
-        GoogleProvider({
-          clientId: process.env.GOOGLE_CLIENT_ID!,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-      ]
-      : []),
-    ...(hasTwitter
-      ? [
-        TwitterProvider({
-          clientId: process.env.TWITTER_CLIENT_ID!,
-          clientSecret: process.env.TWITTER_CLIENT_SECRET!,
-          version: "2.0",
-        }),
-      ]
-      : []),
-  ],
-  callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "credentials") return true;
-      log.auth.debug("signIn: OAuth", { provider: account?.provider, userId: user.id });
-      const exists = await prisma.user.findFirst({
-        where: { id: user.id!, deletedAt: null },
-        include: { slugs: true },
-      });
-
-      if (exists && exists.slugs.length > 0) {
-        log.auth.info("signIn: existing user", { userId: user.id });
 
         return true;
-      }
+      },
+      async redirect({ url, baseUrl }) {
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
 
-      if (exists && exists.slugs.length === 0) {
-        log.auth.info("signIn: redirect to complete-signup", { userId: user.id });
+        if (new URL(url).origin === baseUrl) return url;
 
-        return "/auth/complete-signup";
-      }
-
-      return true;
+        return baseUrl;
+      },
     },
-    async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+    events: {
+      async createUser({ user }) {
+        if (!user.id) return;
+        const u = await prisma.user.findUnique({ where: { id: user.id }, include: { slugs: true } });
 
-      if (new URL(url).origin === baseUrl) return url;
+        if (u?.slugs.length) return;
+        const sentinel = new Date("2000-01-01");
 
-      return baseUrl;
+        if (u?.birthdate.getTime() !== sentinel.getTime()) return;
+        // OAuth-created user with placeholder birthdate; Profile/Slug created in /auth/complete-signup
+      },
     },
-  },
-  events: {
-    async createUser({ user }) {
-      if (!user.id) return;
-      const u = await prisma.user.findUnique({ where: { id: user.id }, include: { slugs: true } });
-
-      if (u?.slugs.length) return;
-      const sentinel = new Date("2000-01-01");
-
-      if (u?.birthdate.getTime() !== sentinel.getTime()) return;
-      // OAuth-created user with placeholder birthdate; Profile/Slug created in /auth/complete-signup
-    },
-  },
-};
+  };
 
 export function isAgeAllowed(birthdate: Date): boolean {
   const now = new Date();

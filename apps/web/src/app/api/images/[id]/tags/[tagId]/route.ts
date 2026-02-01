@@ -9,9 +9,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; tagId: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_TAGGING !== "true") {
     return NextResponse.json({ error: "tagging_disabled" }, { status: 403 });
   }
@@ -21,6 +23,7 @@ export async function DELETE(
     where: { imageId_tagId: { imageId: id, tagId } },
     include: { tag: true },
   });
+
   if (!it) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   await prisma.imageTag.delete({
@@ -38,5 +41,6 @@ export async function DELETE(
   });
 
   log.api.tags.info("tag remove: success", { imageId: id, tagId, userId: session.user.id });
+
   return NextResponse.json({ ok: true });
 }

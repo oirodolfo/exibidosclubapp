@@ -19,6 +19,7 @@ export function VerticalFeedClient() {
 
   const loadMoreIfNeeded = useCallback(() => {
     const idx = currentIndexRef.current;
+
     if (idx >= allItems.length - 2 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -26,13 +27,14 @@ export function VerticalFeedClient() {
 
   useEffect(() => {
     loadMoreIfNeeded();
-  }, [currentIndexRef.current, allItems.length, loadMoreIfNeeded]);
+  }, [allItems.length, loadMoreIfNeeded]);
 
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
     const scrollTop = containerRef.current.scrollTop;
     const viewportHeight = containerRef.current.clientHeight;
     const index = Math.round(scrollTop / viewportHeight);
+
     if (index !== currentIndexRef.current) {
       currentIndexRef.current = index;
       loadMoreIfNeeded();

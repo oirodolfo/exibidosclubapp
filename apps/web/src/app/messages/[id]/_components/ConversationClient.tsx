@@ -17,6 +17,7 @@ export function ConversationClient({ conversationId, currentUserId }: Props) {
   const send = () => {
     if (!body.trim()) return;
     const msg = body.trim();
+
     setBody("");
     sendMutation.mutate(msg);
   };

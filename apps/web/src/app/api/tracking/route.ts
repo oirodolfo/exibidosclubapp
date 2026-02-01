@@ -17,6 +17,7 @@ export async function POST(req: Request) {
 
   const session = await getServerSession(authOptions);
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
 
   const { name, payload } = parse.data;

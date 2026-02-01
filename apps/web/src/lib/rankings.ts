@@ -24,13 +24,16 @@ export async function ensureBadgesExist(): Promise<void> {
 export async function awardFirstUpload(userId: string): Promise<boolean> {
   await ensureBadgesExist();
   const badge = await prisma.badge.findUnique({ where: { key: "first_upload" } });
+
   if (!badge) return false;
   const existing = await prisma.userBadge.findUnique({
     where: { userId_badgeId: { userId, badgeId: badge.id } },
   });
+
   if (existing) return false;
   await prisma.userBadge.create({
     data: { userId, badgeId: badge.id },
   });
+
   return true;
 }

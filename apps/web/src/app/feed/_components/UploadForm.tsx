@@ -28,24 +28,33 @@ export function UploadForm({ onDone, onCancel }: UploadFormProps) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
     if (!file) {
       setError("Choose a photo.");
+
       return;
     }
+
     if (!ALLOWED_TYPES.split(",").includes(file.type)) {
       setError("Only JPEG, PNG, and WebP are allowed.");
+
       return;
     }
+
     if (file.size > MAX_MB * 1024 * 1024) {
       setError(`Max size ${MAX_MB}MB.`);
+
       return;
     }
     setLoading(true);
     const formData = new FormData();
+
     formData.set("file", file);
+
     if (caption.trim()) formData.set("caption", caption.trim());
     formData.set("visibility", visibility);
     formData.set("blurMode", blurMode);
+
     try {
       const res = await fetch("/api/images/upload", {
         method: "POST",
@@ -55,15 +64,19 @@ export function UploadForm({ onDone, onCancel }: UploadFormProps) {
         error?: string;
         duplicateOf?: string;
       };
+
       if (!res.ok) {
         if (res.status === 401) {
           onCancel();
           setLoading(false);
+
           return;
         }
+
         if (res.status === 409 && data.duplicateOf) {
           setError("This photo was already uploaded.");
           setLoading(false);
+
           return;
         }
         const code = data.error;
@@ -79,8 +92,10 @@ export function UploadForm({ onDone, onCancel }: UploadFormProps) {
                   : code === "processing_failed"
                     ? "Processing failed. Try another image."
                     : code || "Upload failed.";
+
         setError(msg);
         setLoading(false);
+
         return;
       }
       onDone();

@@ -22,38 +22,51 @@ export function UploadForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
     if (!file) {
       setError("Choose a photo.");
+
       return;
     }
+
     if (!ALLOWED_TYPES.split(",").includes(file.type)) {
       setError("Only JPEG, PNG, and WebP are allowed.");
+
       return;
     }
+
     if (file.size > MAX_MB * 1024 * 1024) {
       setError(`Max size ${MAX_MB}MB.`);
+
       return;
     }
     setLoading(true);
     const formData = new FormData();
+
     formData.set("file", file);
+
     if (caption.trim()) formData.set("caption", caption.trim());
     formData.set("visibility", visibility);
     formData.set("blurMode", blurMode);
+
     try {
       const res = await fetch("/api/images/upload", {
         method: "POST",
         body: formData,
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; duplicateOf?: string } & Record<string, unknown>;
+
       if (!res.ok) {
         if (res.status === 401) {
           router.replace("/auth/login?callbackUrl=/upload");
+
           return;
         }
+
         if (res.status === 409 && data.duplicateOf) {
           setError("This photo was already uploaded.");
           setLoading(false);
+
           return;
         }
         const code = data.error as string | undefined;
@@ -69,13 +82,16 @@ export function UploadForm() {
                   : code === "processing_failed"
                     ? "Processing failed. Try another image."
                     : code || "Upload failed.";
+
         setError(msg);
         setLoading(false);
+
         return;
       }
       const meRes = await fetch("/api/user/me");
       const me = (await meRes.json()) as { slug?: string | null };
       const slug = me?.slug;
+
       if (slug) router.replace(`/${slug}?tab=photos`);
       else router.replace("/");
     } catch {

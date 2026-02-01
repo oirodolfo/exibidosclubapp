@@ -24,7 +24,9 @@ export function FollowButton({ slug, followStatus }: { slug: string; followStatu
         {loading ? "…" : "Unfollow"}
       </Button>
     );
+
   if (followStatus === "pending") return <span>Requested</span>;
+
   return (
     <Button type="button" variant="secondary" onClick={follow} disabled={loading}>
       {loading ? "…" : "Follow"}

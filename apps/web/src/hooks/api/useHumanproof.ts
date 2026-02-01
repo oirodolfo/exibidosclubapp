@@ -28,8 +28,11 @@ export function useHumanproofStatus() {
     queryKey: statusKey,
     queryFn: async (): Promise<StatusResponse | null> => {
       const res = await fetch("/api/humanproof/status");
+
       if (res.status === 401) return null;
+
       if (!res.ok) throw new Error("Failed to fetch status");
+
       return res.json();
     },
     staleTime: 60 * 1000,
@@ -41,6 +44,7 @@ type CodePayload = { deviceFingerprint: string; sessionId: string };
 
 export function useHumanproofCode() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: async (payload: CodePayload): Promise<CodeResponse> => {
       const res = await fetch("/api/humanproof/verification/code", {
@@ -49,7 +53,9 @@ export function useHumanproofCode() {
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({})) as CodeResponse & { message?: string };
+
       if (!res.ok) throw new Error(data.message ?? "Could not get code");
+
       return data;
     },
     onSuccess: () => {
@@ -62,16 +68,20 @@ type UploadResponse = { accepted: boolean; failureReasons: string[] };
 
 export function useHumanproofUpload() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: async (file: Blob): Promise<UploadResponse> => {
       const formData = new FormData();
+
       formData.set("file", file, "verify.jpg");
       const res = await fetch("/api/humanproof/verification/upload", {
         method: "POST",
         body: formData,
       });
       const data = await res.json().catch(() => ({})) as UploadResponse & { message?: string };
+
       if (!res.ok) throw new Error(data.message ?? "Upload failed");
+
       return data;
     },
     onSuccess: () => {

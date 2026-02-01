@@ -41,23 +41,29 @@ async function applyFaceBlur(
   const scaleX = targetW / origW;
   const scaleY = targetH / origH;
   const composites: { input: Buffer; top: number; left: number }[] = [];
+
   for (const face of faces) {
     const regions = blurMode === "eyes" && face.eyes ? face.eyes : [face.box];
+
     for (const r of regions) {
       const left = Math.max(0, Math.floor(r.x * scaleX));
       const top = Math.max(0, Math.floor(r.y * scaleY));
       const w = Math.min(targetW - left, Math.ceil(r.width * scaleX));
       const h = Math.min(targetH - top, Math.ceil(r.height * scaleY));
+
       if (w <= 0 || h <= 0) continue;
       const patch = await sharp(baseBuffer)
         .extract({ left, top, width: w, height: h })
         .blur(FACE_BLUR_SIGMA)
         .jpeg({ quality: FACE_BLUR_JPEG_QUALITY })
         .toBuffer();
+
       composites.push({ input: patch, top, left });
     }
   }
+
   if (composites.length === 0) return baseBuffer;
+
   return sharp(baseBuffer).composite(composites).jpeg({ quality: THUMB_QUALITY }).toBuffer();
 }
 
@@ -91,6 +97,7 @@ export async function processImage(
   await upload(originalKey, buffer, mime);
 
   let faces: FaceResult[] = [];
+
   if (blurMode !== "none" || process.env.FEATURE_FACE_BLUR === "true") {
     faces = await detectFaces(buffer);
     log.storage.face.debug("processImage: face detection", { count: faces.length });
@@ -107,8 +114,10 @@ export async function processImage(
     blurMode !== "none" && faces.length > 0
       ? await applyFaceBlur(thumbBase, faces, origW, origH, thumbW, thumbH, blurMode)
       : thumbBase;
+
   thumbBuffer = await applyWatermark(thumbBuffer, thumbW, thumbH, THUMB_QUALITY);
   const thumbKey = buildStorageKey(userId, imageId, "thumb", "jpg");
+
   await upload(thumbKey, thumbBuffer, "image/jpeg");
 
   const blurBase = await sharp(buffer)
@@ -123,8 +132,10 @@ export async function processImage(
     blurMode !== "none" && faces.length > 0
       ? await applyFaceBlur(blurBase, faces, origW, origH, blurW, blurH, blurMode)
       : blurBase;
+
   blurBuffer = await applyWatermark(blurBuffer, blurW, blurH, BLUR_PREVIEW_QUALITY);
   const blurKey = buildStorageKey(userId, imageId, "blur", "jpg");
+
   await upload(blurKey, blurBuffer, "image/jpeg");
 
   log.storage.upload.info("processImage: done", { imageId, blurSuggested: faces.length > 0 });

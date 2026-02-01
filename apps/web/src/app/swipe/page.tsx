@@ -7,9 +7,11 @@ import { SwipeFeed } from "./_components/SwipeFeed";
 
 export default async function SwipePage() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect("/auth/login?callbackUrl=/swipe");
   }
+
   if (process.env.FEATURE_SWIPE !== "true") {
     return (
       <main className={page.default}>
@@ -21,6 +23,7 @@ export default async function SwipePage() {
       </main>
     );
   }
+
   return (
     <main className={page.default}>
       <header className="mb-4 flex items-center justify-between">

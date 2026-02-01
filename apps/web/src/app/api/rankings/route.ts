@@ -20,21 +20,31 @@ export async function GET(req: Request) {
 
   const since = (() => {
     const now = new Date();
+
     if (period === "daily") {
       const d = new Date(now);
+
       d.setHours(0, 0, 0, 0);
+
       return d;
     }
+
     if (period === "weekly") {
       const d = new Date(now);
+
       d.setDate(d.getDate() - 7);
+
       return d;
     }
+
     if (period === "monthly") {
       const d = new Date(now);
+
       d.setMonth(d.getMonth() - 1);
+
       return d;
     }
+
     return new Date(0);
   })();
 
@@ -51,6 +61,7 @@ export async function GET(req: Request) {
   });
 
   const imageIds = swipes.map((s) => s.imageId);
+
   if (imageIds.length === 0) {
     return NextResponse.json({ rankings: [], period });
   }
@@ -67,6 +78,7 @@ export async function GET(req: Request) {
   let items = swipes
     .map((s, idx) => {
       const img = byId[s.imageId];
+
       return img
         ? {
             rank: idx + 1,
@@ -97,6 +109,7 @@ export async function GET(req: Request) {
         const thumbUrl = r.thumbKey
           ? await getSignedDownloadUrl(r.thumbKey, 3600).catch(() => null)
           : null;
+
         return { ...r, thumbUrl };
       })
     );

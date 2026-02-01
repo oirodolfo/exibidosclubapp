@@ -32,21 +32,26 @@ const profileSelect = {
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },
     select: profileSelect,
   });
+
   if (!profile) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
   return NextResponse.json(profile);
 }
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const parse = PatchBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed", details: parse.error.flatten() }, { status: 400 });
 
   const data = Object.fromEntries(
@@ -58,5 +63,6 @@ export async function PATCH(req: Request) {
     create: { userId: session.user.id, ...data },
     update: data,
   });
+
   return NextResponse.json(profile);
 }

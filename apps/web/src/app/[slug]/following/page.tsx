@@ -7,12 +7,14 @@ import { link, listReset, listItemBordered, page, slugHandle, mainBlock } from "
 
 export default async function FollowingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+
   if (!slug) notFound();
 
   const slugRow = await prisma.slug.findFirst({
     where: { slug, user: { deletedAt: null } },
     include: { user: { include: { profile: true } } },
   });
+
   if (!slugRow) notFound();
 
   const ownerId = slugRow.userId;
@@ -22,11 +24,14 @@ export default async function FollowingPage({ params }: { params: Promise<{ slug
   const session = await getServerSession(authOptions);
   const isOwner = !!session?.user?.id && session.user.id === ownerId;
   let isFollower = false;
+
   if (session?.user?.id && !isOwner) {
     const f = await prisma.follow.findUnique({ where: { fromId_toId: { fromId: session.user.id, toId: ownerId } }, select: { status: true } });
+
     isFollower = f?.status === "accepted";
   }
   const canSee = isOwner || isFollower || !isPrivate;
+
   if (!canSee) {
     return (
       <main className={mainBlock}>
@@ -50,6 +55,7 @@ export default async function FollowingPage({ params }: { params: Promise<{ slug
         {list.map((f) => {
           const s = f.to.slugs[0]?.slug;
           const name = f.to.profile?.displayName ?? f.to.name ?? s ?? "—";
+
           return (
             <li key={f.id} className={listItemBordered}>
               {s ? <Link href={`/${s}`} className={link}>{name}</Link> : name}

@@ -7,6 +7,7 @@ import { UploadForm } from "./_components/UploadForm";
 
 export default async function UploadPage() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect("/auth/login?callbackUrl=/upload");
   }

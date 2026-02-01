@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -20,5 +22,10 @@
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": false
   },
-  "exclude": ["node_modules", "dist", ".next", "build"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".next",
+    "build"
+  ]
 }

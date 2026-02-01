@@ -17,6 +17,7 @@ export async function GET(
     where: { id: imageId, deletedAt: null },
     select: { id: true },
   });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const comments = await prisma.comment.findMany({
@@ -53,6 +54,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
@@ -62,9 +64,11 @@ export async function POST(
     where: { id: imageId, deletedAt: null },
     select: { id: true },
   });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) {
     return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   }

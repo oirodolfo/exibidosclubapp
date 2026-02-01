@@ -12,8 +12,10 @@ export default async function VerifyLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user) {
     redirect("/auth/login?callbackUrl=/verify");
   }
+
   return <>{children}</>;
 }

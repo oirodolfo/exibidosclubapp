@@ -8,6 +8,7 @@ const PostBody = z.object({ slug: z.string().min(1).max(30) });
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const list = await prisma.closeFriend.findMany({
@@ -26,16 +27,20 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   const { slug } = parse.data;
 
   const slugRow = await prisma.slug.findUnique({ where: { slug }, select: { userId: true } });
+
   if (!slugRow) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const targetId = slugRow.userId;
+
   if (targetId === session.user.id) return NextResponse.json({ error: "cannot_add_self" }, { status: 400 });
 
   await prisma.closeFriend.upsert({
@@ -43,5 +48,6 @@ export async function POST(req: Request) {
     create: { userId: session.user.id, targetId },
     update: {},
   });
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }

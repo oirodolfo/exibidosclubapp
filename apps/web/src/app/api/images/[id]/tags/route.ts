@@ -23,6 +23,7 @@ export async function GET(
       },
     },
   });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const votes = await prisma.vote.groupBy({
@@ -52,28 +53,35 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_TAGGING !== "true") {
     return NextResponse.json({ error: "tagging_disabled" }, { status: 403 });
   }
   const { id } = await params;
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   const { tagId } = parse.data;
 
   const image = await prisma.image.findUnique({ where: { id, deletedAt: null } });
+
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+
   if (!tag) return NextResponse.json({ error: "tag_not_found" }, { status: 404 });
 
   const existing = await prisma.imageTag.findUnique({
     where: { imageId_tagId: { imageId: id, tagId } },
   });
+
   if (existing) {
     log.api.tags.info("tag add: conflict (already tagged)", { imageId: id, tagId });
+
     return NextResponse.json({ error: "already_tagged" }, { status: 409 });
   }
 
@@ -92,5 +100,6 @@ export async function POST(
   });
 
   log.api.tags.info("tag add: success", { imageId: id, tagId, tagName: tag.name, userId: session.user.id });
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }
