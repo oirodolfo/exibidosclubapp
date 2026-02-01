@@ -28,17 +28,24 @@ export function UploadButton() {
 
   const handleUploadTap = useCallback(() => {
     if (isLoading) return;
+
     if (status === "VERIFIED") {
       setUploadFormOpen(true);
+
       return;
     }
+
     if (status === "UNVERIFIED") {
       setUploadGateOpen(true);
+
       return;
     }
+
     if (status === "PENDING") return;
+
     if (status === "REQUIRES_RECHECK" || status === "REVOKED") {
       setUploadGateOpen(true);
+
       return;
     }
     setUploadGateOpen(true);

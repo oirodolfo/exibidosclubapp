@@ -13,8 +13,11 @@ export function RankingsTab({ rankingsEnabled = true }: Props) {
   const { data: rankings, isLoading, error } = useRankings(period);
 
   if (!rankingsEnabled) return <p className="text-neutral-500">Rankings are disabled.</p>;
+
   if (error) return <p className="text-red-600">{error.message}</p>;
+
   if (isLoading) return <p className="text-neutral-500">Loading rankings…</p>;
+
   if (!rankings?.length) {
     return <p className="text-neutral-500">No rankings yet. Like images in Swipe to build them!</p>;
   }

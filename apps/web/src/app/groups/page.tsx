@@ -7,9 +7,11 @@ import { GroupsClient } from "./_components/GroupsClient";
 
 export default async function GroupsPage() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect("/auth/login?callbackUrl=/groups");
   }
+
   if (process.env.FEATURE_GROUPS !== "true") {
     return (
       <main className={page.default}>
@@ -21,6 +23,7 @@ export default async function GroupsPage() {
       </main>
     );
   }
+
   return (
     <main className={page.default}>
       <header className="mb-4 flex items-center justify-between">

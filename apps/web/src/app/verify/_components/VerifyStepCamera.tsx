@@ -26,6 +26,7 @@ export function VerifyStepCamera({
 
   const startCamera = useCallback(async () => {
     setError(null);
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -35,7 +36,9 @@ export function VerifyStepCamera({
         },
         audio: false,
       });
+
       streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setReady(true);
@@ -43,13 +46,18 @@ export function VerifyStepCamera({
     } catch (e) {
       const msg =
         e instanceof Error ? e.message : "Camera unavailable.";
+
       setError(msg);
     }
   }, []);
 
   useEffect(() => {
-    startCamera();
+    const id = setTimeout(() => {
+      startCamera();
+    }, 0);
+
     return () => {
+      clearTimeout(id);
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     };
@@ -57,11 +65,14 @@ export function VerifyStepCamera({
 
   const handleCapture = useCallback(() => {
     const video = videoRef.current;
+
     if (!video || !streamRef.current || loading) return;
     const canvas = document.createElement("canvas");
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
+
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
     canvas.toBlob(

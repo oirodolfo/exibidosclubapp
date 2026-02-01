@@ -61,10 +61,12 @@ const fallbackEmojis = ["🧠", "🚀", "📦", "🧪", "⚙️", "🔥", "🌱"
 
 function hash(str: string) {
   let h = 0;
+
   for (let i = 0; i < str.length; i++) {
     h = (h << 5) - h + str.charCodeAt(i);
     h |= 0;
   }
+
   return Math.abs(h);
 }
 
@@ -83,6 +85,7 @@ function formatNamespace(parts: string[]) {
   return parts
     .map((ns) => {
       const emoji = emojiFor(ns);
+
       return `${emoji} ${ns}`;
     })
     .join(" ");
@@ -90,6 +93,7 @@ function formatNamespace(parts: string[]) {
 
 function formatLevel(level: LogLevel, text: string) {
   if (disableColor) return text;
+
   return `${levelColors[level]}${text}${reset}`;
 }
 

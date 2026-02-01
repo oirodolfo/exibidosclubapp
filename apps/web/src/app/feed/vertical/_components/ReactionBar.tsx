@@ -18,6 +18,7 @@ export function ReactionBar({ imageId }: { imageId: string }) {
 
   const handleClick = (type: ReactionType) => {
     if (setReaction.isPending || removeReaction.isPending) return;
+
     if (myReaction === type) {
       removeReaction.mutate();
     } else {
@@ -30,6 +31,7 @@ export function ReactionBar({ imageId }: { imageId: string }) {
       {REACTION_TYPES.map((type) => {
         const count = byType[type] ?? 0;
         const isActive = myReaction === type;
+
         return (
           <button
             key={type}

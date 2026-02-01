@@ -27,8 +27,10 @@ function sha256(buffer: Buffer): string {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     log.api.upload.warn("upload: unauthorized");
+
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -43,6 +45,7 @@ export async function POST(req: Request) {
 
   if (!isStorageConfigured()) {
     log.api.upload.error("upload: storage not configured (S3 or local)");
+
     return NextResponse.json(
       { error: "storage_unavailable" },
       { status: 503 }
@@ -50,6 +53,7 @@ export async function POST(req: Request) {
   }
 
   let formData: FormData;
+
   try {
     formData = await req.formData();
   } catch {
@@ -60,8 +64,10 @@ export async function POST(req: Request) {
   }
 
   const file = formData.get("file");
+
   if (!file || !(file instanceof File)) {
     log.api.upload.warn("upload: missing file");
+
     return NextResponse.json(
       { error: "missing_file" },
       { status: 400 }
@@ -69,6 +75,7 @@ export async function POST(req: Request) {
   }
 
   const mime = file.type;
+
   if (!ALLOWED_MIMES.includes(mime as (typeof ALLOWED_MIMES)[number])) {
     return NextResponse.json(
       { error: "invalid_type", allowed: [...ALLOWED_MIMES] },
@@ -107,8 +114,10 @@ export async function POST(req: Request) {
     },
     select: { id: true },
   });
+
   if (existing) {
     log.api.upload.info("upload: duplicate rejected", { contentHash: contentHash.slice(0, 12), duplicateOf: existing.id });
+
     return NextResponse.json(
       { error: "duplicate", duplicateOf: existing.id },
       { status: 409 }
@@ -118,10 +127,12 @@ export async function POST(req: Request) {
   const id = crypto.randomUUID();
 
   let result: Awaited<ReturnType<typeof processImage>>;
+
   try {
     result = await processImage(userId, id, buffer, mime, blurMode);
   } catch (e) {
     log.api.upload.error("upload: process failed", e);
+
     return NextResponse.json(
       { error: "processing_failed" },
       { status: 500 }
@@ -169,6 +180,7 @@ export async function POST(req: Request) {
 
   if (process.env.FEATURE_RANKINGS === "true") {
     const count = await prisma.image.count({ where: { userId, deletedAt: null } });
+
     if (count === 1) {
       try {
         await awardFirstUpload(userId);

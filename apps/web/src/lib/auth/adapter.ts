@@ -19,6 +19,7 @@ export function ExibidosPrismaAdapter(): Adapter {
           passwordHash: null,
         },
       });
+
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
@@ -26,7 +27,9 @@ export function ExibidosPrismaAdapter(): Adapter {
       const u = await prisma.user.findUnique({
         where: { id, deletedAt: null },
       });
+
       if (!u) return null;
+
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
@@ -34,7 +37,9 @@ export function ExibidosPrismaAdapter(): Adapter {
       const u = await prisma.user.findFirst({
         where: { email, deletedAt: null },
       });
+
       if (!u) return null;
+
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
@@ -43,8 +48,10 @@ export function ExibidosPrismaAdapter(): Adapter {
         where: { provider_providerAccountId: { provider, providerAccountId } },
         include: { user: true },
       });
+
       if (!a?.user || a.user.deletedAt) return null;
       const u = a.user;
+
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
@@ -58,6 +65,7 @@ export function ExibidosPrismaAdapter(): Adapter {
           emailVerified: user.emailVerified ?? undefined,
         },
       });
+
       return { ...u, email: u.email, emailVerified: u.emailVerified };
     },
 
@@ -78,6 +86,7 @@ export function ExibidosPrismaAdapter(): Adapter {
       const s = await prisma.session.create({
         data: { token: sessionToken, userId, expiresAt: expires },
       });
+
       return { sessionToken: s.token, userId: s.userId, expires: s.expiresAt };
     },
 
@@ -86,7 +95,9 @@ export function ExibidosPrismaAdapter(): Adapter {
         where: { token: sessionToken },
         include: { user: true },
       });
+
       if (!s || s.expiresAt < new Date() || s.user.deletedAt) return null;
+
       return {
         session: { sessionToken: s.token, userId: s.userId, expires: s.expiresAt },
         user: { ...s.user, email: s.user.email, emailVerified: s.user.emailVerified },
@@ -98,6 +109,7 @@ export function ExibidosPrismaAdapter(): Adapter {
         where: { token: sessionToken },
         data: { expiresAt: expires },
       });
+
       return { sessionToken: s.token, userId: s.userId, expires: s.expiresAt };
     },
 

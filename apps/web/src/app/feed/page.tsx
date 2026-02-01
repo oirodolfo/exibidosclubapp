@@ -9,9 +9,11 @@ import { FeedClient } from "./_components/FeedClient";
  */
 export default async function FeedPage() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user) {
     redirect("/auth/login?callbackUrl=/feed");
   }
+
   return (
     <main className="min-h-screen pb-24">
       <FeedClient />

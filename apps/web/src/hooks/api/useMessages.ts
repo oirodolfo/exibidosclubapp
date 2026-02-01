@@ -16,8 +16,10 @@ export function useConversations() {
     queryKey: ["messages", "conversations"],
     queryFn: async () => {
       const res = await fetch("/api/messages/conversations");
+
       if (!res.ok) return [];
       const d = (await res.json()) as { conversations?: Conversation[] };
+
       return d.conversations ?? [];
     },
   });
@@ -29,7 +31,9 @@ export function useConversation(conversationId: string | null) {
     queryFn: async () => {
       if (!conversationId) return null;
       const res = await fetch(`/api/messages/conversations/${conversationId}`);
+
       if (!res.ok) return null;
+
       return res.json() as Promise<{
         conversationId: string;
         other: { id: string; name: string | null; slug: string | null } | null;
@@ -42,6 +46,7 @@ export function useConversation(conversationId: string | null) {
 
 export function useSendMessage(conversationId: string) {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: async (body: string) => {
       const res = await fetch(`/api/messages/conversations/${conversationId}`, {
@@ -49,7 +54,9 @@ export function useSendMessage(conversationId: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ body }),
       });
+
       if (!res.ok) throw new Error("Failed");
+
       return res.json() as Promise<Message>;
     },
     onSuccess: () => {

@@ -17,8 +17,10 @@ export function useRankings(period: string) {
     queryKey: ["rankings", period],
     queryFn: async () => {
       const res = await fetch(`/api/rankings?period=${period}`);
+
       if (!res.ok) throw new Error("Failed");
       const d = (await res.json()) as { rankings?: RankingItem[] };
+
       return d.rankings ?? [];
     },
     staleTime: 2 * 60 * 1000,

@@ -11,13 +11,16 @@ export default async function ConversationPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect("/auth/login?callbackUrl=/messages");
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     redirect("/messages");
   }
   const { id } = await params;
+
   return (
     <main className={page.default}>
       <p className="mb-4">

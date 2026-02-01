@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Light middleware: does NOT block feed or navigation.
+ * Light proxy: does NOT block feed or navigation.
  * Trust backend (API routes) as source of truth for auth and verification.
  * Optionally extend later to protect direct POSTs to upload APIs (already guarded in handlers).
  */
-export function middleware(_req: NextRequest) {
+export function proxy(_request: NextRequest) {
   return NextResponse.next();
 }
 

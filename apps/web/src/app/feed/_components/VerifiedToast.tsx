@@ -13,13 +13,17 @@ export function VerifiedToast() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("verified") === "1") {
+    if (searchParams.get("verified") !== "1") return;
+    router.replace("/feed", { scroll: false });
+    const id = requestAnimationFrame(() => {
       setShow(true);
-      router.replace("/feed", { scroll: false });
-      const t = setTimeout(() => setShow(false), 4000);
-      return () => clearTimeout(t);
-    }
-    return undefined;
+    });
+    const t = setTimeout(() => setShow(false), 4000);
+
+    return () => {
+      cancelAnimationFrame(id);
+      clearTimeout(t);
+    };
   }, [searchParams, router]);
 
   if (!show) return null;

@@ -11,9 +11,11 @@ const PostBody = z.object({
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return NextResponse.json({ error: "messaging_disabled" }, { status: 403 });
   }
@@ -48,14 +50,17 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return NextResponse.json({ error: "messaging_disabled" }, { status: 403 });
   }
 
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   const { toId, message } = parse.data;
 
@@ -64,11 +69,13 @@ export async function POST(req: Request) {
   }
 
   const to = await prisma.user.findUnique({ where: { id: toId, deletedAt: null } });
+
   if (!to) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
 
   const existing = await prisma.messageRequest.findUnique({
     where: { fromId_toId: { fromId: session.user.id, toId } },
   });
+
   if (existing) {
     return NextResponse.json({ error: "request_exists", status: existing.status }, { status: 409 });
   }
@@ -97,6 +104,7 @@ export async function POST(req: Request) {
     });
     const conv = convs.find((c) => c.participants.length === 2);
     let convId = conv?.id;
+
     if (!conv) {
       const newConv = await prisma.conversation.create({
         data: {
@@ -105,8 +113,10 @@ export async function POST(req: Request) {
           },
         },
       });
+
       convId = newConv.id;
     }
+
     if (message && convId) {
       await prisma.message.create({
         data: { conversationId: convId, senderId: session.user.id, body: message },

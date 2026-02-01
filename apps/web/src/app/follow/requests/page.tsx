@@ -25,8 +25,10 @@ export default function FollowRequestsPage() {
 
   if (error?.message === "unauthorized") {
     router.replace("/auth/login?callbackUrl=/follow/requests");
+
     return null;
   }
+
   if (isLoading) return <main className={mainBlock}>Loading…</main>;
 
   const requests = list ?? [];

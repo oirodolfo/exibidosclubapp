@@ -11,9 +11,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return NextResponse.json({ error: "messaging_disabled" }, { status: 403 });
   }
@@ -30,6 +32,7 @@ export async function GET(
       },
     },
   });
+
   if (!part) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const other = part.conversation.participants.find((p) => p.userId !== session.user!.id);
@@ -53,9 +56,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
   if (process.env.FEATURE_MESSAGING !== "true") {
     return NextResponse.json({ error: "messaging_disabled" }, { status: 403 });
   }
@@ -64,9 +69,11 @@ export async function POST(
   const part = await prisma.conversationParticipant.findFirst({
     where: { conversationId: id, userId: session.user.id },
   });
+
   if (!part) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const parse = PostBody.safeParse(await req.json());
+
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
 
   const message = await prisma.message.create({
