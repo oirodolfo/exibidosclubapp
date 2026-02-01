@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import type {
+import { Inject, Injectable } from "@nestjs/common";
+import {
   ApprovedImageHashRepository,
   RejectedImageHashRepository,
 } from "../../application/ports/image-hash.repository";
@@ -15,7 +15,9 @@ export interface HashCheckResult {
 @Injectable()
 export class HashService {
   constructor(
+    @Inject(ApprovedImageHashRepository)
     private readonly approved: ApprovedImageHashRepository,
+    @Inject(RejectedImageHashRepository)
     private readonly rejected: RejectedImageHashRepository,
     private readonly config: HumanproofConfigService
   ) {}

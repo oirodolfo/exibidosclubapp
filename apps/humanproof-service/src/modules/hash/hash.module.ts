@@ -3,6 +3,7 @@ import {
   ApprovedImageHashRepository,
   RejectedImageHashRepository,
 } from "../../application/ports/image-hash.repository";
+import { HumanproofConfigModule } from "../../config/config.module";
 import {
   InMemoryApprovedImageHashRepository,
   InMemoryRejectedImageHashRepository,
@@ -10,6 +11,7 @@ import {
 import { HashService } from "./hash.service";
 
 @Module({
+  imports: [HumanproofConfigModule],
   providers: [
     HashService,
     {
