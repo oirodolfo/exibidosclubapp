@@ -159,6 +159,9 @@ importers:
       '@exibidos/ml-contracts':
         specifier: workspace:*
         version: link:../ml-contracts
+      '@exibidos/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -168,12 +171,6 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^10.4.15
         version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
-      bullmq:
-        specifier: ^5.34.5
-        version: 5.67.2
-      ioredis:
-        specifier: ^5.4.1
-        version: 5.9.2
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -211,6 +208,9 @@ importers:
       '@exibidos/ml':
         specifier: workspace:*
         version: link:../ml
+      '@exibidos/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -220,15 +220,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^10.4.15
         version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
-      bullmq:
-        specifier: ^5.34.5
-        version: 5.67.2
       fastify:
         specifier: ^4.28.1
         version: 4.28.1
-      ioredis:
-        specifier: ^5.4.1
-        version: 5.9.2
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -596,6 +590,28 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  packages/queue:
+    dependencies:
+      bullmq:
+        specifier: ^5.34.5
+        version: 5.67.2
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.9.2
+    devDependencies:
+      '@nestjs/common':
+        specifier: ^10.4.15
+        version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^10.4.15
+        version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@types/node':
         specifier: ^22.10.1
         version: 22.19.7
