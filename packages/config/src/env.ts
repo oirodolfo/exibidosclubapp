@@ -65,6 +65,14 @@ export interface ServerEnv {
   mlServiceUrl: string | null;
   cdnImageBase: string | null;
   vectorDbUrl: string | null;
+  /** Cloudflare R2 (S3-compatible). Private bucket; CDN serves processed assets. */
+  r2: {
+    accountId: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    bucket: string;
+    configured: boolean;
+  };
 }
 
 /** Client-safe env (NEXT_PUBLIC_* only). Safe to use in browser. */
@@ -135,8 +143,21 @@ function loadServerEnv(): ServerEnv {
     },
     apiPort: asInt(raw.API_PORT ?? raw.PORT, 4000),
     mlServiceUrl: raw.ML_SERVICE_URL ?? raw.ML_EMBEDDING_URL ?? null,
-    cdnImageBase: raw.CDN_IMAGE_BASE ?? null,
+    cdnImageBase: raw.CDN_IMAGE_BASE ?? raw.CDN_BASE_URL ?? null,
     vectorDbUrl: raw.VECTOR_DB_URL ?? null,
+    r2: (() => {
+      const accountId = raw.R2_ACCOUNT_ID ?? "";
+      const accessKeyId = raw.R2_ACCESS_KEY_ID ?? "";
+      const secretAccessKey = raw.R2_SECRET_ACCESS_KEY ?? "";
+      const bucket = raw.R2_BUCKET ?? "";
+      return {
+        accountId,
+        accessKeyId,
+        secretAccessKey,
+        bucket,
+        configured: !!(accountId && accessKeyId && secretAccessKey && bucket),
+      };
+    })(),
   };
 }
 
