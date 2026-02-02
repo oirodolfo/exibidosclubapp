@@ -29,7 +29,10 @@ export async function POST(
   if (!parse.success) return NextResponse.json({ error: "validation_failed" }, { status: 400 });
   const { tagId, weight } = parse.data;
 
-  const image = await prisma.image.findUnique({ where: { id, deletedAt: null } });
+  const image = await prisma.image.findUnique({
+    where: { id, deletedAt: null },
+    select: { id: true, userId: true },
+  });
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const tag = await prisma.tag.findUnique({ where: { id: tagId }, select: { id: true, categoryId: true } });
@@ -75,12 +78,7 @@ export async function POST(
 
   updateImageRankingScore(id).catch(() => {});
 
-  const image = await prisma.image.findUnique({
-    where: { id },
-    select: { userId: true },
-  });
-  if (image) {
-    createNotification(image.userId, "category_vote", "Vote", vote.id, {
+  createNotification(image.userId, "category_vote", "Vote", vote.id, {
       actorId: session.user.id,
       imageId: id,
       tagId,

@@ -62,7 +62,7 @@ export async function POST(
   const { id } = await params;
   const image = await prisma.image.findUnique({
     where: { id, deletedAt: null },
-    select: { id: true },
+    select: { id: true, userId: true },
   });
   if (!image) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
@@ -91,12 +91,7 @@ export async function POST(
 
   updateImageRankingScore(id).catch(() => {});
 
-  const image = await prisma.image.findUnique({
-    where: { id },
-    select: { userId: true },
-  });
-  if (image) {
-    createNotification(image.userId, "feed_comment", "Comment", comment.id, {
+  createNotification(image.userId, "feed_comment", "Comment", comment.id, {
       actorId: session.user.id,
       imageId: id,
     }).catch(() => {});
