@@ -572,6 +572,19 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/image-contracts:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   packages/ui:
     dependencies:
       react:
