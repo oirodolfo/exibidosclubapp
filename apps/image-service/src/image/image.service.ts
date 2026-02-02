@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@exibidos/db/client";
+import { prisma } from "@exibidos/db";
 import type { ImageMlMetadataData } from "@exibidos/ml-contracts";
 import type { BlurMode } from "../transform/contracts";
 import { CacheService } from "../cache/cache.service";
